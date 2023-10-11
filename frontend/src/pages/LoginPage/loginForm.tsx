@@ -1,24 +1,24 @@
+import { /* Visibility, */ VisibilityOff } from "@mui/icons-material";
 import {
   Button,
   Checkbox,
   FormControlLabel,
+  IconButton,
+  InputAdornment,
   TextField,
   styled,
 } from "@mui/material";
 
-/* const Form = styled("form")({
-  width: "40%",
-  backgroundColor: "#FFFFFF",
+const Form = styled("form")({
+  width: "60%",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  padding: "30px",
-  borderRadius: "50px",
-  boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
   textAlign: "center",
   margin: "auto",
-}); */
+  paddingTop: "24px",
+});
 
 const ButtonStyled = styled(Button)({
   boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
@@ -28,7 +28,7 @@ const ButtonStyled = styled(Button)({
 });
 
 const TextFieldStyled = styled(TextField)({
-  width: "70%",
+  width: "100%",
   "& label.Mui-focused": {
     color: "#FF5E00",
   },
@@ -52,7 +52,7 @@ const TextFieldStyled = styled(TextField)({
 
 const LoginForm = () => {
   return (
-    <form style={{ display: "flex", flexDirection: "column"}}>
+    <Form>
       <TextFieldStyled
         id="email"
         label="Email"
@@ -66,6 +66,18 @@ const LoginForm = () => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                color="primary"
+                aria-label="Toggle password visibility"
+              >
+                <VisibilityOff />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <FormControlLabel
         label="Lembrar-me"
@@ -81,7 +93,7 @@ const LoginForm = () => {
           <span>Entrar</span>
         </ButtonStyled>
       </div>
-    </form>
+    </Form>
   );
 };
 
