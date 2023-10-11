@@ -6,19 +6,19 @@ import {
   styled,
 } from "@mui/material";
 
-const Form = styled("form")({
-  width: "50%",
+/* const Form = styled("form")({
+  width: "40%",
   backgroundColor: "#FFFFFF",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  padding: "20px",
+  padding: "30px",
   borderRadius: "50px",
   boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
   textAlign: "center",
   margin: "auto",
-});
+}); */
 
 const ButtonStyled = styled(Button)({
   boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
@@ -28,6 +28,7 @@ const ButtonStyled = styled(Button)({
 });
 
 const TextFieldStyled = styled(TextField)({
+  width: "70%",
   "& label.Mui-focused": {
     color: "#FF5E00",
   },
@@ -51,31 +52,36 @@ const TextFieldStyled = styled(TextField)({
 
 const LoginForm = () => {
   return (
-    <Form>
+    <form style={{ display: "flex", flexDirection: "column"}}>
       <TextFieldStyled
         id="email"
         label="Email"
         variant="outlined"
         margin="normal"
-        fullWidth
+        fullWidth={false}
       />
       <TextFieldStyled
         id="password"
         label="Senha"
         variant="outlined"
         margin="normal"
-        fullWidth
+        fullWidth={false}
       />
       <FormControlLabel
         label="Lembrar-me"
         control={<Checkbox color="primary" />}
       />
       <div>
-        <ButtonStyled variant="contained" color="primary" fullWidth>
+        <ButtonStyled
+          fullWidth
+          type="submit"
+          variant="contained"
+          color="primary"
+        >
           <span>Entrar</span>
         </ButtonStyled>
       </div>
-    </Form>
+    </form>
   );
 };
 
