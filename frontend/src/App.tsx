@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import RealtorProfile from "./pages/RealtorProfile";
+import SignUp from "./pages/SignUp";
 
 const router = createBrowserRouter([
     {
@@ -10,6 +11,10 @@ const router = createBrowserRouter([
     {
         path: "/realtor-profile",
         element: <RealtorProfile />,
+    },
+    {
+        path: "/signup",
+        element: <SignUp />,
     },
 ]);
 
