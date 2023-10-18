@@ -11,6 +11,10 @@ const Container = styled("div")`
     flex-direction: column;
     gap: 40px;
     padding: 0px 120px;
+
+    @media (max-width: 900px) {
+        padding: 0 20px;
+    }
 `;
 
 const FirstSection = styled("section")`
@@ -44,6 +48,11 @@ const TextContainer = styled("div")`
     grid-template-columns: 7fr 2fr;
     padding: 0 32px;
     padding-bottom: 20px;
+
+    @media (max-width: 768px) {
+        grid-template-rows: 1fr 1fr 200px;
+        grid-template-columns: 1fr;
+    }
 `;
 
 const Header = styled("div")``;
@@ -52,6 +61,10 @@ const Name = styled(Typography)`
     font-family: ${({ theme }) => theme.customTypography.semiBold};
     font-size: 2.2rem;
     margin-top: 70px;
+
+    @media (max-width: 768px) {
+        font-size: 2rem;
+    }
 `;
 
 const Bio = styled(Typography)``;
@@ -67,6 +80,22 @@ const RegionsTitle = styled(Typography)`
 `;
 
 const RegionsList = styled(Typography)``;
+
+const SocialMediaInfoWrapper = styled("div")`
+    grid-row: span 2;
+    grid-column: 2;
+    padding: 0 20px;
+    border-left: 1px solid ${({ theme }) => theme.customPallete.grey};
+    padding-left: 40px;
+
+    @media (max-width: 768px) {
+        border-top: 1px solid ${({ theme }) => theme.customPallete.grey};
+        grid-row: 3/3;
+        grid-column: 1;
+        border-left: none;
+        padding: 0;
+    }
+`;
 
 const SecondSection = styled(FirstSection)`
     padding: 32px;
@@ -119,7 +148,9 @@ const RealtorInfo = () => {
                             {realtor.regionsList}
                         </RegionsList>
                     </RegionsInfo>
-                    <SocialMediaInfo />
+                    <SocialMediaInfoWrapper>
+                        <SocialMediaInfo />
+                    </SocialMediaInfoWrapper>
                 </TextContainer>
             </FirstSection>
             <SecondSection>

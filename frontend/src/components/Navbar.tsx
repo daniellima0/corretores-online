@@ -5,13 +5,16 @@ import { Link } from "react-router-dom";
 import { Typography } from "@mui/material";
 import ProfilePictureWithButton from "./ProfilePictureWithButton";
 
-//TODO: make navbar responsive
-
 const Container = styled("div")`
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
     padding: 0 40px;
+    height: 90px;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr 1fr;
+    }
 `;
 
 const Logo = styled("img")`
@@ -21,6 +24,14 @@ const Logo = styled("img")`
 const Nav = styled("nav")`
     display: flex;
     justify-content: space-between;
+    max-width: 500px;
+
+    @media (max-width: 768px) {
+        visibility: hidden;
+        flex-direction: column;
+        grid-column: 1 / 2;
+        grid-row: 2 / 2;
+    }
 `;
 
 const NavItem = styled("li")`
@@ -38,6 +49,10 @@ const ProfileContainer = styled("div")`
     align-items: center;
     gap: 10px;
     justify-self: end;
+
+    @media (max-width: 768px) {
+        grid-column: 2 / 3;
+    }
 `;
 
 const Span = styled("span")`
@@ -49,9 +64,7 @@ const Navbar: React.FC = () => {
 
     return (
         <Container>
-            <Link to="">
-                <Logo src={logo} />
-            </Link>
+            <Logo src={logo} />
             <Nav>
                 <NavItem>
                     <Link to="">Início</Link>

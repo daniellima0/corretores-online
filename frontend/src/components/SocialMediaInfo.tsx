@@ -10,11 +10,7 @@ const Container = styled("div")`
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    padding: 0 20px;
-    grid-row: span 2;
-    grid-column: 2;
-    border-left: 1px solid ${({ theme }) => theme.customPallete.grey};
-    padding-left: 40px;
+    height: 100%;
 `;
 
 const SocialIcons = styled("div")`
