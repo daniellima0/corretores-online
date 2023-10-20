@@ -40,10 +40,10 @@ const HomePage = () => {
     zIndex: "10",
     boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
     marginTop: "20px",
-    marginLeft: "20px",
+    right: "20px",
     backgroundColor: "#FFFFFF",
     display: "flex",
-    width: "auto",
+    width: "fit-content",
     borderRadius: "10px",
   });
 
@@ -102,12 +102,16 @@ const HomePage = () => {
           display: "flex",
           flexDirection: "row",
           width: "100%",
+          justifyContent: "flex-end",
+          height: "850px",
         }}
       >
+        <BrokerList />
         <div
           className="MapContainer"
           style={{
-            width: "80%",
+            width: "75%",
+            height: "100%",
           }}
         >
           <SearchContainer>
@@ -145,7 +149,7 @@ const HomePage = () => {
             zoom={mapSettings.zoom}
             options={mapSettings}
             mapContainerStyle={{
-              height: "90vh",
+              height: "100%",
               width: "100%",
             }}
             onLoad={(map) => {
@@ -153,7 +157,6 @@ const HomePage = () => {
             }}
           ></GoogleMap>
         </div>
-        <BrokerList />
       </div>
       <Footer />
     </div>
