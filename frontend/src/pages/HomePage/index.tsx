@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Box,
+  Container,
   Divider,
   IconButton,
   InputAdornment,
@@ -15,6 +16,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
+import BrokerList from "../../components/BrokerLIst";
 
 const HomePage = () => {
   const { isLoaded, loadError } = useJsApiLoader({
@@ -37,8 +39,8 @@ const HomePage = () => {
     position: "absolute",
     zIndex: "10",
     boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
-    marginTop: "50px",
-    marginLeft: "50px",
+    marginTop: "20px",
+    marginLeft: "20px",
     backgroundColor: "#FFFFFF",
     display: "flex",
     width: "auto",
@@ -53,8 +55,8 @@ const HomePage = () => {
     lat: -13.00978573518952,
     lng: -38.532841915342516,
   });
-  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
 
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   let autocompleteInstance: google.maps.places.Autocomplete | null = null;
 
   const handlePlaceChanged = () => {
@@ -81,11 +83,33 @@ const HomePage = () => {
     handlePlaceChanged();
   };
 
+  if (!isLoaded) {
+    return (
+      <div>
+        <Navbar />
+        <div>Carregando Google Maps...</div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div>
       <Navbar />
-      {isLoaded ? (
-        <div>
+      <div
+        className="BodyContainer"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          width: "100%",
+        }}
+      >
+        <div
+          className="MapContainer"
+          style={{
+            width: "80%",
+          }}
+        >
           <SearchContainer>
             <Autocomplete
               onLoad={(autocomplete) => {
@@ -101,11 +125,6 @@ const HomePage = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Divider
-                        orientation="vertical"
-                        variant="middle"
-                        flexItem
-                      />
                       <IconButton
                         aria-label="Toggle password visibility"
                         sx={{ color: "#505050" }}
@@ -134,11 +153,8 @@ const HomePage = () => {
             }}
           ></GoogleMap>
         </div>
-      ) : loadError ? (
-        <div>Erro ao carregar o Google Maps</div>
-      ) : (
-        <div>Carregando Google Maps...</div>
-      )}
+        <BrokerList />
+      </div>
       <Footer />
     </div>
   );
