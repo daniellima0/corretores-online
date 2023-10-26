@@ -1,6 +1,8 @@
 import { Wrapper } from "@googlemaps/react-wrapper";
+import { Avatar, Button } from "@mui/material";
 import { useRef, useState, useEffect } from "react";
 import { Root, createRoot } from "react-dom/client";
+import HiddenComponent from "./HiddenComponent";
 
 type Broker = {
   id: number;
@@ -58,6 +60,7 @@ function Map({ data }: { data: Broker[] }) {
 
 function Broker(props: { map: google.maps.Map | undefined; data: Broker[] }) {
   const [brokerData, setBrokerData] = useState<Broker[]>(props.data);
+  const [hover, setHover] = useState<number | null>(null);
 
   useEffect(() => {
     setBrokerData(props.data);
@@ -66,16 +69,87 @@ function Broker(props: { map: google.maps.Map | undefined; data: Broker[] }) {
   return (
     <>
       {brokerData.map((broker) => (
-        <Marker key={broker.id} map={props.map} position={broker.position}>
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              padding: "10px",
-              borderRadius: "5px",
-            }}
-          >
-            {broker.name}
-          </div>
+        <Marker
+          key={broker.id}
+          map={props.map}
+          position={broker.position}
+          onClick={() => {
+            console.log("teste");
+          }}
+        >
+          <HiddenComponent hidden={broker.id === hover}>
+            <div
+              style={{
+                backgroundColor: "#ffffff",
+                padding: "10px",
+                borderRadius: "5px",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                gap: "11px",
+              }}
+              onMouseEnter={() => setHover(broker.id)}
+              onMouseLeave={() => setHover(null)}
+            >
+              <Avatar
+                sx={{
+                  width: 24,
+                  height: 24,
+                  fontSize: "15px",
+                }}
+              >
+                {broker.name.charAt(0)}
+              </Avatar>
+            </div>
+          </HiddenComponent>
+          <HiddenComponent hidden={broker.id != hover}>
+            <div
+              style={{
+                backgroundColor: "#fff",
+                padding: "10px",
+                borderRadius: "5px",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                gap: "11px",
+              }}
+              onMouseEnter={() => setHover(broker.id)}
+              onMouseLeave={() => setHover(null)}
+            >
+              <Avatar
+                sx={{
+                  width: 24,
+                  height: 24,
+                  fontSize: "15px",
+                }}
+              >
+                {broker.name.charAt(0)}
+              </Avatar>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "3px",
+                }}
+              >
+                {broker.name}
+                <Button
+                  style={{
+                    width: "100px",
+                    height: "30px",
+                    fontSize: "9px",
+                  }}
+                  variant="contained"
+                >
+                  Visitar perfil
+                </Button>
+              </div>
+            </div>
+          </HiddenComponent>
         </Marker>
       ))}
     </>
@@ -86,10 +160,12 @@ function Marker({
   map,
   position,
   children,
+  onClick,
 }: {
   map: google.maps.Map | undefined;
   position: { lat: number; lng: number };
   children: React.ReactNode;
+  onClick: () => void;
 }) {
   const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(
     null
@@ -112,7 +188,14 @@ function Marker({
         });
       }
     }
+
     importMarkerElement();
+
+    return () => {
+      if (markerRef.current) {
+        markerRef.current.map = null;
+      }
+    };
   }, [map, position]);
 
   useEffect(() => {
@@ -122,8 +205,10 @@ function Marker({
     if (markerRef.current) {
       markerRef.current.position = position;
       markerRef.current.map = map;
+      const listener = markerRef.current.addListener("click", onClick);
+      return () => listener.remove();
     }
-  }, [map, position, children]);
+  }, [map, position, children, onClick]);
 
   return null;
 }
