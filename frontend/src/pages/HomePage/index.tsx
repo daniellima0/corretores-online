@@ -1,8 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Box,
   Container,
-  Divider,
   IconButton,
   InputAdornment,
   TextField,
@@ -17,24 +15,55 @@ import SearchIcon from "@mui/icons-material/Search";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import BrokerList from "../../components/BrokerLIst";
+import CorretoresMap from "../../components/CorretoresMap";
 
 const HomePage = () => {
-  const { isLoaded, loadError } = useJsApiLoader({
+  const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
+    version: "beta",
     libraries: ["places"],
   });
 
-  const mapSettings = {
-    mapId: "b8c651ba52d26afb",
-    clickableIcons: false,
-    streetViewControl: true,
-    mapTypeControl: false,
-    fullscreenControl: false,
-    zoom: 16,
+  type Broker = {
+    id: number;
+    name: string;
+    position: { lat: number; lng: number };
   };
 
-  const SearchContainer = styled(Box)({
+  const [data, setData] = useState<Broker[]>([]);
+
+  useEffect(() => {
+    const testData = [
+      {
+        id: 1,
+        name: "Bernardo Serravalle",
+        position: {
+          lat: -12.993966980061542,
+          lng: -38.44557003269835,
+        },
+      },
+      {
+        id: 2,
+        name: "Arthur Sant'Anna",
+        position: {
+          lat: -12.986820652837016,
+          lng: -38.4369292224266,
+        },
+      },
+      {
+        id: 3,
+        name: "Giulia Franca",
+        position: {
+          lat: -12.985937092644223,
+          lng: -38.44490330351072,
+        },
+      },
+    ];
+    setData(testData);
+  }, []);
+
+  const SearchContainer = styled(Container)({
     padding: "20px",
     position: "absolute",
     zIndex: "10",
@@ -51,11 +80,6 @@ const HomePage = () => {
     width: "400px",
   });
 
-  const [mapCenter] = useState({
-    lat: -13.00978573518952,
-    lng: -38.532841915342516,
-  });
-
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   let autocompleteInstance: google.maps.places.Autocomplete | null = null;
 
@@ -63,7 +87,7 @@ const HomePage = () => {
     if (autocompleteInstance) {
       const place = autocompleteInstance.getPlace();
 
-      if (place.geometry && place.geometry.location) {
+      if (place && place.geometry && place.geometry.location) {
         const newMapCenter = {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
@@ -75,8 +99,11 @@ const HomePage = () => {
     }
   };
 
+  //PODE PARARRR!!!
+
   const autocompleteOptions = {
     componentRestrictions: { country: "BR" },
+    language: "pt-BR",
   };
 
   const handleSearchButtonClick = () => {
@@ -130,7 +157,6 @@ const HomePage = () => {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label="Toggle password visibility"
                         sx={{ color: "#505050" }}
                         onClick={() => {
                           handleSearchButtonClick();
@@ -144,18 +170,7 @@ const HomePage = () => {
               />
             </Autocomplete>
           </SearchContainer>
-          <GoogleMap
-            center={mapCenter}
-            zoom={mapSettings.zoom}
-            options={mapSettings}
-            mapContainerStyle={{
-              height: "100%",
-              width: "100%",
-            }}
-            onLoad={(map) => {
-              setMapInstance(map);
-            }}
-          ></GoogleMap>
+          <CorretoresMap data={data} />
         </div>
       </div>
       <Footer />

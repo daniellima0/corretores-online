@@ -32,7 +32,7 @@ function renderRow(props: ListChildComponentProps) {
               <React.Fragment>
                 <Typography
                   sx={{ display: "inline" }}
-                  component="h5"
+                  component={"span"}
                   variant="h5"
                   color="text.primary"
                 >
@@ -44,7 +44,7 @@ function renderRow(props: ListChildComponentProps) {
               <React.Fragment>
                 <Typography
                   sx={{ display: "inline" }}
-                  component="h6"
+                  component={"span"}
                   variant="h6"
                   color="text.primary"
                 >
