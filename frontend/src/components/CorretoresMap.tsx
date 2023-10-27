@@ -10,40 +10,119 @@ type Broker = {
   position: { lat: number; lng: number };
 };
 
-export default function CorretoresMap({ data }: { data: Broker[] }) {
+type MapProps = {
+  map: google.maps.Map | undefined;
+  data: Broker[];
+};
+
+export default function CorretoresMap({
+  data,
+  searchMapCenter,
+  dataFilter,
+}: {
+  data: Broker[];
+  searchMapCenter: { lat: number; lng: number } | null;
+  dataFilter: any;
+}) {
   return (
     <Wrapper
       apiKey={import.meta.env.VITE_GOOGLE_API_KEY}
       version="beta"
-      libraries={["marker", "maps"]}
+      libraries={["marker", "maps", "geometry"]}
     >
-      <Map data={data} />
+      <Map
+        data={data}
+        searchMapCenter={searchMapCenter}
+        dataFilter={dataFilter}
+      />
     </Wrapper>
   );
 }
 
-const mapOptions = {
-  mapId: "3148b0a282cfd2a4",
-  center: {
-    lat: -12.993966980061542,
-    lng: -38.44557003269835,
-  },
-  clickableIcons: false,
-  streetViewControl: true,
-  mapTypeControl: false,
-  fullscreenControl: false,
-  zoom: 16,
-};
-
-function Map({ data }: { data: Broker[] }) {
+function Map({
+  data,
+  searchMapCenter,
+  dataFilter,
+}: {
+  data: Broker[];
+  searchMapCenter: { lat: number; lng: number } | null;
+  dataFilter: any;
+}) {
   const [map, setMap] = useState<google.maps.Map>();
+  const [circle, setCircle] = useState<google.maps.Circle | null>();
+  const [auxMarker, setAuxMarker] = useState<google.maps.Marker | null>();
+  const [brokersInCircle, setBrokersInCircle] = useState<Broker[] | undefined>(
+    data
+  );
+
   const ref = useRef<HTMLDivElement>(null);
+  const mapOptions = {
+    mapId: "3148b0a282cfd2a4",
+    center: { lat: -12.976982096232536, lng: -38.455293915342516 },
+    clickableIcons: false,
+    streetViewControl: true,
+    mapTypeControl: false,
+    fullscreenControl: false,
+    zoom: 16,
+  };
 
   useEffect(() => {
     if (ref.current) {
       setMap(new window.google.maps.Map(ref.current, mapOptions));
     }
   }, []);
+
+  useEffect(() => {
+    async function getBrokersInCircle() {
+      if (searchMapCenter) {
+        const { spherical } = (await google.maps.importLibrary(
+          "geometry"
+        )) as google.maps.GeometryLibrary;
+        setBrokersInCircle(
+          data
+            .map((broker) => {
+              let distance = spherical.computeDistanceBetween(
+                new google.maps.LatLng(broker.position),
+                new google.maps.LatLng(searchMapCenter)
+              );
+              if (distance <= 1000) {
+                return broker;
+              }
+            })
+            .filter((broker): broker is Broker => broker !== undefined)
+        );
+        dataFilter(brokersInCircle);
+      } else return;
+    }
+    if (circle) {
+      circle.setMap(null);
+    }
+    if (auxMarker) {
+      auxMarker.setMap(null);
+    }
+    if (map && searchMapCenter) {
+      map.panTo(searchMapCenter);
+      setCircle(
+        new google.maps.Circle({
+          strokeColor: "#1C5E9F",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#1C5E9F",
+          fillOpacity: 0.1,
+          map,
+          center: searchMapCenter,
+          radius: 1000,
+        })
+      );
+      setAuxMarker(
+        new google.maps.Marker({
+          map,
+          position: searchMapCenter,
+        })
+      );
+      getBrokersInCircle();
+    }
+  }, [searchMapCenter]);
 
   let props = {
     map: map,
@@ -58,12 +137,13 @@ function Map({ data }: { data: Broker[] }) {
   );
 }
 
-function Broker(props: { map: google.maps.Map | undefined; data: Broker[] }) {
-  const [brokerData, setBrokerData] = useState<Broker[]>(props.data);
+function Broker(props: MapProps) {
+  const { map, data } = props;
+  const [brokerData, setBrokerData] = useState<Broker[]>(data);
   const [hover, setHover] = useState<number | null>(null);
 
   useEffect(() => {
-    setBrokerData(props.data);
+    setBrokerData(data);
   }, [props.data]);
 
   return (
@@ -71,7 +151,7 @@ function Broker(props: { map: google.maps.Map | undefined; data: Broker[] }) {
       {brokerData.map((broker) => (
         <Marker
           key={broker.id}
-          map={props.map}
+          map={map}
           position={broker.position}
           onClick={() => {
             console.log("teste");
@@ -85,6 +165,7 @@ function Broker(props: { map: google.maps.Map | undefined; data: Broker[] }) {
                 borderRadius: "5px",
                 display: "flex",
                 flexDirection: "row",
+                boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
                 justifyContent: "flex-start",
                 alignItems: "center",
                 gap: "11px",
@@ -111,6 +192,7 @@ function Broker(props: { map: google.maps.Map | undefined; data: Broker[] }) {
                 borderRadius: "5px",
                 display: "flex",
                 flexDirection: "row",
+                boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
                 justifyContent: "flex-start",
                 alignItems: "center",
                 gap: "11px",
@@ -142,6 +224,8 @@ function Broker(props: { map: google.maps.Map | undefined; data: Broker[] }) {
                     width: "100px",
                     height: "30px",
                     fontSize: "9px",
+                    backgroundColor: "#1C5E9F",
+                    boxShadow: "none",
                   }}
                   variant="contained"
                 >
@@ -205,7 +289,7 @@ function Marker({
     if (markerRef.current) {
       markerRef.current.position = position;
       markerRef.current.map = map;
-      const listener = markerRef.current.addListener("click", onClick);
+      const listener = markerRef.current.addListener("gmp-click", onClick);
       return () => listener.remove();
     }
   }, [map, position, children, onClick]);

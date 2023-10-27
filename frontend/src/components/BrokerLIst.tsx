@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import {
   Avatar,
@@ -9,6 +9,12 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+
+type Broker = {
+  id: number;
+  name: string;
+  position: { lat: number; lng: number };
+};
 
 function renderRow(props: ListChildComponentProps) {
   const { index, style, data } = props;
@@ -48,9 +54,9 @@ function renderRow(props: ListChildComponentProps) {
                   variant="h6"
                   color="text.primary"
                 >
-                  {item.location.hood},
+                  teste,
                 </Typography>
-                {` ${item.location.street}`}
+                {`123`}
               </React.Fragment>
             }
           />
@@ -60,81 +66,7 @@ function renderRow(props: ListChildComponentProps) {
   );
 }
 
-export default function VirtualizedList() {
-  const [data, setData] = useState<
-    { name: string; location: { hood: string; street: string } }[]
-  >([]);
-
-  useEffect(() => {
-    const testData = [
-      {
-        name: "Bernardo Serravalle",
-        location: {
-          hood: "Pituba",
-          street: "Rua Muito doida",
-        },
-      },
-      {
-        name: "Arthur Sant'Anna",
-        location: {
-          hood: "Itaigara",
-          street: "Avenida Principal",
-        },
-      },
-      {
-        name: "Giulia Franca",
-        location: {
-          hood: "Barra",
-          street: "Rua Tranquila",
-        },
-      },
-      {
-        name: "Bernardo Serravalle",
-        location: {
-          hood: "Pituba",
-          street: "Rua Muito doida",
-        },
-      },
-      {
-        name: "Arthur Sant'Anna",
-        location: {
-          hood: "Itaigara",
-          street: "Avenida Principal",
-        },
-      },
-      {
-        name: "Giulia Franca",
-        location: {
-          hood: "Barra",
-          street: "Rua Tranquila",
-        },
-      },
-      {
-        name: "Bernardo Serravalle",
-        location: {
-          hood: "Pituba",
-          street: "Rua Muito doida",
-        },
-      },
-      {
-        name: "Arthur Sant'Anna",
-        location: {
-          hood: "Itaigara",
-          street: "Avenida Principal",
-        },
-      },
-      {
-        name: "Giulia Franca",
-        location: {
-          hood: "Barra",
-          street: "Rua Tranquila",
-        },
-      },
-    ];
-
-    setData(testData);
-  }, []);
-
+export default function BrokerList({ data }: { data: Broker[] }) {
   return (
     <Box
       sx={{

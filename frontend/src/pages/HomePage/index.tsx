@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Container,
   IconButton,
@@ -6,23 +6,21 @@ import {
   TextField,
   styled,
 } from "@mui/material";
-import {
-  useJsApiLoader,
-  GoogleMap,
-  Autocomplete,
-} from "@react-google-maps/api";
+import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import SearchIcon from "@mui/icons-material/Search";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import BrokerList from "../../components/BrokerLIst";
 import CorretoresMap from "../../components/CorretoresMap";
 
+const libraries: any = ["places"];
+
 const HomePage = () => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
     version: "beta",
-    libraries: ["places"],
+    libraries: libraries,
   });
 
   type Broker = {
@@ -31,37 +29,41 @@ const HomePage = () => {
     position: { lat: number; lng: number };
   };
 
-  const [data, setData] = useState<Broker[]>([]);
-
-  useEffect(() => {
-    const testData = [
-      {
-        id: 1,
-        name: "Bernardo Serravalle",
-        position: {
-          lat: -12.993966980061542,
-          lng: -38.44557003269835,
-        },
+  const testData = [
+    {
+      id: 1,
+      name: "Bernardo Serravalle",
+      position: {
+        lat: -12.993966980061542,
+        lng: -38.44557003269835,
       },
-      {
-        id: 2,
-        name: "Arthur Sant'Anna",
-        position: {
-          lat: -12.986820652837016,
-          lng: -38.4369292224266,
-        },
+    },
+    {
+      id: 2,
+      name: "Arthur Sant'Anna",
+      position: {
+        lat: -12.986820652837016,
+        lng: -38.4369292224266,
       },
-      {
-        id: 3,
-        name: "Giulia Franca",
-        position: {
-          lat: -12.985937092644223,
-          lng: -38.44490330351072,
-        },
+    },
+    {
+      id: 3,
+      name: "Giulia Franca",
+      position: {
+        lat: -12.985937092644223,
+        lng: -38.44490330351072,
       },
-    ];
-    setData(testData);
-  }, []);
+    },
+    {
+      id: 4,
+      name: "Luca Villela",
+      position: {
+        lat: -13.00986936272844,
+        lng: -38.532670253972434,
+      },
+    },
+  ];
+  const [data, setData] = useState<Broker[]>(testData);
 
   const SearchContainer = styled(Container)({
     padding: "20px",
@@ -80,26 +82,24 @@ const HomePage = () => {
     width: "400px",
   });
 
-  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   let autocompleteInstance: google.maps.places.Autocomplete | null = null;
+  const [searchMapCenter, setSearchMapCenter] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const handlePlaceChanged = () => {
     if (autocompleteInstance) {
       const place = autocompleteInstance.getPlace();
 
       if (place && place.geometry && place.geometry.location) {
-        const newMapCenter = {
+        setSearchMapCenter({
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
-        };
-        if (mapInstance) {
-          mapInstance.panTo(newMapCenter);
-        }
+        });
       }
     }
   };
-
-  //PODE PARARRR!!!
 
   const autocompleteOptions = {
     componentRestrictions: { country: "BR" },
@@ -133,7 +133,7 @@ const HomePage = () => {
           height: "850px",
         }}
       >
-        <BrokerList />
+        <BrokerList data={data} />
         <div
           className="MapContainer"
           style={{
@@ -170,7 +170,11 @@ const HomePage = () => {
               />
             </Autocomplete>
           </SearchContainer>
-          <CorretoresMap data={data} />
+          <CorretoresMap
+            data={data}
+            searchMapCenter={searchMapCenter}
+            dataFilter={setData}
+          />
         </div>
       </div>
       <Footer />
