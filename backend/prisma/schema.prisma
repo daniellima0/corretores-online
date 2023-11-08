@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "go run github.com/steebchen/prisma-client-go"
 }
@@ -8,4 +5,85 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model auth_status {
+  aust_id String @id @db.Uuid
+  type    String @db.VarChar
+  user    user[]
+}
+
+model contact_options {
+  coop_id         String            @id @db.Uuid
+  type            String            @db.VarChar
+  socials_options socials_options[]
+}
+
+model realtor {
+  real_id          String             @id @db.Uuid
+  user_id          String             @unique @db.Uuid
+  creci            String             @db.VarChar
+  description      String?            @db.VarChar
+  is_online        Boolean
+  user             user               @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  realtor_location realtor_location[]
+  realtor_regions  realtor_regions[]
+  socials_realtor  socials_realtor[]
+}
+
+model realtor_location {
+  relo_id    String   @id @db.Uuid
+  real_id    String   @db.Uuid
+  latitude   Decimal? @db.Decimal(10, 6)
+  longitude  Decimal? @db.Decimal(10, 6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  realtor    realtor  @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model realtor_regions {
+  rere_id      String       @id @db.Uuid
+  reus_id      String       @db.Uuid
+  real_id      String       @db.Uuid
+  realtor      realtor      @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
+  regions_used regions_used @relation(fields: [reus_id], references: [reus_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model regions_used {
+  reus_id         String            @id @db.Uuid
+  region          String            @db.VarChar
+  realtor_regions realtor_regions[]
+}
+
+model socials_options {
+  soop_id         String            @id @db.Uuid
+  coop_id         String            @db.Uuid
+  icon            String            @db.VarChar
+  name            String            @db.VarChar
+  contact_options contact_options   @relation(fields: [coop_id], references: [coop_id], onDelete: NoAction, onUpdate: NoAction)
+  socials_realtor socials_realtor[]
+}
+
+model socials_realtor {
+  soci_id         String          @id @db.Uuid
+  soop_id         String          @db.Uuid
+  real_id         String          @db.Uuid
+  contact_info    String          @db.VarChar
+  realtor         realtor         @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
+  socials_options socials_options @relation(fields: [soop_id], references: [soop_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  user_id       String      @id @db.Uuid
+  aust_id       String      @db.Uuid
+  name          String      @db.VarChar
+  cpf           String      @db.VarChar
+  email         String      @db.VarChar
+  password      String      @db.VarChar
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  deleted_at    DateTime?   @db.Timestamptz(6)
+  deleted_by    String?     @db.Uuid
+  date_of_birth DateTime    @db.Date
+  telephone     Json
+  realtor       realtor?
+  auth_status   auth_status @relation(fields: [aust_id], references: [aust_id], onDelete: NoAction, onUpdate: NoAction)
 }
