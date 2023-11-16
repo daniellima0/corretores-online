@@ -7,13 +7,14 @@ const Container = styled(Button, {
 })<{
   buttonColor: string;
   invertColor: boolean;
+  width: string;
 }>(
   {
-    width: "fit-content",
     alignSelf: "center",
     borderRadius: "20px",
   },
   (props) => ({
+    width: props.width,
     backgroundColor: props.invertColor ? "white" : props.buttonColor,
     border: `1px solid ${props.buttonColor}`,
     color: props.invertColor ? props.buttonColor : "white",
@@ -30,6 +31,7 @@ interface RoundedButtonProps {
   children?: string;
   buttonColor?: string;
   invertColor?: boolean;
+  width?: string;
 }
 
 const RoundedButton: React.FC<RoundedButtonProps> = (props) => {
@@ -37,6 +39,7 @@ const RoundedButton: React.FC<RoundedButtonProps> = (props) => {
     <Container
       buttonColor={props.buttonColor || "#000"}
       invertColor={props.invertColor || false}
+      width={props.width || "fit-content"}
       onClick={props.onClick}
       variant="contained"
     >
