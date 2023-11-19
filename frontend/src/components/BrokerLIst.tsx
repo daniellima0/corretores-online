@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import {
   Avatar,
@@ -31,7 +31,7 @@ function renderRow(props: ListChildComponentProps) {
       >
         <ListItemButton>
           <ListItemAvatar>
-            <Avatar alt={item.name} />
+            <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} />
           </ListItemAvatar>
           <ListItemText
             primary={
@@ -56,7 +56,7 @@ function renderRow(props: ListChildComponentProps) {
                 >
                   teste,
                 </Typography>
-                {`123`}
+                {` 123`}
               </React.Fragment>
             }
           />
@@ -67,6 +67,13 @@ function renderRow(props: ListChildComponentProps) {
 }
 
 export default function BrokerList({ data }: { data: Broker[] }) {
+  const [localData, setLocalData] = useState<Broker[]>([]);
+
+  useEffect(() => {
+    console.log("Data prop changed:", data);
+    setLocalData(data);
+  }, [data]);
+
   return (
     <Box
       sx={{

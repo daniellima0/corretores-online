@@ -73,32 +73,40 @@ function Map({
   }, []);
 
   useEffect(() => {
+    if (map && searchMapCenter) {
+      setAuxMarker(
+        new google.maps.Marker({
+          map,
+          position: searchMapCenter,
+        })
+      );
+    }
+  }, [map, searchMapCenter]);
+
+  useEffect(() => {
     async function getBrokersInCircle() {
       if (searchMapCenter) {
         const { spherical } = (await google.maps.importLibrary(
           "geometry"
         )) as google.maps.GeometryLibrary;
-        setBrokersInCircle(
-          data
-            .map((broker) => {
-              let distance = spherical.computeDistanceBetween(
-                new google.maps.LatLng(broker.position),
-                new google.maps.LatLng(searchMapCenter)
-              );
-              if (distance <= 1000) {
-                return broker;
-              }
-            })
-            .filter((broker): broker is Broker => broker !== undefined)
-        );
-        dataFilter(brokersInCircle);
-      } else return;
+        const brokersInCircleData = data
+          .map((broker) => {
+            let distance = spherical.computeDistanceBetween(
+              new google.maps.LatLng(broker.position),
+              new google.maps.LatLng(searchMapCenter)
+            );
+            return distance <= 500 ? broker : null;
+          })
+          .filter((broker): broker is Broker => broker !== null);
+        setBrokersInCircle(brokersInCircleData);
+        dataFilter(brokersInCircleData);
+      } else {
+        setBrokersInCircle([]);
+      }
     }
+
     if (circle) {
       circle.setMap(null);
-    }
-    if (auxMarker) {
-      auxMarker.setMap(null);
     }
     if (map && searchMapCenter) {
       map.panTo(searchMapCenter);
@@ -111,18 +119,16 @@ function Map({
           fillOpacity: 0.1,
           map,
           center: searchMapCenter,
-          radius: 1000,
-        })
-      );
-      setAuxMarker(
-        new google.maps.Marker({
-          map,
-          position: searchMapCenter,
+          radius: 500,
         })
       );
       getBrokersInCircle();
     }
-  }, [searchMapCenter]);
+  }, [map, searchMapCenter]);
+
+  useEffect(() => {
+    dataFilter(brokersInCircle);
+  }, [brokersInCircle, dataFilter]);
 
   let props = {
     map: map,
@@ -178,6 +184,7 @@ function Broker(props: MapProps) {
                   width: 24,
                   height: 24,
                   fontSize: "15px",
+                  bgcolor: "#FF5E00",
                 }}
               >
                 {broker.name.charAt(0)}
@@ -205,6 +212,7 @@ function Broker(props: MapProps) {
                   width: 24,
                   height: 24,
                   fontSize: "15px",
+                  bgcolor: "#FF5E00",
                 }}
               >
                 {broker.name.charAt(0)}
@@ -264,6 +272,7 @@ function Marker({
 
       if (!rootRef.current && !markerRef.current) {
         const container = document.createElement("div");
+        console.log("Creating marker");
         rootRef.current = createRoot(container);
         markerRef.current = new AdvancedMarkerElement({
           map: map,
@@ -283,6 +292,7 @@ function Marker({
   }, [map, position]);
 
   useEffect(() => {
+    console.log(rootRef.current);
     if (rootRef.current) {
       rootRef.current.render(children);
     }
@@ -292,7 +302,7 @@ function Marker({
       const listener = markerRef.current.addListener("gmp-click", onClick);
       return () => listener.remove();
     }
-  }, [map, position, children, onClick]);
+  }, [map, position, children, onClick, rootRef.current]);
 
   return null;
 }

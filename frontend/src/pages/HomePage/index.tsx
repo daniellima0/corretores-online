@@ -64,6 +64,7 @@ const HomePage = () => {
     },
   ];
   const [data, setData] = useState<Broker[]>(testData);
+  const [filteredData, setFilteredData] = useState<Broker[]>(testData);
 
   const SearchContainer = styled(Container)({
     padding: "20px",
@@ -91,7 +92,6 @@ const HomePage = () => {
   const handlePlaceChanged = () => {
     if (autocompleteInstance) {
       const place = autocompleteInstance.getPlace();
-
       if (place && place.geometry && place.geometry.location) {
         setSearchMapCenter({
           lat: place.geometry.location.lat(),
@@ -133,7 +133,7 @@ const HomePage = () => {
           height: "850px",
         }}
       >
-        <BrokerList data={data} />
+        <BrokerList key={data.length} data={filteredData} />
         <div
           className="MapContainer"
           style={{
@@ -173,7 +173,7 @@ const HomePage = () => {
           <CorretoresMap
             data={data}
             searchMapCenter={searchMapCenter}
-            dataFilter={setData}
+            dataFilter={setFilteredData}
           />
         </div>
       </div>
