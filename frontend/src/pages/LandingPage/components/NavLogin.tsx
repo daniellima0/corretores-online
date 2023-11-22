@@ -37,6 +37,7 @@ const Container = styled("div")(({ theme }) => ({
   alignItems: "center",
   padding: "0 40px",
   height: "90px",
+  width: "100%",
   [theme.breakpoints.down("md")]: {
     display: "none",
   },
