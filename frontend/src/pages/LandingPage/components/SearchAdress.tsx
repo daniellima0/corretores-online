@@ -11,7 +11,7 @@ const Container = styled("section")(({ theme }) => ({
   backgroundImage: `url(${background})`,
   backgroundSize: "cover",
   width: "100%",
-  height: "120vh",
+  height: "100vh",
   [theme.breakpoints.down("md")]: {
     display: "none",
   },
@@ -80,6 +80,7 @@ const Titulo = styled(Typography)(({ theme }) => ({
 
 const SearchAdress: React.FC = () => {
   const name = "Encontre o seu Corretor Online";
+  const busca = "Busque por um endereço...";
 
   return (
     <>
@@ -90,7 +91,7 @@ const SearchAdress: React.FC = () => {
         </Titulo>
         <SearchContainer>
           <SearchText>
-            <span>{name}</span>
+            <span>{busca}</span>
           </SearchText>
           <SearchButton fullWidth type="submit">
             <SearchOutlinedIcon></SearchOutlinedIcon>
