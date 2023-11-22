@@ -8,8 +8,12 @@ const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
-    path: "/login",
-    element: <LoginPage />,
+    path: "/realtor-login",
+    element: <LoginPage userType="realtor" />,
+  },
+  {
+    path: "/costumer-login",
+    element: <LoginPage userType="costumer" />,
   },
 ]);
 
