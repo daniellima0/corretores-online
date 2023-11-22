@@ -1,4 +1,5 @@
 import MapView from "./components/MapView";
+import NewMore from "./components/NewMore";
 import SearchAdress from "./components/SearchAdress";
 
 const LandingPage: React.FC = () => {
@@ -6,6 +7,7 @@ const LandingPage: React.FC = () => {
     <>
       <SearchAdress />
       <MapView />
+      <NewMore />
     </>
   );
 };
