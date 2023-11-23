@@ -7,9 +7,9 @@ const Container = styled("section")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   padding: "auto",
-  alignItems: "space-around",
-  justifyItems: "center",
   justifyContent: "center",
+  alignContent: "space-between",
+  alignItems: "center",
   backgroundImage: `url(${house})`,
   backgroundSize: "cover",
   width: "100%",
@@ -21,8 +21,9 @@ const Container = styled("section")(({ theme }) => ({
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
+  marginTop: "auto",
   width: "80%",
-  height: "30vh",
+  height: "45vh",
   color: "#FFFFFF",
   textShadow: "8px 8px 10px rgba(0, 0, 0, 0.50)",
   fontFamily: "${({ theme }) => theme.customTypography.bold}",
@@ -30,7 +31,6 @@ const Title = styled(Typography)(({ theme }) => ({
   fontWeight: "700",
   lineHeight: "75px",
   textAlign: "center",
-  margin: "0 auto",
 
   [theme.breakpoints.down("md")]: {
     display: "none",
@@ -38,10 +38,9 @@ const Title = styled(Typography)(({ theme }) => ({
 }));
 
 const ButtonNewMore = styled(Button)(({ theme }) => ({
-  width: "500px",
-  height: "20%",
+  width: "5vw",
+  height: "20vh",
   color: "#FFFFFF",
-  fontSize: "50vh",
   margin: "0 auto",
 
   [theme.breakpoints.down("md")]: {
@@ -55,8 +54,10 @@ const NewMore: React.FC = () => {
     <>
       <Container>
         <Title>{title}</Title>
-        <ButtonNewMore fullWidth type="submit">
-          <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
+        <ButtonNewMore disableRipple>
+          <KeyboardArrowDownIcon
+            style={{ fontSize: "7vw" }}
+          ></KeyboardArrowDownIcon>
         </ButtonNewMore>
       </Container>
     </>
