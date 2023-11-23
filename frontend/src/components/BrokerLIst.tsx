@@ -16,9 +16,16 @@ type Broker = {
   position: { lat: number; lng: number };
 };
 
-function renderRow(props: ListChildComponentProps) {
-  const { index, style, data } = props;
+function renderRow(
+  props: ListChildComponentProps & { setSearchMapCenter: any }
+) {
+  const { index, style, data, setSearchMapCenter } = props;
   const item = data[index];
+
+  const handleListItemClick = () => {
+    // Call setSearchMapCenter with the appropriate arguments
+    setSearchMapCenter(item.position);
+  };
 
   return (
     <div style={{ overflowX: "hidden" }}>
@@ -29,7 +36,7 @@ function renderRow(props: ListChildComponentProps) {
         component="div"
         disablePadding
       >
-        <ListItemButton>
+        <ListItemButton sx={{ height: "100%" }} onClick={handleListItemClick}>
           <ListItemAvatar>
             <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} />
           </ListItemAvatar>
@@ -53,10 +60,8 @@ function renderRow(props: ListChildComponentProps) {
                   component={"span"}
                   variant="h6"
                   color="text.primary"
-                >
-                  teste,
-                </Typography>
-                {` 123`}
+                ></Typography>
+                Visitar perfil
               </React.Fragment>
             }
           />
@@ -66,7 +71,13 @@ function renderRow(props: ListChildComponentProps) {
   );
 }
 
-export default function BrokerList({ data }: { data: Broker[] }) {
+export default function BrokerList({
+  data,
+  setSearchMapCenter,
+}: {
+  data: Broker[];
+  setSearchMapCenter: any;
+}) {
   const [localData, setLocalData] = useState<Broker[]>([]);
 
   useEffect(() => {
@@ -94,7 +105,11 @@ export default function BrokerList({ data }: { data: Broker[] }) {
           height: "20%",
         }}
       >
-        Foram encontrados <strong>{data.length}</strong> corretores nessa área:
+        {data.length > 1
+          ? `Foram encontrados ${data.length} corretores nessa área:`
+          : data.length === 1
+          ? `Foi encontrado ${data.length} corretor nessa área:`
+          : `Não foram encontrados corretores nessa área.`}
       </Typography>
 
       <FixedSizeList
@@ -106,11 +121,11 @@ export default function BrokerList({ data }: { data: Broker[] }) {
         overscanCount={0}
         style={{
           width: "100%",
-          height: "80%",
+          height: "auto",
           overflowX: "hidden",
         }}
       >
-        {renderRow}
+        {(props) => renderRow({ ...props, setSearchMapCenter })}
       </FixedSizeList>
     </Box>
   );

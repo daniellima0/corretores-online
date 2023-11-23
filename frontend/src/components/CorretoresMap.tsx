@@ -57,13 +57,13 @@ function Map({
 
   const ref = useRef<HTMLDivElement>(null);
   const mapOptions = {
-    mapId: "3148b0a282cfd2a4",
+    mapId: "abc9203fc784d845",
     center: { lat: -12.976982096232536, lng: -38.455293915342516 },
     clickableIcons: false,
     streetViewControl: true,
     mapTypeControl: false,
     fullscreenControl: false,
-    zoom: 16,
+    zoom: 14,
   };
 
   useEffect(() => {
@@ -71,17 +71,6 @@ function Map({
       setMap(new window.google.maps.Map(ref.current, mapOptions));
     }
   }, []);
-
-  useEffect(() => {
-    if (map && searchMapCenter) {
-      setAuxMarker(
-        new google.maps.Marker({
-          map,
-          position: searchMapCenter,
-        })
-      );
-    }
-  }, [map, searchMapCenter]);
 
   useEffect(() => {
     async function getBrokersInCircle() {
@@ -101,10 +90,9 @@ function Map({
         setBrokersInCircle(brokersInCircleData);
         dataFilter(brokersInCircleData);
       } else {
-        setBrokersInCircle([]);
+        setBrokersInCircle(data);
       }
     }
-
     if (circle) {
       circle.setMap(null);
     }
@@ -272,8 +260,8 @@ function Marker({
 
       if (!rootRef.current && !markerRef.current) {
         const container = document.createElement("div");
-        console.log("Creating marker");
         rootRef.current = createRoot(container);
+        console.log("chamou função de importar");
         markerRef.current = new AdvancedMarkerElement({
           map: map,
           position: position,
@@ -292,8 +280,9 @@ function Marker({
   }, [map, position]);
 
   useEffect(() => {
-    console.log(rootRef.current);
+    console.log("aaama");
     if (rootRef.current) {
+      console.log("entramo");
       rootRef.current.render(children);
     }
     if (markerRef.current) {
