@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/google/uuid"
@@ -31,6 +32,10 @@ func (h *ContactOptionHandler) Create(c echo.Context) error {
 
 	contact_option.CoopID = uuid.New().String()
 
+	if strings.TrimSpace(contact_option.Type) == "" {
+		return c.JSON(http.StatusBadRequest, "Type is required")
+	}
+
 	created, err := h.client.ContactOptions.CreateOne(
 		db.ContactOptions.CoopID.Set(contact_option.CoopID),
 		db.ContactOptions.Type.Set(contact_option.Type),
@@ -48,6 +53,10 @@ func (h *ContactOptionHandler) Update(c echo.Context) error {
 	var contact_option db.ContactOptionsModel
 	if err := c.Bind(&contact_option); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	if strings.TrimSpace(contact_option.Type) == "" {
+		return c.JSON(http.StatusBadRequest, "Type is required")
 	}
 
 	updated, err := h.client.ContactOptions.FindUnique(
