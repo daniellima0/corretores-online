@@ -24,7 +24,6 @@ function renderRow(
   const item = data[index];
 
   const handleListItemClick = () => {
-    // Call setSearchMapCenter with the appropriate arguments
     setSearchMapCenter(item.position);
   };
 
@@ -82,7 +81,6 @@ export default function BrokerList({
   const [localData, setLocalData] = useState<Broker[]>([]);
 
   useEffect(() => {
-    console.log("Data prop changed:", data);
     setLocalData(data);
   }, [data]);
 
@@ -95,7 +93,7 @@ export default function BrokerList({
     zIndex: "10",
     [theme.breakpoints.down("sm")]: {
       width: "100%",
-      height: "110%",
+      height: "85%",
     },
   }));
 
@@ -134,7 +132,7 @@ export default function BrokerList({
         overscanCount={0}
         style={{
           width: "100%",
-          height: "70%",
+          height: "85%",
           overflowX: "hidden",
         }}
       >

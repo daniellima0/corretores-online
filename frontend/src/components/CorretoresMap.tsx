@@ -50,7 +50,6 @@ function Map({
 }) {
   const [map, setMap] = useState<google.maps.Map>();
   const [circle, setCircle] = useState<google.maps.Circle | null>();
-  const [auxMarker, setAuxMarker] = useState<google.maps.Marker | null>();
   const [brokersInCircle, setBrokersInCircle] = useState<Broker[] | undefined>(
     data
   );
@@ -148,7 +147,7 @@ function Broker(props: MapProps) {
           map={map}
           position={broker.position}
           onClick={() => {
-            console.log("teste");
+            console.log(setHover(broker.id));
           }}
         >
           <HiddenComponent hidden={broker.id === hover}>
@@ -261,7 +260,6 @@ function Marker({
       if (!rootRef.current && !markerRef.current) {
         const container = document.createElement("div");
         rootRef.current = createRoot(container);
-        console.log("chamou função de importar");
         markerRef.current = new AdvancedMarkerElement({
           map: map,
           position: position,
@@ -280,9 +278,7 @@ function Marker({
   }, [map, position]);
 
   useEffect(() => {
-    console.log("aaama");
     if (rootRef.current) {
-      console.log("entramo");
       rootRef.current.render(children);
     }
     if (markerRef.current) {

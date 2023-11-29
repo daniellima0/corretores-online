@@ -1,8 +1,7 @@
-import { CSSProperties, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
-  Container,
   IconButton,
   InputAdornment,
   Modal,
@@ -10,7 +9,6 @@ import {
   Typography,
   styled,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import SearchIcon from "@mui/icons-material/Search";
@@ -52,31 +50,13 @@ const HomePage = () => {
       display: "flex",
       flexDirection: "row",
       width: "100%",
-      height: "850px",
+      height: "850px  ",
     };
     mapContainerStyle = {
       width: "75%",
       height: "100%",
     };
   }
-
-  /*  const SearchContainer = styled(Container)(({ theme }) => ({
-    padding: "20px",
-    position: "absolute",
-    zIndex: 10,
-    boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
-    marginTop: "20px",
-    right: "20px",
-    backgroundColor: "#FFFFFF",
-    display: "flex",
-    width: "420px",
-    borderRadius: "10px",
-    jistifyContent: "center",
-    alignItems: "center",
-    [theme.breakpoints.down("sm")]: {
-      display: "none",
-    },
-  })); */
 
   const LocationInput = styled(TextField)(({ theme }) => ({
     position: "absolute",
@@ -110,16 +90,21 @@ const HomePage = () => {
     },
   }));
 
+  const CapsulaInutil = styled("div")({
+    display: "flex",
+  });
+
   useEffect(() => {
     const successCallback = (position: any) => {
       setSearchMapCenter({
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       });
-      console.log(position);
     };
 
-    const errorCallback = (error: any) => {};
+    const errorCallback = (error: any) => {
+      console.error(error);
+    };
 
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
   }, []);
@@ -338,7 +323,7 @@ const HomePage = () => {
           setSearchMapCenter={setSearchMapCenter}
         />
         <div className="MapContainer" style={mapContainerStyle}>
-          <>
+          <CapsulaInutil>
             <Autocomplete
               onLoad={(autocomplete) => {
                 autocompleteInstance = autocomplete;
@@ -366,7 +351,7 @@ const HomePage = () => {
                 }}
               />
             </Autocomplete>
-          </>
+          </CapsulaInutil>
 
           <CorretoresMap
             data={data}
