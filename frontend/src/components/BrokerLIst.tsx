@@ -97,6 +97,8 @@ export default function BrokerList({
     },
   }));
 
+  console.log(data);
+
   return (
     <ListBox>
       <div
@@ -112,7 +114,7 @@ export default function BrokerList({
           sx={{
             padding: "20px",
             boxShadow: "0 1px 10px 0px rgba(0, 0, 0, 0.2)",
-            height: "30%",
+            height: "100%",
           }}
         >
           {data.length > 1
@@ -124,7 +126,7 @@ export default function BrokerList({
       </div>
 
       <FixedSizeList
-        height={1000}
+        height={data.length * 100}
         width={""}
         itemSize={100}
         itemCount={data.length}
@@ -132,7 +134,7 @@ export default function BrokerList({
         overscanCount={0}
         style={{
           width: "100%",
-          height: "85%",
+          height: "75%",
           overflowX: "hidden",
         }}
       >

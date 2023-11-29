@@ -50,7 +50,7 @@ const HomePage = () => {
       display: "flex",
       flexDirection: "row",
       width: "100%",
-      height: "850px  ",
+      height: "850px",
     };
     mapContainerStyle = {
       width: "75%",
