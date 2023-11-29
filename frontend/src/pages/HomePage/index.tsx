@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -9,6 +9,8 @@ import {
   TextField,
   Typography,
   styled,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import SearchIcon from "@mui/icons-material/Search";
@@ -16,7 +18,6 @@ import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import BrokerList from "../../components/BrokerLIst";
 import CorretoresMap from "../../components/CorretoresMap";
-import CloseIcon from "@mui/icons-material/Close";
 
 const libraries: any = ["places"];
 
@@ -27,6 +28,87 @@ const HomePage = () => {
     version: "beta",
     libraries: libraries,
   });
+
+  const isSmallScreen = useMediaQuery((theme: any) =>
+    theme.breakpoints.down("sm")
+  );
+
+  let bodyContainerStyle: any = {};
+  let mapContainerStyle: any = {};
+
+  if (isSmallScreen) {
+    bodyContainerStyle = {
+      display: "flex",
+      flexDirection: "column-reverse",
+      width: "100%",
+      height: "180vh",
+    };
+    mapContainerStyle = {
+      width: "100%",
+      height: "100%",
+    };
+  } else {
+    bodyContainerStyle = {
+      display: "flex",
+      flexDirection: "row",
+      width: "100%",
+      height: "850px",
+    };
+    mapContainerStyle = {
+      width: "75%",
+      height: "100%",
+    };
+  }
+
+  /*  const SearchContainer = styled(Container)(({ theme }) => ({
+    padding: "20px",
+    position: "absolute",
+    zIndex: 10,
+    boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
+    marginTop: "20px",
+    right: "20px",
+    backgroundColor: "#FFFFFF",
+    display: "flex",
+    width: "420px",
+    borderRadius: "10px",
+    jistifyContent: "center",
+    alignItems: "center",
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
+    },
+  })); */
+
+  const LocationInput = styled(TextField)(({ theme }) => ({
+    position: "absolute",
+    zIndex: 10,
+    backgroundColor: "#FFFFFF",
+    border: "10px solid #FFFFFF",
+    borderRadius: "5px",
+    marginTop: "20px",
+    boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
+    right: "20px",
+    [theme.breakpoints.down("sm")]: {
+      marginTop: "10px",
+      right: "auto",
+      left: "10px",
+    },
+  }));
+
+  const ModalBox = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    backgroundColor: "#fff",
+    border: "2px solid #fff",
+    padding: "20px",
+    textAlign: "center",
+    borderRadius: "10px",
+    [theme.breakpoints.down("sm")]: {
+      width: "80%",
+    },
+  }));
 
   useEffect(() => {
     const successCallback = (position: any) => {
@@ -81,27 +163,92 @@ const HomePage = () => {
         lng: -38.532670253972434,
       },
     },
+    {
+      id: 5,
+      name: "Bernardo Serravalle",
+      position: {
+        lat: -12.993966980061542,
+        lng: -38.44557003269835,
+      },
+    },
+    {
+      id: 6,
+      name: "Arthur Sant'Anna",
+      position: {
+        lat: -12.986820652837016,
+        lng: -38.4369292224266,
+      },
+    },
+    {
+      id: 7,
+      name: "Giulia Franca",
+      position: {
+        lat: -12.985937092644223,
+        lng: -38.44490330351072,
+      },
+    },
+    {
+      id: 8,
+      name: "Luca Villela",
+      position: {
+        lat: -13.00986936272844,
+        lng: -38.532670253972434,
+      },
+    },
+    {
+      id: 9,
+      name: "Bernardo Serravalle",
+      position: {
+        lat: -12.993966980061542,
+        lng: -38.44557003269835,
+      },
+    },
+    {
+      id: 10,
+      name: "Arthur Sant'Anna",
+      position: {
+        lat: -12.986820652837016,
+        lng: -38.4369292224266,
+      },
+    },
+    {
+      id: 11,
+      name: "Giulia Franca",
+      position: {
+        lat: -12.985937092644223,
+        lng: -38.44490330351072,
+      },
+    },
+    {
+      id: 12,
+      name: "Luca Villela",
+      position: {
+        lat: -13.00986936272844,
+        lng: -38.532670253972434,
+      },
+    },
   ];
+  const initialSearchBias = {
+    lat: -12.98767014046349,
+    lng: -38.48548147475881,
+  };
   const [open, setOpen] = useState(true);
   const handleClose = () => setOpen(false);
   const [data, setData] = useState<Broker[]>(testData);
   const [filteredData, setFilteredData] = useState<Broker[]>(testData);
-
-  const SearchContainer = styled(Container)({
-    padding: "20px",
-    position: "absolute",
-    zIndex: "10",
-    boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
-    marginTop: "20px",
-    right: "20px",
-    backgroundColor: "#FFFFFF",
-    display: "flex",
-    width: "fit-content",
-    borderRadius: "10px",
-  });
-
-  const LocationInput = styled(TextField)({
-    width: "400px",
+  const [searchInputBias, setSearchInputBias] = useState<
+    | {
+        north: number;
+        south: number;
+        east: number;
+        west: number;
+      }
+    | undefined
+  >({
+    north: initialSearchBias.lat + 0.3,
+    south: initialSearchBias.lat - 0.3,
+    east: initialSearchBias.lng + 0.3,
+    west: initialSearchBias.lng - 0.3,
   });
 
   let autocompleteInstance: google.maps.places.Autocomplete | null = null;
@@ -122,9 +269,21 @@ const HomePage = () => {
     }
   };
 
+  useEffect(() => {
+    if (searchMapCenter) {
+      setSearchInputBias({
+        north: searchMapCenter.lat + 0.3,
+        south: searchMapCenter.lat - 0.3,
+        east: searchMapCenter.lng + 0.3,
+        west: searchMapCenter.lng - 0.3,
+      });
+    }
+  }, [searchMapCenter]);
+
   const autocompleteOptions = {
-    componentRestrictions: { country: "BR" },
-    language: "pt-BR",
+    bounds: searchInputBias,
+    componentRestrictions: { country: "br" },
+    strictBounds: false,
   };
 
   const handleSearchButtonClick = () => {
@@ -141,20 +300,6 @@ const HomePage = () => {
     );
   }
 
-  const style = {
-    position: "absolute" as "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #fff",
-    boxShadow: 24,
-    p: 4,
-    textAlign: "center",
-    borderRadius: "10px",
-  };
-
   return (
     <div>
       <Modal
@@ -163,7 +308,7 @@ const HomePage = () => {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <ModalBox>
           <Typography id="modal-modal-title" variant="h6" component="h2">
             <strong>Bem-vindo ao Corretores Online!</strong>
           </Typography>
@@ -176,39 +321,24 @@ const HomePage = () => {
           </Typography>
           <Button
             variant="outlined"
-            color="error"
+            color="success"
             sx={{ mt: 2 }}
             onClick={handleClose}
           >
-            Fechar
+            Entendi
           </Button>
-        </Box>
+        </ModalBox>
       </Modal>
 
       <Navbar />
-      <div
-        className="BodyContainer"
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-          justifyContent: "flex-end",
-          height: "850px",
-        }}
-      >
+      <div className="BodyContainer" style={bodyContainerStyle}>
         <BrokerList
           key={data.length}
           data={filteredData}
           setSearchMapCenter={setSearchMapCenter}
         />
-        <div
-          className="MapContainer"
-          style={{
-            width: "75%",
-            height: "100%",
-          }}
-        >
-          <SearchContainer>
+        <div className="MapContainer" style={mapContainerStyle}>
+          <>
             <Autocomplete
               onLoad={(autocomplete) => {
                 autocompleteInstance = autocomplete;
@@ -236,7 +366,8 @@ const HomePage = () => {
                 }}
               />
             </Autocomplete>
-          </SearchContainer>
+          </>
+
           <CorretoresMap
             data={data}
             searchMapCenter={searchMapCenter}

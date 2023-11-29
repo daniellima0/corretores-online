@@ -84,7 +84,7 @@ function Map({
               new google.maps.LatLng(broker.position),
               new google.maps.LatLng(searchMapCenter)
             );
-            return distance <= 500 ? broker : null;
+            return distance <= 2000 ? broker : null;
           })
           .filter((broker): broker is Broker => broker !== null);
         setBrokersInCircle(brokersInCircleData);
@@ -107,7 +107,7 @@ function Map({
           fillOpacity: 0.1,
           map,
           center: searchMapCenter,
-          radius: 500,
+          radius: 2000,
         })
       );
       getBrokersInCircle();

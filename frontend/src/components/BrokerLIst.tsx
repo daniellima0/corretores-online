@@ -8,6 +8,7 @@ import {
   ListItemButton,
   ListItemText,
   Typography,
+  styled,
 } from "@mui/material";
 
 type Broker = {
@@ -85,32 +86,44 @@ export default function BrokerList({
     setLocalData(data);
   }, [data]);
 
+  const ListBox = styled(Box)(({ theme }) => ({
+    width: "25%",
+    height: "100%",
+    bgcolor: "background.paper",
+    overflow: "hidden",
+    boxShadow: "10px 0px 10px -10px rgba(0, 0, 0, 0.2)",
+    zIndex: "10",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+      height: "110%",
+    },
+  }));
+
   return (
-    <Box
-      sx={{
-        width: "25%",
-        height: "100%",
-        bgcolor: "background.paper",
-        overflow: "hidden",
-        boxShadow: "10px 0px 10px -10px rgba(0, 0, 0, 0.2)",
-        zIndex: "10",
-      }}
-    >
-      <Typography
-        variant="h4"
-        component="h4"
-        sx={{
-          padding: "40px",
-          boxShadow: "0 1px 10px 0px rgba(0, 0, 0, 0.2)",
-          height: "20%",
+    <ListBox>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        {data.length > 1
-          ? `Foram encontrados ${data.length} corretores nessa área:`
-          : data.length === 1
-          ? `Foi encontrado ${data.length} corretor nessa área:`
-          : `Não foram encontrados corretores nessa área.`}
-      </Typography>
+        <Typography
+          variant="h4"
+          component="h4"
+          sx={{
+            padding: "20px",
+            boxShadow: "0 1px 10px 0px rgba(0, 0, 0, 0.2)",
+            height: "30%",
+          }}
+        >
+          {data.length > 1
+            ? `Foram encontrados ${data.length} corretores nessa área:`
+            : data.length === 1
+            ? `Foi encontrado ${data.length} corretor nessa área:`
+            : `Não foram encontrados corretores nessa área.`}
+        </Typography>
+      </div>
 
       <FixedSizeList
         height={1000}
@@ -121,12 +134,12 @@ export default function BrokerList({
         overscanCount={0}
         style={{
           width: "100%",
-          height: "auto",
+          height: "70%",
           overflowX: "hidden",
         }}
       >
         {(props) => renderRow({ ...props, setSearchMapCenter })}
       </FixedSizeList>
-    </Box>
+    </ListBox>
   );
 }
