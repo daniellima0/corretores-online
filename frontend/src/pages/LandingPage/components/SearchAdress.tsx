@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import background from "../../../assets/backadress.png";
-import { Button, Input, InputBase, TextField, Typography } from "@mui/material";
+import { Button, InputBase, Typography } from "@mui/material";
 import NavLogin from "./NavLogin";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
@@ -99,7 +99,7 @@ const Titulo = styled(Typography)(({ theme }) => ({
   width: "700px",
   height: "180px",
   color: "#FFFFFF",
-  textShadow: "8px 8px 10px rgba(0, 0, 0, 0.50)",
+  textShadow: "8px 8px 10px rgba(0, 0, 0, 0.20)",
   fontFamily: "${({ theme }) => theme.customTypography.bold}",
   fontSize: "70px",
   fontWeight: "700",

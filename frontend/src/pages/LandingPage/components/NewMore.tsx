@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import house from "../../../assets/house.png";
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const Container = styled("section")(({ theme }) => ({
@@ -8,12 +8,11 @@ const Container = styled("section")(({ theme }) => ({
   flexDirection: "column",
   padding: "auto",
   justifyContent: "center",
-  alignContent: "space-between",
   alignItems: "center",
   backgroundImage: `url(${house})`,
   backgroundSize: "cover",
   width: "100%",
-  height: "100vh",
+  height: "90vh",
 
   [theme.breakpoints.down("md")]: {
     display: "none",
@@ -21,15 +20,13 @@ const Container = styled("section")(({ theme }) => ({
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
-  marginTop: "auto",
-  width: "80%",
-  height: "45vh",
+  width: "50%",
+  height: "fit-content",
   color: "#FFFFFF",
-  textShadow: "8px 8px 10px rgba(0, 0, 0, 0.50)",
+  textShadow: "8px 8px 10px rgba(0, 0, 0, 0.20)",
   fontFamily: "${({ theme }) => theme.customTypography.bold}",
-  fontSize: "60px",
+  fontSize: "70px",
   fontWeight: "700",
-  lineHeight: "75px",
   textAlign: "center",
 
   [theme.breakpoints.down("md")]: {
@@ -37,12 +34,25 @@ const Title = styled(Typography)(({ theme }) => ({
   },
 }));
 
-const ButtonNewMore = styled(Button)(({ theme }) => ({
-  width: "5vw",
-  height: "20vh",
-  color: "#FFFFFF",
-  margin: "0 auto",
+const TitleBox = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  height: "100%",
+  [theme.breakpoints.down("md")]: {
+    display: "none",
+  },
+}));
 
+const SaibaMaisBox = styled("div")(({ theme }) => ({
+  position: "absolute",
+  display: "flex",
+  alignItems: "flex-end",
+  justifyContent: "center",
+  width: "100%",
+  height: "90vh",
+  paddingBottom: "40px",
   [theme.breakpoints.down("md")]: {
     display: "none",
   },
@@ -53,12 +63,14 @@ const NewMore: React.FC = () => {
   return (
     <>
       <Container>
-        <Title>{title}</Title>
-        <ButtonNewMore disableRipple>
+        <TitleBox>
+          <Title>{title}</Title>
+        </TitleBox>
+        <SaibaMaisBox>
           <KeyboardArrowDownIcon
-            style={{ fontSize: "7vw" }}
+            style={{ fontSize: "150px", color: "#FFFFFF" }}
           ></KeyboardArrowDownIcon>
-        </ButtonNewMore>
+        </SaibaMaisBox>
       </Container>
     </>
   );
