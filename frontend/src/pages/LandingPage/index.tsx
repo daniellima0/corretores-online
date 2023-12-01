@@ -2,6 +2,7 @@ import MapView from "./components/MapView";
 import NewMore from "./components/NewMore";
 import SearchAdress from "./components/SearchAdress";
 import GetToKnow from "./components/GetToKnow";
+import HowDoesItWork from "./components/HowDoesItWork";
 
 const LandingPage: React.FC = () => {
   return (
@@ -9,6 +10,7 @@ const LandingPage: React.FC = () => {
       <SearchAdress />
       <MapView />
       <NewMore />
+      <HowDoesItWork />
       <GetToKnow />
     </>
   );
