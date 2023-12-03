@@ -12,9 +12,7 @@ const ButtonContained = styled(Button)(({ theme }) => ({
   fontSize: "17px",
   fontWeight: 800,
   "&: hover": { backgroundColor: "#FF5E00", color: "#ffffff" },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 const ButtonStyled = styled(Button)(({ theme }) => ({
@@ -26,9 +24,7 @@ const ButtonStyled = styled(Button)(({ theme }) => ({
   fontSize: "17px",
   fontWeight: 800,
   "&: hover": { backgroundColor: "rgba(0,0,0,0.18)", color: "#ffffff" },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 const Container = styled("div")(({ theme }) => ({
@@ -38,17 +34,13 @@ const Container = styled("div")(({ theme }) => ({
   padding: "0 40px",
   height: "10%",
   width: "100%",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 const Logo = styled("img")(({ theme }) => ({
   width: "150px",
   alignSelf: "center",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { display: "none" },
 }));
 
 const LoginSpace = styled("div")(({ theme }) => ({
@@ -56,9 +48,7 @@ const LoginSpace = styled("div")(({ theme }) => ({
   alignItems: "center",
   gap: "10px",
   justifySelf: "end",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 const NavLogin: React.FC = () => {

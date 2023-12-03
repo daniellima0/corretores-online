@@ -38,7 +38,9 @@ const Container = styled("section")(({ theme }) => ({
   height: "90vh",
 
   [theme.breakpoints.down("md")]: {
-    display: "none",
+    height: "150vh",
+    justifyContent: "center",
+    alignItems: "center",
   },
 }));
 
@@ -52,9 +54,7 @@ const Title = styled(Typography)(({ theme }) => ({
   fontWeight: "700",
   textAlign: "center",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { padding: "0px", fontSize: "40px" },
 }));
 
 const CardContainer = styled("div")(({ theme }) => ({
@@ -66,7 +66,9 @@ const CardContainer = styled("div")(({ theme }) => ({
   height: "90%",
   gap: "80px",
   [theme.breakpoints.down("md")]: {
-    display: "none",
+    position: "relative",
+    flexDirection: "column",
+    gap: "5px",
   },
 }));
 const InfoCard = styled(Card)(({ theme }) => ({
@@ -75,7 +77,15 @@ const InfoCard = styled(Card)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   height: "50%",
-  "&: hover": { boxShadow: "5px 5px 50px rgba(0, 0, 0, 0.10)" },
+  cursor: "pointer",
+  "&: hover": { boxShadow: "5px 5px 50px rgba(0, 0, 0, 0.20)" },
+  [theme.breakpoints.down("md")]: { height: "50%", scale: "0.8" },
+}));
+
+const DividerStyled = styled(Divider)(({ theme }) => ({
+  height: "350px",
+  width: "3px",
+
   [theme.breakpoints.down("md")]: {
     display: "none",
   },
@@ -88,9 +98,7 @@ const CardIcon = styled("div")(({ theme }) => ({
   width: "100%",
   height: "100%",
   paddingBottom: "20px",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 const GetToKnow: React.FC = () => {
@@ -101,7 +109,13 @@ const GetToKnow: React.FC = () => {
         <CardContainer>
           {cardData.map((card) => (
             <>
-              <InfoCard key={card.id} sx={{ maxWidth: 400 }}>
+              <InfoCard
+                key={card.id}
+                sx={{ maxWidth: 400 }}
+                onClick={() => {
+                  location.href = "/realtor-profile";
+                }}
+              >
                 <CardContent>
                   <CardIcon>
                     <img
@@ -131,11 +145,10 @@ const GetToKnow: React.FC = () => {
                 </CardContent>
               </InfoCard>
               {card.id <= 2 && (
-                <Divider
+                <DividerStyled
                   orientation="vertical"
                   variant="middle"
                   color="#FF5E00"
-                  sx={{ height: "350px", width: "3px" }}
                 />
               )}
             </>

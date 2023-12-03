@@ -2,6 +2,7 @@ import { styled } from "@mui/material/styles";
 import { Button, Typography } from "@mui/material";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { useEffect, useRef, useState } from "react";
+import React from "react";
 
 const Container = styled("section")(({ theme }) => ({
   display: "flex",
@@ -13,15 +14,13 @@ const Container = styled("section")(({ theme }) => ({
   height: "90vh",
   alignItems: "center",
   justifyContent: "center",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { height: "90vh" },
 }));
 
 const MapTextContainer = styled("div")(({ theme }) => ({
   position: "absolute",
   borderRadius: "10px",
-  width: "550px",
+  width: "70%",
   height: "40%",
   boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
   backgroundColor: "#FFFFFF",
@@ -31,10 +30,9 @@ const MapTextContainer = styled("div")(({ theme }) => ({
   justifyContent: "center",
   flexDirection: "column",
   gap: "40px",
+  maxWidth: "550px",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { gap: "20px" },
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
@@ -46,9 +44,7 @@ const Title = styled(Typography)(({ theme }) => ({
   lineHeight: "40px",
   textAlign: "center",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { fontSize: "25px", lineHeight: "30px" },
 }));
 
 const MapTextButton = styled(Button)(({ theme }) => ({
@@ -62,9 +58,7 @@ const MapTextButton = styled(Button)(({ theme }) => ({
   fontWeight: "500",
 
   "&: hover": { backgroundColor: "#FF5E00", color: "#ffffff" },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 const CreateAcount = styled(Typography)(({ theme }) => ({
@@ -77,9 +71,7 @@ const CreateAcount = styled(Typography)(({ theme }) => ({
   fontSize: "14px",
   fontWeight: "500",
   textAlign: "center",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 type Broker = {
@@ -88,12 +80,12 @@ type Broker = {
   position: { lat: number; lng: number };
 };
 
-const MapView: React.FC = () => {
+const MapView: React.ForwardRefRenderFunction<any, {}> = (_, ref) => {
   const numero = "18";
 
   return (
     <>
-      <Container>
+      <Container ref={ref}>
         <MapWrapper />
         <MapTextContainer>
           <Title>
@@ -193,4 +185,4 @@ const Map = () => {
   return <div style={{ width: "100%", height: "100%" }} ref={ref} />;
 };
 
-export default MapView;
+export default React.forwardRef(MapView);

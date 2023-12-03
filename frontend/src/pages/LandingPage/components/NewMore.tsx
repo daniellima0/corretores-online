@@ -14,13 +14,11 @@ const Container = styled("section")(({ theme }) => ({
   width: "100%",
   height: "90vh",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { height: "70vh" },
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
-  width: "50%",
+  width: "65%",
   height: "fit-content",
   color: "#FFFFFF",
   textShadow: "8px 8px 10px rgba(0, 0, 0, 0.20)",
@@ -29,9 +27,7 @@ const Title = styled(Typography)(({ theme }) => ({
   fontWeight: "700",
   textAlign: "center",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { fontSize: "40px", width: "85%" },
 }));
 
 const TitleBox = styled("div")(({ theme }) => ({
@@ -40,9 +36,7 @@ const TitleBox = styled("div")(({ theme }) => ({
   justifyContent: "center",
   width: "100%",
   height: "100%",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { height: "90%" },
 }));
 
 const SaibaMaisBox = styled("div")(({ theme }) => ({
@@ -53,9 +47,7 @@ const SaibaMaisBox = styled("div")(({ theme }) => ({
   width: "100%",
   height: "90vh",
   paddingBottom: "40px",
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { height: "75vh", paddingBottom: "0px" },
 }));
 
 const NewMore: React.FC = () => {

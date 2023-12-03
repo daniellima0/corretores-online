@@ -15,9 +15,7 @@ const Container = styled("section")(({ theme }) => ({
   height: "90vh",
   gap: "40px",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { height: "70vh", gap: "20px" },
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
@@ -30,9 +28,7 @@ const Title = styled(Typography)(({ theme }) => ({
   fontWeight: "700",
   textAlign: "center",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { fontSize: "40px", width: "70%" },
 }));
 
 const Description = styled(Typography)(({ theme }) => ({
@@ -44,9 +40,7 @@ const Description = styled(Typography)(({ theme }) => ({
   fontSize: "30px",
   textAlign: "center",
 
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: { fontSize: "15px" },
 }));
 
 const DiscoverButton = styled(Button)(({ theme }) => ({
@@ -54,9 +48,7 @@ const DiscoverButton = styled(Button)(({ theme }) => ({
   backgroundColor: "#FF5E00",
   color: "#FFFFFF",
   "&: hover": { backgroundColor: "#FF5E00", color: "#ffffff" },
-  [theme.breakpoints.down("md")]: {
-    display: "none",
-  },
+  [theme.breakpoints.down("md")]: {},
 }));
 
 const GetToKnow: React.FC = () => {
