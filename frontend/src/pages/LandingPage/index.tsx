@@ -5,6 +5,7 @@ import GetToKnow from "./components/GetToKnow";
 import HowDoesItWork from "./components/HowDoesItWork";
 import HiddenComponent from "../../components/HiddenComponent";
 import { useRef, useState } from "react";
+import Footer from "../../components/Footer";
 
 const LandingPage: React.FC = () => {
   const [showMap, setShowMap] = useState(false);
@@ -19,6 +20,7 @@ const LandingPage: React.FC = () => {
       <NewMore />
       <HowDoesItWork />
       <GetToKnow />
+      <Footer />
     </>
   );
 };

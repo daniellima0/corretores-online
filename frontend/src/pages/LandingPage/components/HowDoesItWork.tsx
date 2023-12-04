@@ -32,13 +32,13 @@ const Container = styled("section")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   justifyContent: "flex-start",
-  alignItems: "flex-start",
+  alignItems: "center",
   backgroundColor: "#FFFFFF",
   width: "100%",
   height: "90vh",
 
   [theme.breakpoints.down("md")]: {
-    height: "150vh",
+    height: "120vh",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -46,15 +46,19 @@ const Container = styled("section")(({ theme }) => ({
 
 const Title = styled(Typography)(({ theme }) => ({
   padding: "60px",
-  width: "auto",
+  width: "100%",
   height: "auto",
   color: "#FF5E00",
   fontFamily: "${({ theme }) => theme.customTypography.bold}",
   fontSize: "70px",
   fontWeight: "700",
-  textAlign: "center",
+  textAlign: "left",
 
-  [theme.breakpoints.down("md")]: { padding: "0px", fontSize: "40px" },
+  [theme.breakpoints.down("md")]: {
+    padding: "0px",
+    fontSize: "35px",
+    width: "fit-content",
+  },
 }));
 
 const CardContainer = styled("div")(({ theme }) => ({
@@ -62,7 +66,7 @@ const CardContainer = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: "100%",
+  width: "80%",
   height: "90%",
   gap: "80px",
   [theme.breakpoints.down("md")]: {
@@ -74,6 +78,7 @@ const CardContainer = styled("div")(({ theme }) => ({
 const InfoCard = styled(Card)(({ theme }) => ({
   boxShadow: "none",
   display: "flex",
+  minWidth: "160px",
   alignItems: "center",
   justifyContent: "center",
   height: "50%",
@@ -110,7 +115,6 @@ const GetToKnow: React.FC = () => {
           {cardData.map((card) => (
             <>
               <InfoCard
-                key={card.id}
                 sx={{ maxWidth: 400 }}
                 onClick={() => {
                   location.href = "/realtor-profile";
@@ -149,6 +153,7 @@ const GetToKnow: React.FC = () => {
                   orientation="vertical"
                   variant="middle"
                   color="#FF5E00"
+                  key={card.id}
                 />
               )}
             </>

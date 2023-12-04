@@ -12,7 +12,7 @@ const Container = styled("section")(({ theme }) => ({
   backgroundImage: `url(${mulherNoPc})`,
   backgroundSize: "cover",
   width: "100%",
-  height: "90vh",
+  height: "80vh",
   gap: "40px",
 
   [theme.breakpoints.down("md")]: { height: "70vh", gap: "20px" },

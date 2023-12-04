@@ -1,92 +1,187 @@
-import { styled } from "@mui/material/styles";
-import logo from "../assets/logo-black.svg";
+import * as React from "react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
 import profilePicture from "../assets/profile-picture.jpeg";
-import { Link } from "react-router-dom";
-import { Typography } from "@mui/material";
-import ProfilePictureWithButton from "./ProfilePictureWithButton";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/material/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
+import Container from "@mui/material/Container";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import logo from "../assets/logo-black.svg";
+import MenuItem from "@mui/material/MenuItem";
+import { styled } from "@mui/material";
 
-const Container = styled("div")`
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    align-items: center;
-    padding: 0 40px;
-    height: 90px;
+const pages = ["Item 1", "Item 2", "Item 3", "Item 4"];
+const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
-    @media (max-width: 768px) {
-        grid-template-columns: 1fr 1fr;
-    }
-`;
+function NavBar() {
+  const LogoStyled = styled("img")(() => ({
+    height: "45px",
+  }));
 
-const Logo = styled("img")`
-    width: 130px;
-`;
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
+    null
+  );
 
-const Nav = styled("nav")`
-    display: flex;
-    justify-content: space-between;
-    max-width: 500px;
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNav(event.currentTarget);
+  };
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
 
-    @media (max-width: 768px) {
-        visibility: hidden;
-        flex-direction: column;
-        grid-column: 1 / 2;
-        grid-row: 2 / 2;
-    }
-`;
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
 
-const NavItem = styled("li")`
-    list-style: none;
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
 
-    a {
-        text-decoration: none;
-        color: ${({ theme }) => theme.palette.text.primary};
-        cursor: pointer;
-    }
-`;
+  return (
+    <AppBar position="static" sx={{ bgcolor: "white" }}>
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          <LogoStyled
+            src={logo}
+            alt="Logo"
+            style={{ height: "45px" }}
+            sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
+          />
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            href="#app-bar-with-responsive-menu"
+            sx={{
+              mr: 2,
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".3rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          ></Typography>
 
-const ProfileContainer = styled("div")`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-self: end;
+          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon sx={{ color: "black", size: "large" }} />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{
+                display: { xs: "block", md: "none" },
+              }}
+            >
+              {pages.map((page) => (
+                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                  <Typography color="black" textAlign="center">
+                    {page}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+          <LogoStyled
+            src={logo}
+            alt="Logo"
+            style={{ height: "45px" }}
+            sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}
+          />
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            href="#app-bar-with-responsive-menu"
+            sx={{
+              mr: 2,
+              display: { xs: "flex", md: "none" },
+              flexGrow: 1,
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".3rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          ></Typography>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: { xs: "none", md: "flex" },
+              justifyContent: "space-around",
+            }}
+          >
+            {pages.map((page) => (
+              <Button
+                key={page}
+                onClick={handleCloseNavMenu}
+                sx={{ my: 2, color: "black", display: "block" }}
+              >
+                {page}
+              </Button>
+            ))}
+          </Box>
 
-    @media (max-width: 768px) {
-        grid-column: 2 / 3;
-    }
-`;
+          <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Opções">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <Avatar alt="Remy Sharp" src={profilePicture} />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              {settings.map((setting) => (
+                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                  <Typography textAlign="center">{setting}</Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
+  );
+}
 
-const Span = styled("span")`
-    font-family: ${({ theme }) => theme.customTypography.bold};
-`;
-
-const Navbar: React.FC = () => {
-    const name = "Marcel"; //TODO: get name dinamycally via api
-
-    return (
-        <Container>
-            <Logo src={logo} />
-            <Nav>
-                <NavItem>
-                    <Link to="">Início</Link>
-                </NavItem>
-                <NavItem>
-                    <Link to="">Item 2</Link>
-                </NavItem>
-                <NavItem>
-                    <Link to="">Item 3</Link>
-                </NavItem>
-                <NavItem>
-                    <Link to="">Item 4</Link>
-                </NavItem>
-            </Nav>
-            <ProfileContainer>
-                <Typography variant="body1">
-                    Olá, <Span>{name}!</Span>
-                </Typography>
-                <ProfilePictureWithButton src={profilePicture} width="50px" />
-            </ProfileContainer>
-        </Container>
-    );
-};
-
-export default Navbar;
+export default NavBar;

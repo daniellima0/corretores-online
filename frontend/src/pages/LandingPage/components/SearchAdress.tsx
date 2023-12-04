@@ -34,7 +34,7 @@ const ContentFlexContainer = styled("div")(({ theme }) => ({
   alignItems: "flex-start",
   justifyContent: "center",
   gap: "20px",
-  [theme.breakpoints.down("md")]: {},
+  [theme.breakpoints.down("md")]: { width: "80%" },
 }));
 
 const SearchContainer = styled("div")(({ theme }) => ({
@@ -93,7 +93,7 @@ const Titulo = styled(Typography)(({ theme }) => ({
   fontWeight: "700",
   maxWidth: "550px",
 
-  [theme.breakpoints.down("md")]: { fontSize: "40px" },
+  [theme.breakpoints.down("md")]: { fontSize: "50px", lineHeight: "60px" },
 }));
 
 const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
