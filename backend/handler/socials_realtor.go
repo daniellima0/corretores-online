@@ -36,6 +36,14 @@ func (h *SocialsRealtorHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Contact info is required")
 	}
 
+	if socials_realtor.RealID == "" {
+		return c.JSON(http.StatusBadRequest, "Realtor ID is required")
+	}
+
+	if socials_realtor.SoopID == "" {
+		return c.JSON(http.StatusBadRequest, "Socials options ID is required")
+	}
+
 	created, err := h.client.SocialsRealtor.CreateOne(
 		db.SocialsRealtor.SociID.Set(socials_realtor.SociID),
 		db.SocialsRealtor.ContactInfo.Set(socials_realtor.ContactInfo),
@@ -49,7 +57,7 @@ func (h *SocialsRealtorHandler) Create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, created)
 }
 
-func (h *SocialsRealtorHandler) FindAll(c echo.Context) error {
+func (h *SocialsRealtorHandler) List(c echo.Context) error {
 	ctx := context.Background()
 
 	socials_realtor, err := h.client.SocialsRealtor.FindMany().Exec(ctx)
@@ -60,12 +68,11 @@ func (h *SocialsRealtorHandler) FindAll(c echo.Context) error {
 	return c.JSON(http.StatusOK, socials_realtor)
 }
 
-func (h *SocialsRealtorHandler) FindOne(c echo.Context) error {
+func (h *SocialsRealtorHandler) Get(c echo.Context) error {
 	ctx := context.Background()
 
-	sociID := c.Param("soci_id")
 	socials_realtor, err := h.client.SocialsRealtor.FindUnique(
-		db.SocialsRealtor.SociID.Equals(sociID),
+		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -82,9 +89,12 @@ func (h *SocialsRealtorHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	sociID := c.Param("soci_id")
+	if strings.TrimSpace(socials_realtor.ContactInfo) == "" {
+		return c.JSON(http.StatusBadRequest, "Contact info is required")
+	}
+
 	updated, err := h.client.SocialsRealtor.FindUnique(
-		db.SocialsRealtor.SociID.Equals(sociID),
+		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
 	).Update(
 		db.SocialsRealtor.ContactInfo.Set(socials_realtor.ContactInfo),
 	).Exec(ctx)
@@ -98,9 +108,8 @@ func (h *SocialsRealtorHandler) Update(c echo.Context) error {
 func (h *SocialsRealtorHandler) Delete(c echo.Context) error {
 	ctx := context.Background()
 
-	sociID := c.Param("soci_id")
 	deleted, err := h.client.SocialsRealtor.FindUnique(
-		db.SocialsRealtor.SociID.Equals(sociID),
+		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
 	).Delete().Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
