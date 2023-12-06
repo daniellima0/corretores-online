@@ -5,6 +5,7 @@ import RealtorProfile from "./pages/RealtorProfile";
 import Settings from "./pages/Settings";
 import Choice from "./pages/Choice";
 import LoginPage from "./pages/LoginPage";
+import ResetPassword from "./pages/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
   {
     path: "/costumer-login",
     element: <LoginPage userType="costumer" />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
 ]);
 
