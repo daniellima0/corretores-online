@@ -4,6 +4,7 @@ import Homepage from "./pages/HomePage";
 import RealtorProfile from "./pages/RealtorProfile";
 import Settings from "./pages/Settings";
 import Choice from "./pages/Choice";
+import LoginPage from "./pages/LoginPage";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,14 @@ const router = createBrowserRouter([
   {
     path: "/choose-signup",
     element: <Choice componentType="signup" />,
+  },
+  {
+    path: "/realtor-login",
+    element: <LoginPage userType="realtor" />,
+  },
+  {
+    path: "/costumer-login",
+    element: <LoginPage userType="costumer" />,
   },
 ]);
 
