@@ -7,7 +7,6 @@ import RoundedButton from "../../../components/RoundedButton";
 import { Typography } from "@mui/material";
 
 const Container = styled("div")`
-  margin-top: 40px;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -156,7 +155,9 @@ const RealtorInfo = () => {
         <AboutMeTitle variant="h2">Sobre Mim</AboutMeTitle>
         <Description variant="body1">{realtor.description}</Description>
       </SecondSection>
-      <RoundedButton onClick={handleClick} />
+      <RoundedButton onClick={handleClick}>
+        Quero entrar em contato
+      </RoundedButton>
     </Container>
   );
 };
