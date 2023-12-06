@@ -50,22 +50,44 @@ const SaibaMaisBox = styled("div")(({ theme }) => ({
   [theme.breakpoints.down("md")]: { height: "75vh", paddingBottom: "0px" },
 }));
 
-const NewMore: React.FC = () => {
+const KeyboardArrowDownIconContainer = styled("a")(() => ({
+  cursor: "pointer",
+  backgroundColor: "transparent",
+  border: "none",
+}));
+
+const LearnMore: React.FC = () => {
   const title = "O Ramo Imobiliário como você nunca viu.";
+
+  const scrollToTarget = (targetId: string) => {
+    const targetElement = document.getElementById(targetId);
+
+    if (targetElement) {
+      window.scrollTo({
+        behavior: "smooth",
+        top: targetElement.offsetTop,
+      });
+    }
+  };
+
   return (
     <>
-      <Container>
+      <Container id="mapa">
         <TitleBox>
           <Title>{title}</Title>
         </TitleBox>
         <SaibaMaisBox>
-          <KeyboardArrowDownIcon
-            style={{ fontSize: "150px", color: "#FFFFFF" }}
-          ></KeyboardArrowDownIcon>
+          <KeyboardArrowDownIconContainer
+            onClick={() => scrollToTarget("aqui")}
+          >
+            <KeyboardArrowDownIcon
+              style={{ fontSize: "150px", color: "#FFFFFF" }}
+            ></KeyboardArrowDownIcon>
+          </KeyboardArrowDownIconContainer>
         </SaibaMaisBox>
       </Container>
     </>
   );
 };
 
-export default NewMore;
+export default LearnMore;

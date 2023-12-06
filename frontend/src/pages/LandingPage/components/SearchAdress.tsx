@@ -103,7 +103,6 @@ const AutocompleteStyled = styled(Autocomplete)(({ theme }) => ({
 
 type SearchAdressProps = {
   showMap: (value: boolean) => void;
-  mapRef: React.MutableRefObject<any>;
 };
 
 const SearchAdress: React.FC<SearchAdressProps> = ({ showMap, mapRef }) => {
@@ -130,6 +129,19 @@ const SearchAdress: React.FC<SearchAdressProps> = ({ showMap, mapRef }) => {
       </div>
     );
   }
+
+  const handleClick = () => {
+    showMap(true);
+
+    const targetElement = document.getElementById("mapa");
+
+    if (targetElement) {
+      window.scrollTo({
+        behavior: "smooth",
+        top: targetElement.offsetTop,
+      });
+    }
+  };
 
   return (
     <>
@@ -159,17 +171,7 @@ const SearchAdress: React.FC<SearchAdressProps> = ({ showMap, mapRef }) => {
               >
                 <InputSearch placeholder={busca} />
               </AutocompleteStyled>
-              <SearchButton
-                type="submit"
-                onClick={() => {
-                  showMap(true);
-                  if (mapRef.current) {
-                    mapRef.current.scrollIntoView({
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-              >
+              <SearchButton type="submit" onClick={handleClick}>
                 <SearchOutlinedIcon></SearchOutlinedIcon>
               </SearchButton>
             </SearchContainer>

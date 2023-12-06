@@ -2,7 +2,6 @@ import { styled } from "@mui/material/styles";
 import { Button, Typography } from "@mui/material";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { useEffect, useRef, useState } from "react";
-import React from "react";
 
 const Container = styled("section")(({ theme }) => ({
   display: "flex",
@@ -11,10 +10,10 @@ const Container = styled("section")(({ theme }) => ({
   backgroundColor: "#FFFFFF",
   backgroundSize: "cover",
   width: "100%",
-  height: "90vh",
+  height: "100vh",
   alignItems: "center",
   justifyContent: "center",
-  [theme.breakpoints.down("md")]: { height: "90vh" },
+  [theme.breakpoints.down("md")]: { height: "100vh" },
 }));
 
 const MapTextContainer = styled("div")(({ theme }) => ({
@@ -80,12 +79,12 @@ type Broker = {
   position: { lat: number; lng: number };
 };
 
-const MapView: React.ForwardRefRenderFunction<any, {}> = (_, ref) => {
+const MapView = () => {
   const numero = "18";
 
   return (
     <>
-      <Container ref={ref}>
+      <Container>
         <MapWrapper />
         <MapTextContainer>
           <Title>
@@ -185,4 +184,4 @@ const Map = () => {
   return <div style={{ width: "100%", height: "100%" }} ref={ref} />;
 };
 
-export default React.forwardRef(MapView);
+export default MapView;
