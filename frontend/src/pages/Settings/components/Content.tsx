@@ -5,6 +5,7 @@ import ProfilePicture from "../../../components/ProfilePicture";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
 import ProfilePictureWithButton from "../../../components/ProfilePictureWithButton";
+// import { useState } from "react";
 
 const Container = styled("div")`
   display: flex;
@@ -60,6 +61,11 @@ const SectionTitle = styled(Typography)`
 const SectionContentWrapper = styled("div")`
   display: flex;
   justify-content: space-between;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    gap: 40px;
+  }
 `;
 
 const InputGroupWrapper = styled("div")`
@@ -67,6 +73,10 @@ const InputGroupWrapper = styled("div")`
   flex-direction: column;
   gap: 20px;
   width: 60%;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const ProfilePictureWithButtonWrapper = styled("div")`
@@ -87,8 +97,46 @@ const CancelButton = styled(RoundedButton)``;
 
 const SaveButton = styled(RoundedButton)``;
 
+// interface ProfileFormState {
+//   name: string;
+//   email: string;
+//   telefone: string;
+//   apelido: string;
+//   senha: string;
+//   confirmarSenha: string;
+//   instagram: string;
+//   facebook: string;
+//   whatsapp: string;
+//   regioesDeAtuacao: string;
+//   bio: string;
+// }
+
+// const initialProfileState: ProfileFormState = {
+//   name: "Marcel Fonseca",
+//   email: "marcel.fonseca@gmail.com",
+//   telefone: "+557198159-1481",
+//   apelido: "marcel.fonseca",
+//   senha: "senhadousuario",
+//   confirmarSenha: "",
+//   instagram: "https://www.instagram.com/marcel.fonseca",
+//   facebook: "https://www.facebook.com/marcel.fonseca",
+//   whatsapp: "+557198159-1481",
+//   regioesDeAtuacao: "Barra, Pituba, Imbuí",
+//   bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
+// };
+
 const Content = () => {
   const theme = useTheme();
+
+  // const [profileData, setProfileData] =
+  //   useState<ProfileFormState>(initialProfileState);
+
+  // const handleInputChange = (name: keyof ProfileFormState, value: string) => {
+  //   setProfileData((prevData) => ({
+  //     ...prevData,
+  //     [name]: value,
+  //   }));
+  // };
 
   return (
     <Container>
@@ -129,6 +177,17 @@ const Content = () => {
               name="apelido"
               type="text"
               defaultValue="marcel.fonseca"
+            />
+            <InputGroup
+              label="Senha"
+              name="senha"
+              type="password"
+              defaultValue="senhadousuario"
+            />
+            <InputGroup
+              label="Confirme a mudança de senha"
+              type="password"
+              defaultValue=""
             />
           </InputGroupWrapper>
           <ProfilePictureWithButtonWrapper>
