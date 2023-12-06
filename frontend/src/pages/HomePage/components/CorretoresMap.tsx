@@ -147,7 +147,7 @@ function Broker(props: MapProps) {
           map={map}
           position={broker.position}
           onClick={() => {
-            console.log(setHover(broker.id));
+            setHover(broker.id);
           }}
         >
           <HiddenComponent hidden={broker.id === hover}>

@@ -91,13 +91,11 @@ export default function BrokerList({
     overflow: "hidden",
     boxShadow: "10px 0px 10px -10px rgba(0, 0, 0, 0.2)",
     zIndex: "10",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("md")]: {
       width: "100%",
       height: "85%",
     },
   }));
-
-  console.log(data);
 
   return (
     <ListBox>

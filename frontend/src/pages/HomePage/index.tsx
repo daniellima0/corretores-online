@@ -14,8 +14,8 @@ import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import SearchIcon from "@mui/icons-material/Search";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
-import BrokerList from "../../components/BrokerLIst";
-import CorretoresMap from "../../components/CorretoresMap";
+import BrokerList from "./components/BrokerLIst";
+import CorretoresMap from "./components/CorretoresMap";
 
 const libraries: any = ["places"];
 
@@ -28,7 +28,7 @@ const HomePage = () => {
   });
 
   const isSmallScreen = useMediaQuery((theme: any) =>
-    theme.breakpoints.down("sm")
+    theme.breakpoints.down("md")
   );
 
   let bodyContainerStyle: any = {};
@@ -67,7 +67,7 @@ const HomePage = () => {
     marginTop: "20px",
     boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
     right: "20px",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("md")]: {
       marginTop: "10px",
       right: "auto",
       left: "10px",
@@ -85,7 +85,7 @@ const HomePage = () => {
     padding: "20px",
     textAlign: "center",
     borderRadius: "10px",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("md")]: {
       width: "80%",
     },
   }));
