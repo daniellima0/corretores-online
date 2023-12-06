@@ -29,6 +29,7 @@ func main() {
 	}()
 
 	router.ContactOptionRouter(e, client)
+	router.RealtorRouter(e, client)
 	router.SocialsOptionsRouter(e, client)
 	log.Print(e.Routes())
 	e.Logger.Fatal(e.Start(":8080"))
