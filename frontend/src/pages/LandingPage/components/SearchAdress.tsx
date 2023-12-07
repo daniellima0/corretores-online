@@ -4,7 +4,6 @@ import { Button, InputBase, Typography } from "@mui/material";
 import NavLogin from "./NavLogin";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import Footer from "../../../components/Footer";
 
 const libraries: any = ["places"];
 
@@ -105,7 +104,7 @@ type SearchAdressProps = {
   showMap: (value: boolean) => void;
 };
 
-const SearchAdress: React.FC<SearchAdressProps> = ({ showMap, mapRef }) => {
+const SearchAdress: React.FC<SearchAdressProps> = ({ showMap }) => {
   const name = "Encontre o seu Corretor Online";
   const busca = "Busque por um endereço...";
 
@@ -121,13 +120,7 @@ const SearchAdress: React.FC<SearchAdressProps> = ({ showMap, mapRef }) => {
   };
 
   if (!isLoaded) {
-    return (
-      <div>
-        <NavLogin />
-        <div>Carregando Google Maps...</div>
-        <Footer />
-      </div>
-    );
+    return <Container></Container>;
   }
 
   const handleClick = () => {
@@ -161,11 +154,7 @@ const SearchAdress: React.FC<SearchAdressProps> = ({ showMap, mapRef }) => {
                 }}
                 onPlaceChanged={() => {
                   showMap(true);
-                  if (mapRef.current) {
-                    mapRef.current.scrollIntoView({
-                      behavior: "smooth",
-                    });
-                  }
+                  handleClick();
                 }}
                 options={autocompleteOptions}
               >

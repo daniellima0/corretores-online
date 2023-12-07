@@ -46,7 +46,10 @@ function NavBar() {
   };
 
   return (
-    <AppBar position="static" sx={{ bgcolor: "white", boxShadow: "none" }}>
+    <AppBar
+      position="static"
+      sx={{ bgcolor: "white", boxShadow: "0 1px 10px 0px rgba(0, 0, 0, 0.2)" }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <LogoStyled

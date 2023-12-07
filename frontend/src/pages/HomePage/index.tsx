@@ -219,7 +219,6 @@ const HomePage = () => {
   };
   const [open, setOpen] = useState(true);
   const handleClose = () => setOpen(false);
-  const [data, setData] = useState<Broker[]>(testData);
   const [filteredData, setFilteredData] = useState<Broker[]>(testData);
   const [searchInputBias, setSearchInputBias] = useState<
     | {
@@ -279,7 +278,12 @@ const HomePage = () => {
     return (
       <div>
         <Navbar />
-        <div>Carregando Google Maps...</div>
+        <div
+          className="BodyContainer"
+          style={{ width: "100%", height: "90vh" }}
+        >
+          Carregando Google Maps...
+        </div>
         <Footer />
       </div>
     );
@@ -318,7 +322,7 @@ const HomePage = () => {
       <Navbar />
       <div className="BodyContainer" style={bodyContainerStyle}>
         <BrokerList
-          key={data.length}
+          key={testData.length}
           data={filteredData}
           setSearchMapCenter={setSearchMapCenter}
         />
@@ -354,7 +358,7 @@ const HomePage = () => {
           </CapsulaInutil>
 
           <CorretoresMap
-            data={data}
+            data={testData}
             searchMapCenter={searchMapCenter}
             dataFilter={setFilteredData}
           />

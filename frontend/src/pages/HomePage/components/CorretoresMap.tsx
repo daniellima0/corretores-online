@@ -124,7 +124,14 @@ function Map({
 
   return (
     <>
-      <div style={{ width: "100%", height: "100%" }} ref={ref} />
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          zIndex: "-1",
+        }}
+        ref={ref}
+      />
       {map && <Broker {...props} />}
     </>
   );
