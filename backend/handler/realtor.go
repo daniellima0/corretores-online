@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/google/uuid"
@@ -138,18 +139,26 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, realtor)
 }
 
-/* func (h *RealtorHandler) Delete(c echo.Context) error {
+func (h *RealtorHandler) Delete(c echo.Context) error {
 	ctx := context.Background()
 
-	deleted, err := h.client.Realtor.FindMany(
+	realtor, err := h.client.Realtor.FindUnique(
 		db.Realtor.RealID.Equals(c.Param("real_id")),
-		db.Realtor.User.Where(db.User.DeletedAt.IsNull()),
-		).Update(
-			db.Realtor.User.
-		).Exec(ctx)
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	deleted, err := h.client.User.FindMany(
+		db.User.UserID.Equals(realtor.UserID),
+		db.User.DeletedAt.IsNull(),
+	).Update(
+		db.User.DeletedAt.Set(time.Now()),
+	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, deleted)
-} */
+}
+

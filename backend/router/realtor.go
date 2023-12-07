@@ -13,6 +13,7 @@ func RealtorRouter(e *echo.Echo, dbClient *db.PrismaClient) {
 	g.POST("", h.Create)
 	g.GET("", h.List)
 	g.GET(":real_id", h.Get)
+	g.DELETE(":real_id", h.Delete) 
 	/* g.PUT(":real_id", h.Update)
-	g.DELETE(":real_id", h.Delete) */
+	*/
 }
