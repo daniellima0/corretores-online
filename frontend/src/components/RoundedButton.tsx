@@ -37,7 +37,7 @@ interface RoundedButtonProps {
 const RoundedButton: React.FC<RoundedButtonProps> = (props) => {
   return (
     <Container
-      buttonColor={props.buttonColor || "#000"}
+      buttonColor={props.buttonColor || "#FF5E00"}
       invertColor={props.invertColor || false}
       width={props.width || "fit-content"}
       onClick={props.onClick}

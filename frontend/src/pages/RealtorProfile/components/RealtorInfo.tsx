@@ -4,9 +4,12 @@ import profilePicture from "../../../assets/profile-picture.jpeg";
 import ProfilePicture from "../../../components/ProfilePicture";
 import SocialMediaInfo from "../../../components/SocialMediaInfo";
 import RoundedButton from "../../../components/RoundedButton";
-import { Typography } from "@mui/material";
+import { FormControlLabel, Switch, Typography } from "@mui/material";
+import React from "react";
 
 const Container = styled("div")`
+  margin-top: 40px;
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -67,8 +70,6 @@ const Name = styled(Typography)`
   }
 `;
 
-const Bio = styled(Typography)``;
-
 const RegionsInfo = styled("div")`
   grid-row: 2;
   align-self: center;
@@ -123,6 +124,11 @@ const RealtorInfo = () => {
     window.open(whatsappUrl, "_blank");
   };
 
+  const [checked, setChecked] = React.useState(false);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(event.target.checked);
+  };
+
   return (
     <Container>
       <FirstSection>
@@ -140,7 +146,19 @@ const RealtorInfo = () => {
         <TextContainer>
           <Header>
             <Name variant="h2">{realtor.name}</Name>
-            <Bio variant="body1">{realtor.bio}</Bio>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={checked}
+                  onChange={handleChange}
+                  inputProps={{ "aria-label": "controlled" }}
+                  size="medium"
+                  color="success"
+                />
+              }
+              label={checked ? "Online" : "Offline"}
+              labelPlacement="end"
+            />
           </Header>
           <RegionsInfo>
             <RegionsTitle variant="h2">Regiōes</RegionsTitle>

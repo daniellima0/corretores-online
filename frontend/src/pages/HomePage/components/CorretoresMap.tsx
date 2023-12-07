@@ -253,9 +253,10 @@ function Marker({
 
   useEffect(() => {
     async function importMarkerElement() {
-      const { AdvancedMarkerElement } = (await google.maps.importLibrary(
-        "marker"
-      )) as google.maps.MarkerLibrary;
+      const { AdvancedMarkerElement, CollisionBehavior } =
+        (await google.maps.importLibrary(
+          "marker"
+        )) as google.maps.MarkerLibrary;
 
       if (!rootRef.current && !markerRef.current) {
         const container = document.createElement("div");
@@ -264,6 +265,8 @@ function Marker({
           map: map,
           position: position,
           content: container,
+          collisionBehavior:
+            CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY,
         });
       }
     }
