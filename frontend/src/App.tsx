@@ -3,7 +3,7 @@ import LandingPage from "./pages/LandingPage";
 import Homepage from "./pages/HomePage";
 import RealtorProfile from "./pages/RealtorProfile";
 import Settings from "./pages/Settings";
-import Choice from "./pages/Choice";
+import ChooseSignup from "./pages/ChooseSignup";
 import LoginPage from "./pages/LoginPage";
 import ResetPassword from "./pages/ResetPassword";
 import SignUp from "./pages/SignUp";
@@ -26,28 +26,24 @@ const router = createBrowserRouter([
     element: <Settings />,
   },
   {
-    path: "/choose-login",
-    element: <Choice componentType="login" />,
-  },
-  {
     path: "/choose-signup",
-    element: <Choice componentType="signup" />,
+    element: <ChooseSignup />,
   },
   {
-    path: "/realtor-login",
-    element: <LoginPage userType="realtor" />,
-  },
-  {
-    path: "/costumer-login",
-    element: <LoginPage userType="costumer" />,
+    path: "/login",
+    element: <LoginPage />,
   },
   {
     path: "/reset-password",
     element: <ResetPassword />,
   },
   {
-    path: "/signup",
-    element: <SignUp />,
+    path: "/realtor-signup",
+    element: <SignUp userType="realtor"/>,
+  },
+  {
+    path: "/costumer-signup",
+    element: <SignUp userType="costumer"/>,
   },
 ]);
 

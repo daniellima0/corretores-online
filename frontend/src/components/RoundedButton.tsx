@@ -28,7 +28,7 @@ const Container = styled(Button, {
 
 interface RoundedButtonProps {
   onClick?: () => void;
-  children?: string;
+  children?: React.ReactNode | React.ReactNode[];
   buttonColor?: string;
   invertColor?: boolean;
   width?: string;

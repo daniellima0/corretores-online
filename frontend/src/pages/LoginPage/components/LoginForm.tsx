@@ -1,8 +1,6 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Button,
-  Checkbox,
-  FormControlLabel,
   IconButton,
   InputAdornment,
   TextField,
@@ -56,13 +54,7 @@ const TextFieldStyled = styled(TextField)({
   },
 });
 
-interface LoginFormProps {
-  userType: "realtor" | "costumer";
-}
-
-const LoginForm: React.FC<LoginFormProps> = (props) => {
-  console.log(props.userType);
-
+const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -98,10 +90,6 @@ const LoginForm: React.FC<LoginFormProps> = (props) => {
             </InputAdornment>
           ),
         }}
-      />
-      <FormControlLabel
-        label="Lembrar-me"
-        control={<Checkbox color="primary" />}
       />
       <div>
         <ButtonStyled

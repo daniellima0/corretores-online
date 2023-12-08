@@ -1,6 +1,7 @@
 import { Typography, styled } from "@mui/material";
 import RoundedButton from "../../components/RoundedButton";
 import { useTheme } from "@mui/material/styles";
+import { Link } from "react-router-dom";
 
 const Div = styled("div")({
   display: "flex",
@@ -43,41 +44,32 @@ const Title = styled(Typography)`
   margin-bottom: 10px;
 `;
 
-interface ChoiceProps {
-  componentType: "login" | "signup";
-}
-
-const Choice: React.FC<ChoiceProps> = (props) => {
+const ChooseSignup = () => {
   const theme = useTheme();
 
   return (
     <Div>
       <Card>
-        <Title variant="h1">
-          <Title variant="h1">
-            {props.componentType === "login"
-              ? "Fazer login como:"
-              : props.componentType === "signup"
-              ? "Fazer cadastro como:"
-              : "Wrong props"}
-          </Title>
-        </Title>
+        <Title variant="h1">Fazer cadastro como:</Title>
         <RoundedButton buttonColor={theme.customPallete.realtor} width="300px">
-          Corretor
+          <Link
+            to="/realtor-signup"
+            style={{ textDecoration: "inherit", color: "inherit" }}
+          >
+            Corretor
+          </Link>
         </RoundedButton>
         <RoundedButton buttonColor={theme.customPallete.costumer} width="300px">
-          Cliente
+          <Link
+            to="/costumer-signup"
+            style={{ textDecoration: "inherit", color: "inherit" }}
+          >
+            Cliente
+          </Link>
         </RoundedButton>
-        {props.componentType === "login" && (
-          <div style={{ textAlign: "center", marginTop: 24 }}>
-            <Typography variant="subtitle1">
-              Não possui uma conta? <a href="/login-page">Cadastre-se</a>
-            </Typography>
-          </div>
-        )}
       </Card>
     </Div>
   );
 };
 
-export default Choice;
+export default ChooseSignup;

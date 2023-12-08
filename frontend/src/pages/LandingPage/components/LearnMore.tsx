@@ -72,7 +72,7 @@ const LearnMore: React.FC = () => {
 
   return (
     <>
-      <Container id="mapa">
+      <Container>
         <TitleBox>
           <Title>{title}</Title>
         </TitleBox>

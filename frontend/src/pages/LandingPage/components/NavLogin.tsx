@@ -11,6 +11,8 @@ import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
+import { Link } from "react-router-dom";
+import { useTheme } from "@emotion/react";
 
 const pages = ["Entrar", "Cadastrar"];
 
@@ -60,6 +62,8 @@ function NavLogin() {
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
+
+  const theme = useTheme();
 
   return (
     <AppBar position="static" color="transparent" sx={{ boxShadow: "none" }}>
@@ -130,11 +134,21 @@ function NavLogin() {
             {pages.map((page) =>
               page === "Entrar" ? (
                 <ButtonContained variant="contained" key={page}>
-                  {page}
+                  <Link
+                    to="/login"
+                    style={{ textDecoration: "inherit", color: "inherit" }}
+                  >
+                    {page}
+                  </Link>
                 </ButtonContained>
               ) : (
                 <ButtonStyled variant="outlined" key={page}>
-                  {page}
+                  <Link
+                    to="/choose-signup"
+                    style={{ textDecoration: "inherit", color: "inherit" }}
+                  >
+                    {page}
+                  </Link>
                 </ButtonStyled>
               )
             )}

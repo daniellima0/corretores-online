@@ -2,6 +2,7 @@ import { styled } from "@mui/material/styles";
 import mulherNoPc from "../../../assets/MulherNoPc.png";
 import { Button, Typography } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { Link } from "react-router-dom";
 
 const Container = styled("section")(({ theme }) => ({
   display: "flex",
@@ -65,7 +66,12 @@ const GetToKnow: React.FC = () => {
           endIcon={<OpenInNewIcon />}
           size="large"
         >
-          Conhecer o Site
+          <Link
+            to="/choose-signup"
+            style={{ textDecoration: "inherit", color: "inherit" }}
+          >
+            Conhecer o Site
+          </Link>
         </DiscoverButton>
       </Container>
     </>

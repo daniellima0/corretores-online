@@ -25,7 +25,12 @@ function renderRow(
   };
 
   return (
-    <ListItem alignItems="flex-start" component="div" disablePadding>
+    <ListItem
+      key={item.id}
+      alignItems="flex-start"
+      component="div"
+      disablePadding
+    >
       <ListItemButton sx={{ height: "100%" }} onClick={handleListItemClick}>
         <ListItemAvatar>
           <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} />
@@ -112,6 +117,7 @@ export default function BrokerList({
         </Typography>
 
         <div
+          id="luca"
           style={{
             overflowY: "auto",
             flexGrow: 1,
