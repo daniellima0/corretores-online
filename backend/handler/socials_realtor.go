@@ -18,6 +18,21 @@ type SocialsRealtorResponse struct {
 	db.SocialsRealtorModel
 }
 
+type ContactOptions struct {
+	Type string `json:"type"`
+}
+
+type SocialsOptions struct {
+	Icon          string         `json:"icon"`
+	Name          string         `json:"name"`
+	ContactOption ContactOptions `json:"contact_option"`
+}
+
+type SocialsRealtor struct {
+	ContactInfo    string         `json:"contact_info"`
+	SocialsOptions SocialsOptions `json:"socials_options"`
+}
+
 func NewSocialsRealtorHandler(client *db.PrismaClient) *SocialsRealtorHandler {
 	return &SocialsRealtorHandler{client}
 }
@@ -54,18 +69,57 @@ func (h *SocialsRealtorHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, created)
+	pickCreated, err := h.client.SocialsRealtor.FindUnique(
+		db.SocialsRealtor.SociID.Equals(created.SociID),
+	).With(
+		db.SocialsRealtor.SocialsOptions.Fetch().With(
+			db.SocialsOptions.ContactOptions.Fetch(),
+		),
+	).Exec(ctx)
+
+	createdFiltered := SocialsRealtor{
+		ContactInfo: pickCreated.ContactInfo,
+		SocialsOptions: SocialsOptions{
+			Icon: pickCreated.SocialsOptions().Icon,
+			Name: pickCreated.SocialsOptions().Name,
+			ContactOption: ContactOptions{
+				Type: pickCreated.SocialsOptions().ContactOptions().Type,
+			},
+		},
+	}
+
+	return c.JSON(http.StatusCreated, createdFiltered)
 }
 
 func (h *SocialsRealtorHandler) List(c echo.Context) error {
 	ctx := context.Background()
 
-	socials_realtor, err := h.client.SocialsRealtor.FindMany().Exec(ctx)
+	socials_realtor, err := h.client.SocialsRealtor.FindMany(
+		db.SocialsRealtor.RealID.Equals(c.QueryParam("real_id")),
+	).With(
+		db.SocialsRealtor.SocialsOptions.Fetch().With(
+			db.SocialsOptions.ContactOptions.Fetch(),
+		),
+	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, socials_realtor)
+	var socials []SocialsRealtor
+	for _, social := range socials_realtor {
+		socials = append(socials, SocialsRealtor{
+			ContactInfo: social.ContactInfo,
+			SocialsOptions: SocialsOptions{
+				Icon: social.SocialsOptions().Icon,
+				Name: social.SocialsOptions().Name,
+				ContactOption: ContactOptions{
+					Type: social.SocialsOptions().ContactOptions().Type,
+				},
+			},
+		})
+	}
+
+	return c.JSON(http.StatusOK, socials)
 }
 
 func (h *SocialsRealtorHandler) Get(c echo.Context) error {
@@ -73,12 +127,27 @@ func (h *SocialsRealtorHandler) Get(c echo.Context) error {
 
 	socials_realtor, err := h.client.SocialsRealtor.FindUnique(
 		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
+	).With(
+		db.SocialsRealtor.SocialsOptions.Fetch().With(
+			db.SocialsOptions.ContactOptions.Fetch(),
+		),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, socials_realtor)
+	social := SocialsRealtor{
+		ContactInfo: socials_realtor.ContactInfo,
+		SocialsOptions: SocialsOptions{
+			Icon: socials_realtor.SocialsOptions().Icon,
+			Name: socials_realtor.SocialsOptions().Name,
+			ContactOption: ContactOptions{
+				Type: socials_realtor.SocialsOptions().ContactOptions().Type,
+			},
+		},
+	}
+
+	return c.JSON(http.StatusOK, social)
 }
 
 func (h *SocialsRealtorHandler) Update(c echo.Context) error {
@@ -95,6 +164,10 @@ func (h *SocialsRealtorHandler) Update(c echo.Context) error {
 
 	updated, err := h.client.SocialsRealtor.FindUnique(
 		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
+	).With(
+		db.SocialsRealtor.SocialsOptions.Fetch().With(
+			db.SocialsOptions.ContactOptions.Fetch(),
+		),
 	).Update(
 		db.SocialsRealtor.ContactInfo.Set(socials_realtor.ContactInfo),
 	).Exec(ctx)
@@ -102,7 +175,18 @@ func (h *SocialsRealtorHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, updated)
+	updatedFiltered := SocialsRealtor{
+		ContactInfo: updated.ContactInfo,
+		SocialsOptions: SocialsOptions{
+			Icon: updated.SocialsOptions().Icon,
+			Name: updated.SocialsOptions().Name,
+			ContactOption: ContactOptions{
+				Type: updated.SocialsOptions().ContactOptions().Type,
+			},
+		},
+	}
+
+	return c.JSON(http.StatusOK, updatedFiltered)
 }
 
 func (h *SocialsRealtorHandler) Delete(c echo.Context) error {
@@ -110,10 +194,25 @@ func (h *SocialsRealtorHandler) Delete(c echo.Context) error {
 
 	deleted, err := h.client.SocialsRealtor.FindUnique(
 		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
+	).With(
+		db.SocialsRealtor.SocialsOptions.Fetch().With(
+			db.SocialsOptions.ContactOptions.Fetch(),
+		),
 	).Delete().Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, deleted)
+	deletedFiltered := SocialsRealtor{
+		ContactInfo: deleted.ContactInfo,
+		SocialsOptions: SocialsOptions{
+			Icon: deleted.SocialsOptions().Icon,
+			Name: deleted.SocialsOptions().Name,
+			ContactOption: ContactOptions{
+				Type: deleted.SocialsOptions().ContactOptions().Type,
+			},
+		},
+	}
+
+	return c.JSON(http.StatusOK, deletedFiltered)
 }
