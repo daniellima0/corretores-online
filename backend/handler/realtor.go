@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"encoding/json"
+
+	//"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,11 +31,13 @@ type Telephone struct {
 
 type RequestBody struct {
 	db.UserModel
-	Creci     string    `json:"creci"`
-	Telephone Telephone `json:"telephone"`
+	Description *string   `json:"description"`
+	Creci       string    `json:"creci"`
+	Telephone   Telephone `json:"telephone"`
 }
 
 type User struct {
+	UserID      string    `json:"user_id"`
 	Name        string    `json:"name"`
 	Cpf         string    `json:"cpf"`
 	Email       string    `json:"email"`
@@ -41,19 +45,19 @@ type User struct {
 	Telephone   Telephone `json:"telephone"`
 }
 
-type ContactOptions struct {
+type Contact struct {
 	Type string `json:"type"`
 }
 
-type SocialsOptions struct {
-	Name           string         `json:"name"`
-	Icon           string         `json:"icon"`
-	ContactOptions ContactOptions `json:"contact_options"`
+type Options struct {
+	Name    string  `json:"name"`
+	Icon    string  `json:"icon"`
+	Contact Contact `json:"contact_options"`
 }
 
-type SocialsRealtor struct {
-	ContactInfo    string         `json:"contact_info"`
-	SocialsOptions SocialsOptions `json:"socials_options"`
+type RealtorSocials struct {
+	ContactInfo string  `json:"contact_info"`
+	Options     Options `json:"socials_options"`
 }
 
 type RealtorLocation struct {
@@ -70,11 +74,12 @@ type RealtorRegions struct {
 }
 
 type Realtor struct {
+	RealID          string           `json:"real_id"`
 	Creci           string           `json:"creci"`
 	IsOnline        bool             `json:"is_online"`
 	Description     string           `json:"description"`
 	User            User             `json:"user"`
-	SocialsRealtor  []SocialsRealtor `json:"socials_realtor"`
+	RealtorSocials  []RealtorSocials `json:"socials_realtor"`
 	RealtorLocation RealtorLocation  `json:"realtor_location"`
 	RealtorRegions  []RealtorRegions `json:"realtor_regions"`
 }
@@ -142,6 +147,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 
 	var realtor db.RealtorModel
 	realtor.RealID = uuid.New().String()
+	realtor.UserID = request.UserID
 	realtor.Creci = request.Creci
 
 	if strings.TrimSpace(realtor.Creci) == "" {
@@ -152,14 +158,37 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.Realtor.RealID.Set(realtor.RealID),
 		db.Realtor.Creci.Set(realtor.Creci),
 		db.Realtor.IsOnline.Set(false),
-		db.Realtor.User.Link(db.User.UserID.Equals(request.UserID)),
+		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 
 	if err := h.client.Prisma.Transaction(userCreated, realtorCreated).Exec(ctx); err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, realtor)
+	description, _ := realtorCreated.Result().Description()
+
+	telephoneBytes := userCreated.Result().Telephone
+	telephoneResponse := Telephone{}
+	if err := json.Unmarshal(telephoneBytes, &telephoneResponse); err != nil {
+		return err
+	}
+
+	response := Realtor{
+		RealID:      realtorCreated.Result().RealID,
+		Creci:       realtorCreated.Result().Creci,
+		IsOnline:    realtorCreated.Result().IsOnline,
+		Description: description,
+		User: User{
+			UserID:      userCreated.Result().UserID,
+			Name:        userCreated.Result().Name,
+			Cpf:         userCreated.Result().Cpf,
+			Email:       userCreated.Result().Email,
+			DateOfBirth: userCreated.Result().DateOfBirth,
+			Telephone:   telephoneResponse,
+		},
+	}
+
+	return c.JSON(http.StatusCreated, response)
 }
 
 func (h *RealtorHandler) List(c echo.Context) error {
@@ -210,12 +239,12 @@ func (h *RealtorHandler) List(c echo.Context) error {
 
 		if realtor.SocialsRealtor() != nil {
 			for _, social := range realtor.SocialsRealtor() {
-				var socialFiltered SocialsRealtor
+				var socialFiltered RealtorSocials
 				socialFiltered.ContactInfo = social.ContactInfo
-				socialFiltered.SocialsOptions.Name = social.SocialsOptions().Name
-				socialFiltered.SocialsOptions.Icon = social.SocialsOptions().Icon
-				socialFiltered.SocialsOptions.ContactOptions.Type = social.SocialsOptions().ContactOptions().Type
-				realtorFiltered.SocialsRealtor = append(realtorFiltered.SocialsRealtor, socialFiltered)
+				socialFiltered.Options.Name = social.SocialsOptions().Name
+				socialFiltered.Options.Icon = social.SocialsOptions().Icon
+				socialFiltered.Options.Contact.Type = social.SocialsOptions().ContactOptions().Type
+				realtorFiltered.RealtorSocials = append(realtorFiltered.RealtorSocials, socialFiltered)
 			}
 		}
 		if realtor.RealtorRegions() != nil {
@@ -271,12 +300,12 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 
 	if realtor.SocialsRealtor() != nil {
 		for _, social := range realtor.SocialsRealtor() {
-			var socialFiltered SocialsRealtor
+			var socialFiltered RealtorSocials
 			socialFiltered.ContactInfo = social.ContactInfo
-			socialFiltered.SocialsOptions.Name = social.SocialsOptions().Name
-			socialFiltered.SocialsOptions.Icon = social.SocialsOptions().Icon
-			socialFiltered.SocialsOptions.ContactOptions.Type = social.SocialsOptions().ContactOptions().Type
-			realtorFiltered.SocialsRealtor = append(realtorFiltered.SocialsRealtor, socialFiltered)
+			socialFiltered.Options.Name = social.SocialsOptions().Name
+			socialFiltered.Options.Icon = social.SocialsOptions().Icon
+			socialFiltered.Options.Contact.Type = social.SocialsOptions().ContactOptions().Type
+			realtorFiltered.RealtorSocials = append(realtorFiltered.RealtorSocials, socialFiltered)
 		}
 	}
 	if realtor.RealtorRegions() != nil {
@@ -318,4 +347,133 @@ func (h *RealtorHandler) Delete(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, deleted)
+}
+
+func (h *RealtorHandler) Update(c echo.Context) error {
+	ctx := context.Background()
+
+	var request RequestBody
+	if err := c.Bind(&request); err != nil {
+		return err
+	}
+
+	if strings.TrimSpace(request.Name) == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Name is required")
+	}
+
+	if strings.TrimSpace(request.Cpf) == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Cpf is required")
+	}
+
+	if strings.TrimSpace(request.Email) == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Email is required")
+	}
+
+	if strings.TrimSpace(request.Password) == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
+	}
+
+	if request.DateOfBirth.IsZero() {
+		return echo.NewHTTPError(http.StatusBadRequest, "DateOfBirth is required")
+	}
+
+	if strings.TrimSpace(request.Telephone.DDD) == "" || strings.TrimSpace(request.Telephone.Number) == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Telephone is required")
+	}
+
+	if strings.TrimSpace(request.Creci) == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Creci is required")
+	}
+
+	telephoneJson, err := json.Marshal(request.Telephone)
+	if err != nil {
+		return err
+	}
+
+	realtor, err := h.client.Realtor.FindUnique(
+		db.Realtor.RealID.Equals(c.Param("real_id")),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	realtorUpdated := h.client.Realtor.FindUnique(
+		db.Realtor.RealID.Equals(realtor.RealID),
+	).Update(
+		db.Realtor.Creci.Set(request.Creci),
+		db.Realtor.Description.SetIfPresent(request.Description),
+	).Tx()
+
+	userUpdated := h.client.User.FindMany(
+		db.User.UserID.Equals(realtor.UserID),
+		db.User.DeletedAt.IsNull(),
+	).Update(
+		db.User.Name.Set(request.Name),
+		db.User.Cpf.Set(request.Cpf),
+		db.User.Email.Set(request.Email),
+		db.User.Password.Set(request.Password),
+		db.User.DateOfBirth.Set(request.DateOfBirth),
+		db.User.Telephone.Set(telephoneJson),
+	).Tx()
+
+	if err := h.client.Prisma.Transaction(realtorUpdated, userUpdated).Exec(ctx); err != nil {
+		return err
+	}
+
+	response, err := h.client.Realtor.FindUnique(
+		db.Realtor.RealID.Equals(c.Param("real_id")),
+	).With(
+		db.Realtor.User.Fetch(),
+		db.Realtor.SocialsRealtor.Fetch().With(
+			db.SocialsRealtor.SocialsOptions.Fetch().With(
+				db.SocialsOptions.ContactOptions.Fetch(),
+			),
+		),
+		db.Realtor.RealtorLocation.Fetch(),
+		db.Realtor.RealtorRegions.Fetch().With(
+			db.RealtorRegions.RegionsUsed.Fetch(),
+		),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	responseFiltered := Realtor{}
+	responseFiltered.RealID = response.RealID
+	responseFiltered.Creci = response.Creci
+	responseFiltered.IsOnline = response.IsOnline
+	responseFiltered.Description, _ = response.Description()
+	responseFiltered.User.UserID = response.User().UserID
+	responseFiltered.User.Name = response.User().Name
+	responseFiltered.User.Cpf = response.User().Cpf
+	responseFiltered.User.Email = response.User().Email
+	responseFiltered.User.DateOfBirth = response.User().DateOfBirth
+	json.Unmarshal(response.User().Telephone, &responseFiltered.User.Telephone)
+
+	if response.SocialsRealtor() != nil {
+		for _, social := range response.SocialsRealtor() {
+			var socialFiltered RealtorSocials
+			socialFiltered.ContactInfo = social.ContactInfo
+			socialFiltered.Options.Name = social.SocialsOptions().Name
+			socialFiltered.Options.Icon = social.SocialsOptions().Icon
+			socialFiltered.Options.Contact.Type = social.SocialsOptions().ContactOptions().Type
+			responseFiltered.RealtorSocials = append(responseFiltered.RealtorSocials, socialFiltered)
+		}
+	}
+	if response.RealtorRegions() != nil {
+		for _, region := range response.RealtorRegions() {
+			if region.RegionsUsed() != nil {
+				var regionFiltered RealtorRegions
+				regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
+				responseFiltered.RealtorRegions = append(responseFiltered.RealtorRegions, regionFiltered)
+			}
+		}
+	}
+	realtorLocation, ok := response.RealtorLocation()
+	if ok {
+		responseFiltered.RealtorLocation.Latitude, _ = realtorLocation.Latitude()
+		responseFiltered.RealtorLocation.Longitude, _ = realtorLocation.Longitude()
+	}
+
+	return c.JSON(http.StatusOK, responseFiltered)
 }
