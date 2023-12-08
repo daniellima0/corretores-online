@@ -91,11 +91,10 @@ model user {
   aust_id               String                  @db.Uuid
   name                  String                  @db.VarChar
   cpf                   String                  @db.VarChar
-  email                 String                  @db.VarChar
+  email                 String                  @unique(map: "unique_email") @db.VarChar
   password              String                  @db.VarChar
   created_at            DateTime                @default(now()) @db.Timestamptz(6)
   deleted_at            DateTime?               @db.Timestamptz(6)
-  deleted_by            String?                 @db.Uuid
   date_of_birth         DateTime                @db.Date
   telephone             Json
   realtor               realtor?

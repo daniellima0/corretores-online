@@ -3,17 +3,19 @@ package main
 import (
 	//"encoding/json"
 	"log"
-	"os"
 
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/router"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	os.Setenv("DATABASE_URL", "postgresql://postgres:123@localhost:5432/corretoresOnline?schema=public")
-
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	e := echo.New()
 	e.Use(middleware.Logger())
 
@@ -29,6 +31,7 @@ func main() {
 	}()
 
 	router.ContactOptionRouter(e, client)
+	router.UserRouter(e, client)
 	router.RealtorRouter(e, client)
 	router.SocialsOptionsRouter(e, client)
 	log.Print(e.Routes())
