@@ -1,9 +1,7 @@
 import { styled } from "@mui/material/styles/";
 import { Avatar, Typography } from "@mui/material";
-import ProfilePicture from "../../../components/ProfilePicture";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
-import ProfilePictureWithButton from "../../../components/ProfilePictureWithButton";
 import { useState } from "react";
 
 const Container = styled("div")`
