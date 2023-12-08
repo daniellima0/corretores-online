@@ -70,13 +70,13 @@ type RealtorRegions struct {
 }
 
 type Realtor struct {
-	Creci           string            `json:"creci"`
-	IsOnline        bool              `json:"is_online"`
-	Description     string            `json:"description"`
-	User            User              `json:"user"`
-	SocialsRealtor  []SocialsRealtor  `json:"socials_realtor"`
-	RealtorLocation []RealtorLocation `json:"realtor_location"`
-	RealtorRegions  []RealtorRegions  `json:"realtor_regions"`
+	Creci           string           `json:"creci"`
+	IsOnline        bool             `json:"is_online"`
+	Description     string           `json:"description"`
+	User            User             `json:"user"`
+	SocialsRealtor  []SocialsRealtor `json:"socials_realtor"`
+	RealtorLocation RealtorLocation  `json:"realtor_location"`
+	RealtorRegions  []RealtorRegions `json:"realtor_regions"`
 }
 
 func NewRealtorHandler(client *db.PrismaClient) *RealtorHandler {
@@ -227,13 +227,10 @@ func (h *RealtorHandler) List(c echo.Context) error {
 				}
 			}
 		}
-		if realtor.RealtorLocation() != nil {
-			for _, location := range realtor.RealtorLocation() {
-				var locationFiltered RealtorLocation
-				locationFiltered.Latitude, _ = location.Latitude()
-				locationFiltered.Longitude, _ = location.Longitude()
-				realtorFiltered.RealtorLocation = append(realtorFiltered.RealtorLocation, locationFiltered)
-			}
+		realtorLocation, ok := realtor.RealtorLocation()
+		if ok {
+			realtorFiltered.RealtorLocation.Latitude, _ = realtorLocation.Latitude()
+			realtorFiltered.RealtorLocation.Longitude, _ = realtorLocation.Longitude()
 		}
 
 		realtorsFiltered = append(realtorsFiltered, realtorFiltered)
@@ -291,13 +288,10 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 			}
 		}
 	}
-	if realtor.RealtorLocation() != nil {
-		for _, location := range realtor.RealtorLocation() {
-			var locationFiltered RealtorLocation
-			locationFiltered.Latitude, _ = location.Latitude()
-			locationFiltered.Longitude, _ = location.Longitude()
-			realtorFiltered.RealtorLocation = append(realtorFiltered.RealtorLocation, locationFiltered)
-		}
+	realtorLocation, ok := realtor.RealtorLocation()
+	if ok {
+		realtorFiltered.RealtorLocation.Latitude, _ = realtorLocation.Latitude()
+		realtorFiltered.RealtorLocation.Longitude, _ = realtorLocation.Longitude()
 	}
 
 	return c.JSON(http.StatusOK, realtorFiltered)
