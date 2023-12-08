@@ -1,6 +1,5 @@
 import { styled } from "@mui/material/styles/";
-import { Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { Avatar, Typography } from "@mui/material";
 import ProfilePicture from "../../../components/ProfilePicture";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
@@ -52,6 +51,10 @@ const Section = styled("section")`
   margin-top: 20px;
 `;
 
+const CancelButton = styled(RoundedButton)``;
+
+const SaveButton = styled(RoundedButton)``;
+
 const SectionTitle = styled(Typography)`
   font-size: 1rem;
   border-bottom: 1px solid ${(props) => props.theme.customPallete.grey};
@@ -94,10 +97,6 @@ const ButtonGroup = styled("div")`
   justify-content: space-between;
 `;
 
-const CancelButton = styled(RoundedButton)``;
-
-const SaveButton = styled(RoundedButton)``;
-
 // interface ProfileFormState {
 //   name: string;
 //   email: string;
@@ -126,18 +125,12 @@ const SaveButton = styled(RoundedButton)``;
 //   bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
 // };
 
-const Content = () => {
-  const theme = useTheme();
+interface SignUpFormProps {
+  userType: "realtor" | "costumer";
+}
 
-  // const [profileData, setProfileData] =
-  //   useState<ProfileFormState>(initialProfileState);
-
-  // const handleInputChange = (name: keyof ProfileFormState, value: string) => {
-  //   setProfileData((prevData) => ({
-  //     ...prevData,
-  //     [name]: value,
-  //   }));
-  // };
+const Content: React.FC<SignUpFormProps> = (props) => {
+  const primaryColor = props.userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
   const [profileData, setProfileData] = useState({
     name: "Marcel Fonseca",
@@ -190,7 +183,11 @@ const Content = () => {
     <Container>
       <UserInfo>
         <ProfilePictureWrapper>
-          <ProfilePicture width="50px" />
+          <Avatar
+            alt="Marcel Fonseca"
+            src="/static/images/avatar/1.jpg"
+            sx={{ width: "50px", height: "50px" }}
+          />
         </ProfilePictureWrapper>
         <NameWrapper>
           <Name variant="body1">Marcel Fonseca</Name>
@@ -248,7 +245,11 @@ const Content = () => {
             <ProfilePictureWithButtonDescription variant="body1">
               Foto de Perfil
             </ProfilePictureWithButtonDescription>
-            <ProfilePictureWithButton width="130px" />
+            <Avatar
+              alt="Marcel Fonseca"
+              src="/static/images/avatar/1.jpg"
+              sx={{ width: "130px", height: "130px", fontSize: "60px" }}
+            />
           </ProfilePictureWithButtonWrapper>
         </SectionContentWrapper>
       </Section>
@@ -303,16 +304,13 @@ const Content = () => {
       </Section>
       <ButtonGroup>
         <CancelButton
-          buttonColor={theme.customPallete.costumer}
+          buttonColor={primaryColor}
           invertColor={true}
           onClick={refreshPage}
         >
           Cancelar
         </CancelButton>
-        <SaveButton
-          buttonColor={theme.customPallete.costumer}
-          onClick={handleSave}
-        >
+        <SaveButton buttonColor={primaryColor} onClick={handleSave}>
           Salvar
         </SaveButton>
       </ButtonGroup>

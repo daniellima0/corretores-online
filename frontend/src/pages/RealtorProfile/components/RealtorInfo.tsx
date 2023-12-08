@@ -6,6 +6,7 @@ import SocialMediaInfo from "../../../components/SocialMediaInfo";
 import RoundedButton from "../../../components/RoundedButton";
 import { FormControlLabel, Switch, Typography } from "@mui/material";
 import React from "react";
+import QRCode from "react-qr-code";
 
 const Container = styled("div")`
   margin-top: 40px;
@@ -31,6 +32,9 @@ const FirstSection = styled("section")`
 
 const ImagesContainer = styled("div")`
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 `;
 
 const Banner = styled("img")`
@@ -75,6 +79,16 @@ const RegionsInfo = styled("div")`
   align-self: center;
 `;
 
+const QRCodeWrapper = styled("div")`
+  width: "50px";
+  height: "50px";
+  position: absolute;
+  margin-right: 20px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 10px;
+`;
+
 const RegionsTitle = styled(Typography)`
   font-family: ${({ theme }) => theme.customTypography.semiBold};
   font-size: 1.2rem;
@@ -109,7 +123,11 @@ const AboutMeTitle = styled(Typography)`
 
 const Description = styled(Typography)``;
 
-const RealtorInfo = () => {
+interface SignUpFormProps {
+  userType: "realtor" | "costumer";
+}
+
+const RealtorInfo: React.FC<SignUpFormProps> = (props) => {
   const realtor = {
     name: "Marcel Fonseca",
     bio: "Lorem ipsum Lorem ipsum Lorem ipsum",
@@ -133,6 +151,12 @@ const RealtorInfo = () => {
     <Container>
       <FirstSection>
         <ImagesContainer>
+          <QRCodeWrapper>
+            <QRCode
+              style={{ height: "120px", width: "120px" }}
+              value="https://www.google.com"
+            />
+          </QRCodeWrapper>
           <Banner src={defaultBanner} />
           <ProfilePictureWrapper>
             <ProfilePicture
@@ -149,6 +173,7 @@ const RealtorInfo = () => {
             <FormControlLabel
               control={
                 <Switch
+                  disabled={props.userType === "realtor" ? false : true}
                   checked={checked}
                   onChange={handleChange}
                   inputProps={{ "aria-label": "controlled" }}
@@ -160,6 +185,7 @@ const RealtorInfo = () => {
               labelPlacement="end"
             />
           </Header>
+
           <RegionsInfo>
             <RegionsTitle variant="h2">Regiōes</RegionsTitle>
             <RegionsList variant="body1">{realtor.regionsList}</RegionsList>
