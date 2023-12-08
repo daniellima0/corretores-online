@@ -5,13 +5,14 @@ import ProfilePicture from "../../../components/ProfilePicture";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
 import ProfilePictureWithButton from "../../../components/ProfilePictureWithButton";
-// import { useState } from "react";
+import { useState } from "react";
 
 const Container = styled("div")`
   display: flex;
   flex-direction: column;
   gap: 40px;
   padding: 0 40px;
+  margin-bottom: 40px;
 `;
 
 const UserInfo = styled("div")`
@@ -138,6 +139,53 @@ const Content = () => {
   //   }));
   // };
 
+  const [profileData, setProfileData] = useState({
+    name: "Marcel Fonseca",
+    email: "marcel.fonseca@gmail.com",
+    telefone: "+557198159-1481",
+    apelido: "marcel.fonseca",
+    senha: "senhadousuario",
+    confirmarSenha: "",
+    instagram: "https://www.instagram.com/marcel.fonseca",
+    facebook: "https://www.facebook.com/marcel.fonseca",
+    whatsapp: "+557198159-1481",
+    regioesDeAtuacao: "Barra, Pituba, Imbuí",
+    bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
+  });
+
+  const validateData = () => {
+    if (
+      !profileData.name ||
+      !profileData.email ||
+      !profileData.telefone ||
+      !profileData.apelido ||
+      !profileData.senha
+    ) {
+      alert("Preencha todos os campos obrigatórios!");
+      return false;
+    }
+    if (profileData.senha !== profileData.confirmarSenha) {
+      alert("As senhas não coincidem!");
+      return;
+    }
+    return true;
+  };
+
+  const handleInputChange =
+    (field: string) => (event: { target: { value: any } }) => {
+      setProfileData({ ...profileData, [field]: event.target.value });
+    };
+
+  const handleSave = () => {
+    if (validateData()) {
+      console.log("Dados válidos, salvando...");
+    }
+  };
+
+  const refreshPage = () => {
+    window.location.reload();
+  };
+
   return (
     <Container>
       <UserInfo>
@@ -159,35 +207,41 @@ const Content = () => {
               name="name"
               type="text"
               defaultValue="Marcel Fonseca"
+              onChange={handleInputChange("name")}
             />
             <InputGroup
               label="Email"
               name="email"
               type="text"
               defaultValue="marcel.fonseca@gmail.com"
+              onChange={handleInputChange("email")}
             />
             <InputGroup
               label="Telefone"
               name="telefone"
               type="text"
               defaultValue="+557198159-1481"
+              onChange={handleInputChange("telefone")}
             />
             <InputGroup
               label="Apelido"
               name="apelido"
               type="text"
               defaultValue="marcel.fonseca"
+              onChange={handleInputChange("apelido")}
             />
             <InputGroup
               label="Senha"
               name="senha"
               type="password"
               defaultValue="senhadousuario"
+              onChange={handleInputChange("senha")}
             />
             <InputGroup
               label="Confirme a mudança de senha"
               type="password"
-              defaultValue=""
+              defaultValue="senhadousuario"
+              onChange={handleInputChange("confirmarSenha")}
             />
           </InputGroupWrapper>
           <ProfilePictureWithButtonWrapper>
@@ -207,6 +261,7 @@ const Content = () => {
             type="text"
             defaultValue="https://www.instagram.com/marcel.fonseca"
             icon="/public/instagram.svg"
+            onChange={handleInputChange("instagram")}
           />
           <InputGroup
             label="Facebook"
@@ -214,6 +269,7 @@ const Content = () => {
             type="text"
             defaultValue="https://www.facebook.com/marcel.fonseca"
             icon="/public/facebook.png"
+            onChange={handleInputChange("facebook")}
           />
           <InputGroup
             label="WhatsApp"
@@ -221,6 +277,7 @@ const Content = () => {
             type="text"
             defaultValue="+557198159-1481"
             icon="/public/whatsapp.svg"
+            onChange={handleInputChange("whatsapp")}
           />
         </InputGroupWrapper>
       </Section>
@@ -232,6 +289,7 @@ const Content = () => {
             name="regioes-de-atuacao"
             type="text"
             defaultValue="Barra, Pituba, Imbuí"
+            onChange={handleInputChange("regioesDeAtuacao")}
           />
           <InputGroup
             label="Bio"
@@ -239,6 +297,7 @@ const Content = () => {
             type="text"
             defaultValue="Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas."
             isTextField={true}
+            onChange={handleInputChange("bio")}
           />
         </InputGroupWrapper>
       </Section>
@@ -246,10 +305,14 @@ const Content = () => {
         <CancelButton
           buttonColor={theme.customPallete.costumer}
           invertColor={true}
+          onClick={refreshPage}
         >
           Cancelar
         </CancelButton>
-        <SaveButton buttonColor={theme.customPallete.costumer}>
+        <SaveButton
+          buttonColor={theme.customPallete.costumer}
+          onClick={handleSave}
+        >
           Salvar
         </SaveButton>
       </ButtonGroup>

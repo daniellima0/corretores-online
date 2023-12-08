@@ -26,33 +26,11 @@ const Form = styled("form")({
   },
 });
 
-const ButtonStyled = styled(Button)({
-  boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
-  borderRadius: "45px",
-  margin: "30px 0px 10px 0px",
-  backgroundColor: "#1C5E9F",
-  width: "120px",
-});
-
 const TextFieldStyled = styled(TextField)({
   width: "100%",
-  "& label.Mui-focused": {
-    color: "#FF5E00",
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: "#FF5E00",
-  },
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
-      borderColor: "#1C5E9F",
       borderRadius: "15px",
-      border: "2px solid #1C5E9F",
-    },
-    "&:hover fieldset": {
-      borderColor: "#1C5E9F",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#1C5E9F",
     },
   },
 });
@@ -64,15 +42,24 @@ const Title = styled(Typography)`
 `;
 
 interface SignUpFormProps {
-  userType: string;
+  userType: "realtor" | "costumer";
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = (props) => {
-  const [showPassword, setShowPassword] = useState(false);
+  const primaryColor = props.userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const ButtonStyled = styled(Button)({
+    boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
+    borderRadius: "45px",
+    margin: "30px 0px 10px 0px",
+    backgroundColor: primaryColor,
+    width: "120px",
+    "&: hover": {
+      backgroundColor: primaryColor,
+      color: "#ffffff",
+      border: "none",
+    },
+  });
 
   const questions = [
     "Qual é o nome do seu primeiro animal de estimação?",
@@ -86,14 +73,71 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     "Qual é o modelo do seu primeiro carro?",
     "Em que ano você se formou no ensino médio?",
   ];
-  const [selectedQuestions, setSelectedQuestions] = React.useState<string[]>(
-    []
-  );
-  const [filteredQuestions, setFilteredQuestions] =
-    React.useState<string[]>(questions);
-  const [perguntaUm, setPerguntaUm] = React.useState("");
-  const [perguntaDois, setPerguntaDois] = React.useState("");
-  const [perguntaTres, setPerguntaTres] = React.useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const [formData, setFormData] = React.useState({
+    nome: "",
+    sobrenome: "",
+    telefone: "",
+    cpf: "",
+    creci: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    perguntaUm: "",
+    respostaUm: "",
+    perguntaDois: "",
+    respostaDois: "",
+    perguntaTres: "",
+    respostaTres: "",
+  });
+
+  const handleInputChange =
+    (field: string) => (event: { target: { value: any } }) => {
+      setFormData({ ...formData, [field]: event.target.value });
+    };
+
+  const validateData = () => {
+    for (const field in formData) {
+      if (!formData[field]) {
+        if (field === "creci" && props.userType === "costumer") continue;
+        alert(`Preencha o campo ${field}!`);
+        return;
+      }
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("As senhas não coincidem!");
+      return;
+    }
+
+    if (
+      formData["perguntaUm"] === formData["perguntaDois"] ||
+      formData["perguntaUm"] === formData["perguntaTres"] ||
+      formData["perguntaDois"] === formData["perguntaTres"]
+    ) {
+      alert("Perguntas de segurança repetidas!");
+      return;
+    }
+
+    const securityQuestions = ["perguntaUm", "perguntaDois", "perguntaTres"];
+    for (const questionField of securityQuestions) {
+      const question = formData[questionField];
+      const answer = formData[`resposta${questionField.slice(8)}`];
+      if (!question || !answer) {
+        console.log(question, answer);
+        alert(`Preencha a pergunta e a resposta correspondente!`);
+        return;
+      }
+    }
+
+    console.log("Data validation successful!");
+  };
 
   return (
     <Form>
@@ -103,6 +147,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.nome}
+        onChange={handleInputChange("nome")}
       />
       <TextFieldStyled
         id="sobrenome"
@@ -110,6 +156,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.sobrenome}
+        onChange={handleInputChange("sobrenome")}
       />
       <TextFieldStyled
         id="telefone"
@@ -117,6 +165,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.telefone}
+        onChange={handleInputChange("telefone")}
       />
       <TextFieldStyled
         id="cpf"
@@ -124,20 +174,28 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.cpf}
+        onChange={handleInputChange("cpf")}
       />
-      <TextFieldStyled
-        id="creci"
-        label="CRECI"
-        variant="outlined"
-        margin="normal"
-        fullWidth={false}
-      />
+      {props.userType === "realtor" && (
+        <TextFieldStyled
+          id="creci"
+          label="CRECI"
+          variant="outlined"
+          margin="normal"
+          fullWidth={false}
+          value={formData.creci}
+          onChange={handleInputChange("creci")}
+        />
+      )}
       <TextFieldStyled
         id="email"
         label="Email"
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.email}
+        onChange={handleInputChange("email")}
       />
       <TextFieldStyled
         type={showPassword ? "text" : "password"}
@@ -146,11 +204,13 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.password}
+        onChange={handleInputChange("password")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
               <IconButton
-                color="primary"
+                sx={{ color: "black" }}
                 aria-label="Toggle password visibility"
                 onClick={togglePasswordVisibility}
               >
@@ -162,15 +222,18 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       />
       <TextFieldStyled
         type={showPassword ? "text" : "password"}
+        id="confirmPassword"
         label="Confirme sua senha"
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.confirmPassword}
+        onChange={handleInputChange("confirmPassword")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
               <IconButton
-                color="primary"
+                sx={{ color: "black" }}
                 aria-label="Toggle password visibility"
                 onClick={togglePasswordVisibility}
               >
@@ -185,49 +248,62 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       </Title>
       <SelectQuestion
         placeholder={"Escolha a pergunta 1..."}
-        question={perguntaUm}
-        setQuestion={setPerguntaUm}
-        possibleQuestions={filteredQuestions}
+        question={formData.perguntaUm}
+        setQuestion={(value: any) =>
+          handleInputChange("perguntaUm")({ target: { value } })
+        }
+        possibleQuestions={questions}
       />
       <TextFieldStyled
         id="respostaUm"
         label="Resposta 1"
         variant="outlined"
         margin="normal"
-        fullWidth={false}
+        value={formData.respostaUm}
+        onChange={handleInputChange("respostaUm")}
+        style={{ width: "100%", borderRadius: "15px" }}
       />
       <SelectQuestion
         placeholder={"Escolha a pergunta 2..."}
-        question={perguntaDois}
-        setQuestion={setPerguntaDois}
-        possibleQuestions={filteredQuestions}
+        question={formData.perguntaDois}
+        setQuestion={(value: any) =>
+          handleInputChange("perguntaDois")({ target: { value } })
+        }
+        possibleQuestions={questions}
       />
       <TextFieldStyled
         id="respostaDois"
         label="Resposta 2"
         variant="outlined"
         margin="normal"
-        fullWidth={false}
+        value={formData.respostaDois}
+        onChange={handleInputChange("respostaDois")}
+        sx={{ width: "100%", borderRadius: "15px" }}
       />
       <SelectQuestion
         placeholder={"Escolha a pergunta 3..."}
-        question={perguntaTres}
-        setQuestion={setPerguntaTres}
-        possibleQuestions={filteredQuestions}
+        question={formData.perguntaTres}
+        setQuestion={(value: any) =>
+          handleInputChange("perguntaTres")({ target: { value } })
+        }
+        possibleQuestions={questions}
       />
       <TextFieldStyled
         id="respostaTres"
         label="Resposta 3"
         variant="outlined"
         margin="normal"
-        fullWidth={false}
+        value={formData.respostaTres}
+        onChange={handleInputChange("respostaTres")}
+        sx={{ width: "100%", borderRadius: "15px" }}
       />
       <div>
         <ButtonStyled
           fullWidth
-          type="submit"
+          type="button"
           variant="contained"
           color="primary"
+          onClick={validateData}
         >
           <span>Cadastrar</span>
         </ButtonStyled>

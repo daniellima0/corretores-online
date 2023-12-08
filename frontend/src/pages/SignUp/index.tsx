@@ -42,7 +42,7 @@ const Title = styled(Typography)`
 `;
 
 interface SignUpProps {
-  userType: string;
+  userType: "realtor" | "costumer";
 }
 
 const SignUp: React.FC<SignUpProps> = (props) => {

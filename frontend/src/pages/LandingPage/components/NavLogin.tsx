@@ -12,7 +12,6 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useTheme } from "@emotion/react";
 
 const pages = ["Entrar", "Cadastrar"];
 
@@ -62,8 +61,6 @@ function NavLogin() {
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
-
-  const theme = useTheme();
 
   return (
     <AppBar position="static" color="transparent" sx={{ boxShadow: "none" }}>
