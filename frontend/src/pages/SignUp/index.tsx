@@ -23,6 +23,8 @@ const Card = styled("div")({
   borderRadius: "50px",
   boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
   margin: "auto",
+  marginTop: "50px",
+  marginBottom: "50px",
   maxWidth: "700px",
 
   "@media (max-width: 800px)": {

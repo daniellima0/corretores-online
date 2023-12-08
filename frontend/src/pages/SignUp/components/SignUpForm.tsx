@@ -4,10 +4,12 @@ import {
   IconButton,
   InputAdornment,
   TextField,
+  Typography,
   styled,
 } from "@mui/material";
 import { useState } from "react";
 import * as React from "react";
+import SelectQuestion from "./SelectQuestion";
 
 const Form = styled("form")({
   width: "80%",
@@ -55,6 +57,12 @@ const TextFieldStyled = styled(TextField)({
   },
 });
 
+const Title = styled(Typography)`
+  font-family: ${({ theme }) => theme.customTypography.bold};
+  font-size: 1.8rem;
+  margin-top: 20px;
+`;
+
 interface SignUpFormProps {
   userType: string;
 }
@@ -65,6 +73,27 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  const questions = [
+    "Qual é o nome do seu primeiro animal de estimação?",
+    "Em que cidade você nasceu?",
+    "Qual é o nome do meio da sua mãe?",
+    "Qual era o nome da sua escola primária?",
+    "Qual é o seu prato de comida favorito?",
+    "Qual é o nome do seu melhor amigo de infância?",
+    "Qual é o nome da rua em que você cresceu?",
+    "Qual é o nome do seu personagem fictício favorito?",
+    "Qual é o modelo do seu primeiro carro?",
+    "Em que ano você se formou no ensino médio?",
+  ];
+  const [selectedQuestions, setSelectedQuestions] = React.useState<string[]>(
+    []
+  );
+  const [filteredQuestions, setFilteredQuestions] =
+    React.useState<string[]>(questions);
+  const [perguntaUm, setPerguntaUm] = React.useState("");
+  const [perguntaDois, setPerguntaDois] = React.useState("");
+  const [perguntaTres, setPerguntaTres] = React.useState("");
 
   return (
     <Form>
@@ -150,6 +179,48 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
             </InputAdornment>
           ),
         }}
+      />
+      <Title variant="h1">
+        Perguntas de segurança para recuperação de senha
+      </Title>
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 1..."}
+        question={perguntaUm}
+        setQuestion={setPerguntaUm}
+        possibleQuestions={filteredQuestions}
+      />
+      <TextFieldStyled
+        id="respostaUm"
+        label="Resposta 1"
+        variant="outlined"
+        margin="normal"
+        fullWidth={false}
+      />
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 2..."}
+        question={perguntaDois}
+        setQuestion={setPerguntaDois}
+        possibleQuestions={filteredQuestions}
+      />
+      <TextFieldStyled
+        id="respostaDois"
+        label="Resposta 2"
+        variant="outlined"
+        margin="normal"
+        fullWidth={false}
+      />
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 3..."}
+        question={perguntaTres}
+        setQuestion={setPerguntaTres}
+        possibleQuestions={filteredQuestions}
+      />
+      <TextFieldStyled
+        id="respostaTres"
+        label="Resposta 3"
+        variant="outlined"
+        margin="normal"
+        fullWidth={false}
       />
       <div>
         <ButtonStyled
