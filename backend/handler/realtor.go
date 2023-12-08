@@ -41,9 +41,14 @@ type User struct {
 	Telephone   Telephone `json:"telephone"`
 }
 
+type ContactOptions struct {
+	Type string `json:"type"`
+}
+
 type SocialsOptions struct {
-	Name string `json:"name"`
-	Icon string `json:"icon"`
+	Name           string         `json:"name"`
+	Icon           string         `json:"icon"`
+	ContactOptions ContactOptions `json:"contact_options"`
 }
 
 type SocialsRealtor struct {
@@ -209,6 +214,7 @@ func (h *RealtorHandler) List(c echo.Context) error {
 				socialFiltered.ContactInfo = social.ContactInfo
 				socialFiltered.SocialsOptions.Name = social.SocialsOptions().Name
 				socialFiltered.SocialsOptions.Icon = social.SocialsOptions().Icon
+				socialFiltered.SocialsOptions.ContactOptions.Type = social.SocialsOptions().ContactOptions().Type
 				realtorFiltered.SocialsRealtor = append(realtorFiltered.SocialsRealtor, socialFiltered)
 			}
 		}
@@ -248,12 +254,53 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 			),
 		),
 		db.Realtor.RealtorLocation.Fetch(),
+		db.Realtor.RealtorRegions.Fetch().With(
+			db.RealtorRegions.RegionsUsed.Fetch(),
+		),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, realtor)
+	var realtorFiltered Realtor
+	realtorFiltered.Creci = realtor.Creci
+	realtorFiltered.IsOnline = realtor.IsOnline
+	realtorFiltered.Description, _ = realtor.Description()
+	realtorFiltered.User.Name = realtor.User().Name
+	realtorFiltered.User.Cpf = realtor.User().Cpf
+	realtorFiltered.User.Email = realtor.User().Email
+	realtorFiltered.User.DateOfBirth = realtor.User().DateOfBirth
+	json.Unmarshal(realtor.User().Telephone, &realtorFiltered.User.Telephone)
+
+	if realtor.SocialsRealtor() != nil {
+		for _, social := range realtor.SocialsRealtor() {
+			var socialFiltered SocialsRealtor
+			socialFiltered.ContactInfo = social.ContactInfo
+			socialFiltered.SocialsOptions.Name = social.SocialsOptions().Name
+			socialFiltered.SocialsOptions.Icon = social.SocialsOptions().Icon
+			socialFiltered.SocialsOptions.ContactOptions.Type = social.SocialsOptions().ContactOptions().Type
+			realtorFiltered.SocialsRealtor = append(realtorFiltered.SocialsRealtor, socialFiltered)
+		}
+	}
+	if realtor.RealtorRegions() != nil {
+		for _, region := range realtor.RealtorRegions() {
+			if region.RegionsUsed() != nil {
+				var regionFiltered RealtorRegions
+				regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
+				realtorFiltered.RealtorRegions = append(realtorFiltered.RealtorRegions, regionFiltered)
+			}
+		}
+	}
+	if realtor.RealtorLocation() != nil {
+		for _, location := range realtor.RealtorLocation() {
+			var locationFiltered RealtorLocation
+			locationFiltered.Latitude, _ = location.Latitude()
+			locationFiltered.Longitude, _ = location.Longitude()
+			realtorFiltered.RealtorLocation = append(realtorFiltered.RealtorLocation, locationFiltered)
+		}
+	}
+
+	return c.JSON(http.StatusOK, realtorFiltered)
 }
 
 func (h *RealtorHandler) Delete(c echo.Context) error {
@@ -277,86 +324,4 @@ func (h *RealtorHandler) Delete(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, deleted)
-}
-
-func (h *RealtorHandler) AddSocial(c echo.Context) error {
-	ctx := context.Background()
-
-	var realtor_social db.SocialsRealtorModel
-	if err := c.Bind(&realtor_social); err != nil {
-		return err
-	}
-
-	realtor_social.SociID = uuid.New().String()
-
-	if strings.TrimSpace(realtor_social.ContactInfo) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Contact info is required")
-	}
-
-	if strings.TrimSpace(realtor_social.RealID) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Realtor id is required")
-	}
-
-	if strings.TrimSpace(realtor_social.SoopID) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Social option is required")
-	}
-
-	realtor_social_created, err := h.client.SocialsRealtor.CreateOne(
-		db.SocialsRealtor.SociID.Set(realtor_social.SociID),
-		db.SocialsRealtor.ContactInfo.Set(realtor_social.ContactInfo),
-		db.SocialsRealtor.Realtor.Link(db.Realtor.RealID.Equals(realtor_social.RealID)),
-		db.SocialsRealtor.SocialsOptions.Link(db.SocialsOptions.SoopID.Equals(realtor_social.SoopID)),
-	).Exec(ctx)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusCreated, realtor_social_created)
-}
-
-func (h *RealtorHandler) UpdateSocial(c echo.Context) error {
-	ctx := context.Background()
-
-	var realtor_social db.SocialsRealtorModel
-	if err := c.Bind(&realtor_social); err != nil {
-		return err
-	}
-
-	realtor_social_updated, err := h.client.SocialsRealtor.FindUnique(
-		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
-	).Update(
-		db.SocialsRealtor.ContactInfo.Set(realtor_social.ContactInfo),
-	).Exec(ctx)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusCreated, realtor_social_updated)
-}
-
-func (h *RealtorHandler) ListSocials(c echo.Context) error {
-	ctx := context.Background()
-
-	socials, err := h.client.SocialsRealtor.FindMany(
-		db.SocialsRealtor.RealID.Equals(c.Param("real_id")),
-	).Exec(ctx)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, socials)
-}
-
-func (h *RealtorHandler) DeleteSocial(c echo.Context) error {
-	ctx := context.Background()
-
-	social, err := h.client.SocialsRealtor.FindUnique(
-		db.SocialsRealtor.SociID.Equals(c.Param("soci_id")),
-	).Delete().Exec(ctx)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, social)
 }
