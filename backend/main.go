@@ -18,6 +18,7 @@ func main() {
 	}
 	e := echo.New()
 	e.Use(middleware.Logger())
+	e.Use(middleware.CORS())
 
 	client := db.NewClient()
 	if err := client.Prisma.Connect(); err != nil {
