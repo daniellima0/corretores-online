@@ -7,6 +7,7 @@ import {
   styled,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Form = styled("form")({
   width: "80%",
@@ -56,19 +57,61 @@ const TextFieldStyled = styled(TextField)({
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const navigator = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    fetch("http://localhost:8080/a-preencher", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((json) => {
+        console.log(json);
+        navigator("/home-page");
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Erro ao fazer login");
+      });
+  };
+
+  const handleChange =
+    (fieldId: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [fieldId]: value,
+      }));
+    };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   return (
-    <Form>
+    <Form onSubmit={handleLogin}>
       <TextFieldStyled
         id="email"
         label="Email"
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.email}
+        onChange={handleChange("email")}
       />
       <TextFieldStyled
         type={showPassword ? "text" : "password"}
@@ -77,6 +120,8 @@ const LoginForm = () => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.password}
+        onChange={handleChange("password")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">

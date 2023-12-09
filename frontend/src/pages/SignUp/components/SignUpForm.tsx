@@ -7,9 +7,10 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as React from "react";
 import SelectQuestion from "./SelectQuestion";
+import { useNavigate } from "react-router-dom";
 
 const Form = styled("form")({
   width: "80%",
@@ -47,6 +48,7 @@ interface SignUpFormProps {
 
 const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   const primaryColor = props.userType === "realtor" ? "#1C5E9F" : "#FF5E00";
+  const navigate = useNavigate();
 
   const ButtonStyled = styled(Button)({
     boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
@@ -186,7 +188,12 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         ...(props.userType === "realtor" && { creci: formData.creci }),
       };
 
-      fetch("http://localhost:8080/realtors/", {
+      let signUpUrl =
+        props.userType === "realtor"
+          ? "http://localhost:8080/realtors/"
+          : "http://localhost:8080/user/";
+
+      fetch(signUpUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -201,11 +208,10 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         })
         .then((json) => {
           console.log(json);
-          // Handle successful response
+          navigate("/login");
         })
         .catch((error) => {
           console.error(error);
-          // Handle error, log additional details if available
         });
     }
   };
