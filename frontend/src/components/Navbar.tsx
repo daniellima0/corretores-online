@@ -16,10 +16,11 @@ import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
 import { useContext } from "react";
 import { UserTypeContext } from "../App";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function NavBar() {
   const { userType } = useContext(UserTypeContext);
+  const navigator = useNavigate();
 
   const pages = [];
 
@@ -62,6 +63,18 @@ function NavBar() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+    fetch("http://localhost:8080/auth/logout")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+      })
+      .then(() => {
+        navigator("/landing-page");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (

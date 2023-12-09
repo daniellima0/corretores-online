@@ -113,11 +113,31 @@ function NavLogin() {
                 display: { xs: "block", md: "none" },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
+              {pages.map((page) =>
+                page === "Entrar" ? (
+                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center">
+                      <Link
+                        to="/login"
+                        style={{ textDecoration: "inherit", color: "inherit" }}
+                      >
+                        {page}
+                      </Link>
+                    </Typography>
+                  </MenuItem>
+                ) : (
+                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center">
+                      <Link
+                        to="/choose-signup"
+                        style={{ textDecoration: "inherit", color: "inherit" }}
+                      >
+                        {page}
+                      </Link>
+                    </Typography>
+                  </MenuItem>
+                )
+              )}
             </Menu>
           </Box>
 
