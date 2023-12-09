@@ -20,24 +20,23 @@ model contact_options {
 }
 
 model realtor {
-  real_id          String             @id @db.Uuid
-  user_id          String             @unique @db.Uuid
-  creci            String             @db.VarChar
-  description      String?            @db.VarChar
+  real_id          String            @id @db.Uuid
+  user_id          String            @unique @db.Uuid
+  creci            String            @db.VarChar
+  description      String?           @db.VarChar
   is_online        Boolean
-  user             user               @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
-  realtor_location realtor_location[]
+  user             user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  realtor_location realtor_location?
   realtor_regions  realtor_regions[]
   socials_realtor  socials_realtor[]
 }
 
 model realtor_location {
-  relo_id    String   @id @db.Uuid
-  real_id    String   @db.Uuid
-  latitude   Decimal? @db.Decimal(10, 6)
-  longitude  Decimal? @db.Decimal(10, 6)
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  realtor    realtor  @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
+  relo_id   String   @id @db.Uuid
+  real_id   String   @unique(map: "unique_real_id") @db.Uuid
+  latitude  Decimal? @db.Decimal(10, 6)
+  longitude Decimal? @db.Decimal(10, 6)
+  realtor   realtor  @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model realtor_regions {
