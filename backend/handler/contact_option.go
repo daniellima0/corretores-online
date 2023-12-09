@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -24,6 +25,23 @@ func NewContactOptionHandler(client *db.PrismaClient) *ContactOptionHandler {
 
 func (h *ContactOptionHandler) Create(c echo.Context) error {
 	ctx := context.Background()
+
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
 
 	var contact_option db.ContactOptionsModel
 	if err := c.Bind(&contact_option); err != nil {
