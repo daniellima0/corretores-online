@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
@@ -83,39 +82,6 @@ func (h *UserHandler) Create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, created)
-}
-
-func (h *UserHandler) Login(c echo.Context) error {
-	ctx := context.Background()
-
-	var user UserResponse
-	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-
-	if strings.TrimSpace(user.Email) == "" {
-		return c.JSON(http.StatusBadRequest, "Email is required")
-	}
-
-	if strings.TrimSpace(user.Password) == "" {
-		return c.JSON(http.StatusBadRequest, "Password is required")
-	}
-	userDb, err := h.client.User.FindUnique(
-		db.User.Email.Equals(user.Email),
-	).Exec(ctx)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(userDb.Password), []byte(user.Password))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	auth.GenerateJWT(c.Response().Writer, userDb.UserID)
-
-	return c.JSON(http.StatusOK, userDb)
-
 }
 
 func (h *UserHandler) Delete(c echo.Context) error {
