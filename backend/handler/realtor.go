@@ -14,6 +14,7 @@ import (
 	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RealtorHandler struct {
@@ -81,12 +82,17 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return err
 	}
 
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	userCreated := h.client.User.CreateOne(
 		db.User.UserID.Set(request.UserID),
 		db.User.Name.Set(request.Name),
 		db.User.Cpf.Set(request.Cpf),
 		db.User.Email.Set(request.Email),
-		db.User.Password.Set(request.Password),
+		db.User.Password.Set(string(encryptedPassword)),
 		db.User.DateOfBirth.Set(request.DateOfBirth),
 		db.User.Telephone.Set(telephoneJson),
 		db.User.AuthStatus.Link(db.AuthStatus.AustID.Equals(auth_status.AustID)),
