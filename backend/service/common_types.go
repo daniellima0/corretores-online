@@ -11,13 +11,24 @@ type Telephone struct {
 	Number string `json:"number"`
 }
 
+type QuestionAnswer struct {
+	SaquID   string `json:"saqu_id"`
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
+}
+
+type SafetyQuestionsUser struct {
+	QuestionAnswer [3]QuestionAnswer `json:"question_answer"`
+}
+
 type User struct {
-	UserID      string    `json:"user_id"`
-	Name        string    `json:"name"`
-	Cpf         string    `json:"cpf"`
-	Email       string    `json:"email"`
-	DateOfBirth time.Time `json:"date_of_birth"`
-	Telephone   Telephone `json:"telephone"`
+	UserID              string              `json:"user_id"`
+	Name                string              `json:"name"`
+	Cpf                 string              `json:"cpf"`
+	Email               string              `json:"email"`
+	DateOfBirth         time.Time           `json:"date_of_birth"`
+	Telephone           Telephone           `json:"telephone"`
+	SafetyQuestionsUser SafetyQuestionsUser `json:"safety_questions"`
 }
 
 type Contact struct {
