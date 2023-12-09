@@ -89,3 +89,7 @@ type RealtorGet struct {
 	RealtorLocation RealtorLocation  `json:"realtor_location"`
 	RealtorRegions  []RealtorRegions `json:"realtor_regions"`
 }
+type CheckUserLoggedInResponse struct {
+	UserID string `json:"user_id"`
+	AuthStatus string `json:"auth_status"`
+}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/daniellima0/corretores-online/backend/auth"
+	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -77,7 +78,12 @@ func (h *AuthHandler) CheckUserLoggedIn(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, userDb.Name)
+	response := service.CheckUserLoggedInResponse{
+		UserID:     userDb.UserID,
+		AuthStatus: userDb.AuthStatus().Type,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (h *AuthHandler) Logout(c echo.Context) error {
