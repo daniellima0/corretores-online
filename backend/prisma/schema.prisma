@@ -25,6 +25,7 @@ model realtor {
   creci            String            @db.VarChar
   description      String?           @db.VarChar
   is_online        Boolean
+  avatar           String?           @db.VarChar(255)
   user             user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   realtor_location realtor_location?
   realtor_regions  realtor_regions[]
@@ -49,7 +50,7 @@ model realtor_regions {
 
 model regions_used {
   reus_id         String            @id @db.Uuid
-  region          String            @db.VarChar
+  region          String            @unique(map: "unique_regions") @db.VarChar
   realtor_regions realtor_regions[]
 }
 

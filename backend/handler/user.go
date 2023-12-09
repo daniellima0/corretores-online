@@ -9,6 +9,7 @@ import (
 
 	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
+	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/steebchen/prisma-client-go/runtime/types"
@@ -19,14 +20,9 @@ type UserHandler struct {
 	client *db.PrismaClient
 }
 
-type Telephone struct {
-	DDD    string `json:"DDD"`
-	Number string `json:"number"`
-}
-
 type UserResponse struct {
 	db.UserModel
-	Telephone Telephone `json:"telephone"`
+	Telephone service.Telephone `json:"telephone"`
 }
 
 func NewUserHandler(client *db.PrismaClient) *UserHandler {

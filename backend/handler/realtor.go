@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
+	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/steebchen/prisma-client-go/runtime/types"
 )
 
 type RealtorHandler struct {
@@ -24,64 +24,11 @@ type RealtorResponse struct {
 	db.RealtorModel
 }
 
-type Telephone struct {
-	DDD    string `json:"DDD"`
-	Number string `json:"number"`
-}
-
 type RequestBody struct {
 	db.UserModel
-	Description *string   `json:"description"`
-	Creci       string    `json:"creci"`
-	Telephone   Telephone `json:"telephone"`
-}
-
-type User struct {
-	UserID      string    `json:"user_id"`
-	Name        string    `json:"name"`
-	Cpf         string    `json:"cpf"`
-	Email       string    `json:"email"`
-	DateOfBirth time.Time `json:"date_of_birth"`
-	Telephone   Telephone `json:"telephone"`
-}
-
-type Contact struct {
-	Type string `json:"type"`
-}
-
-type Options struct {
-	Name    string  `json:"name"`
-	Icon    string  `json:"icon"`
-	Contact Contact `json:"contact_options"`
-}
-
-type RealtorSocials struct {
-	ContactInfo string  `json:"contact_info"`
-	Options     Options `json:"socials_options"`
-}
-
-type RealtorLocation struct {
-	Latitude  types.Decimal `json:"latitude"`
-	Longitude types.Decimal `json:"longitude"`
-}
-
-type RegionsUsed struct {
-	Region string `json:"region"`
-}
-
-type RealtorRegions struct {
-	RegionsUsed RegionsUsed `json:"regions_used"`
-}
-
-type Realtor struct {
-	RealID          string           `json:"real_id"`
-	Creci           string           `json:"creci"`
-	IsOnline        bool             `json:"is_online"`
-	Description     string           `json:"description"`
-	User            User             `json:"user"`
-	RealtorSocials  []RealtorSocials `json:"socials_realtor"`
-	RealtorLocation RealtorLocation  `json:"realtor_location"`
-	RealtorRegions  []RealtorRegions `json:"realtor_regions"`
+	Description *string           `json:"description"`
+	Creci       string            `json:"creci"`
+	Telephone   service.Telephone `json:"telephone"`
 }
 
 func NewRealtorHandler(client *db.PrismaClient) *RealtorHandler {
@@ -168,17 +115,17 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 	description, _ := realtorCreated.Result().Description()
 
 	telephoneBytes := userCreated.Result().Telephone
-	telephoneResponse := Telephone{}
+	telephoneResponse := service.Telephone{}
 	if err := json.Unmarshal(telephoneBytes, &telephoneResponse); err != nil {
 		return err
 	}
 
-	response := Realtor{
+	response := service.Realtor{
 		RealID:      realtorCreated.Result().RealID,
 		Creci:       realtorCreated.Result().Creci,
 		IsOnline:    realtorCreated.Result().IsOnline,
 		Description: description,
-		User: User{
+		User: service.User{
 			UserID:      userCreated.Result().UserID,
 			Name:        userCreated.Result().Name,
 			Cpf:         userCreated.Result().Cpf,
@@ -225,9 +172,9 @@ func (h *RealtorHandler) List(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var realtorsFiltered []Realtor
+	var realtorsFiltered []service.Realtor
 	for _, realtor := range realtors {
-		var realtorFiltered Realtor
+		var realtorFiltered service.Realtor
 		realtorFiltered.Creci = realtor.Creci
 		realtorFiltered.IsOnline = realtor.IsOnline
 		realtorFiltered.Description, _ = realtor.Description()
@@ -239,7 +186,7 @@ func (h *RealtorHandler) List(c echo.Context) error {
 
 		if realtor.SocialsRealtor() != nil {
 			for _, social := range realtor.SocialsRealtor() {
-				var socialFiltered RealtorSocials
+				var socialFiltered service.RealtorSocials
 				socialFiltered.ContactInfo = social.ContactInfo
 				socialFiltered.Options.Name = social.SocialsOptions().Name
 				socialFiltered.Options.Icon = social.SocialsOptions().Icon
@@ -250,7 +197,7 @@ func (h *RealtorHandler) List(c echo.Context) error {
 		if realtor.RealtorRegions() != nil {
 			for _, region := range realtor.RealtorRegions() {
 				if region.RegionsUsed() != nil {
-					var regionFiltered RealtorRegions
+					var regionFiltered service.RealtorRegions
 					regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
 					realtorFiltered.RealtorRegions = append(realtorFiltered.RealtorRegions, regionFiltered)
 				}
@@ -288,7 +235,7 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var realtorFiltered Realtor
+	var realtorFiltered service.Realtor
 	realtorFiltered.Creci = realtor.Creci
 	realtorFiltered.IsOnline = realtor.IsOnline
 	realtorFiltered.Description, _ = realtor.Description()
@@ -300,7 +247,7 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 
 	if realtor.SocialsRealtor() != nil {
 		for _, social := range realtor.SocialsRealtor() {
-			var socialFiltered RealtorSocials
+			var socialFiltered service.RealtorSocials
 			socialFiltered.ContactInfo = social.ContactInfo
 			socialFiltered.Options.Name = social.SocialsOptions().Name
 			socialFiltered.Options.Icon = social.SocialsOptions().Icon
@@ -311,7 +258,7 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 	if realtor.RealtorRegions() != nil {
 		for _, region := range realtor.RealtorRegions() {
 			if region.RegionsUsed() != nil {
-				var regionFiltered RealtorRegions
+				var regionFiltered service.RealtorRegions
 				regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
 				realtorFiltered.RealtorRegions = append(realtorFiltered.RealtorRegions, regionFiltered)
 			}
@@ -438,7 +385,7 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	responseFiltered := Realtor{}
+	responseFiltered := service.Realtor{}
 	responseFiltered.RealID = response.RealID
 	responseFiltered.Creci = response.Creci
 	responseFiltered.IsOnline = response.IsOnline
@@ -452,7 +399,7 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 
 	if response.SocialsRealtor() != nil {
 		for _, social := range response.SocialsRealtor() {
-			var socialFiltered RealtorSocials
+			var socialFiltered service.RealtorSocials
 			socialFiltered.ContactInfo = social.ContactInfo
 			socialFiltered.Options.Name = social.SocialsOptions().Name
 			socialFiltered.Options.Icon = social.SocialsOptions().Icon
@@ -463,7 +410,7 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 	if response.RealtorRegions() != nil {
 		for _, region := range response.RealtorRegions() {
 			if region.RegionsUsed() != nil {
-				var regionFiltered RealtorRegions
+				var regionFiltered service.RealtorRegions
 				regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
 				responseFiltered.RealtorRegions = append(responseFiltered.RealtorRegions, regionFiltered)
 			}
