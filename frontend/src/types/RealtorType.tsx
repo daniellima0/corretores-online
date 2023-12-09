@@ -3,7 +3,7 @@ interface Telephone {
   number: string;
 }
 
-interface User {
+export interface User {
   user_id: string;
   name: string;
   cpf: string;

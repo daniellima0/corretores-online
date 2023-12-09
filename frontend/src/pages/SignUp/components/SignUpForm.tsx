@@ -7,10 +7,9 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import SelectQuestion from "./SelectQuestion";
-import { UserTypeContext } from "../../../App";
 
 const Form = styled("form")({
   width: "80%",
@@ -42,10 +41,12 @@ const Title = styled(Typography)`
   margin-top: 20px;
 `;
 
-const SignUpForm = () => {
-  const { userType } = useContext(UserTypeContext);
+interface SignUpFormProps {
+  userType: "realtor" | "costumer";
+}
 
-  const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
+const SignUpForm: React.FC<SignUpFormProps> = (props) => {
+  const primaryColor = props.userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
   const ButtonStyled = styled(Button)({
     boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
@@ -80,10 +81,12 @@ const SignUpForm = () => {
   };
 
   const [formData, setFormData] = React.useState({
-    nome: "",
-    sobrenome: "",
-    telefone: "",
-    dataNascimento: "",
+    name: "",
+    telephone: {
+      ddd: "",
+      number: "",
+    },
+    date_of_birth: "",
     cpf: "",
     creci: "",
     email: "",
@@ -97,23 +100,52 @@ const SignUpForm = () => {
     respostaTres: "",
   });
 
-  const handleInputChange =
+  /*  const handleInputChange =
     (field: string) => (event: { target: { value: any } }) => {
       setFormData({ ...formData, [field]: event.target.value });
+    }; */
+
+  const handleInputChange =
+    (field: string, nestedField?: string) =>
+    (event: { target: { value: any } }) => {
+      setFormData((prevFormData) => {
+        if (nestedField) {
+          return {
+            ...prevFormData,
+            [field]: {
+              ...prevFormData[field],
+              [nestedField]: event.target.value,
+            },
+          };
+        } else {
+          return { ...prevFormData, [field]: event.target.value };
+        }
+      });
     };
 
   const validateData = () => {
+    console.log(formData.date_of_birth);
     for (const field in formData) {
       if (!formData[field]) {
-        if (field === "creci" && userType === "costumer") continue;
+        if (field === "creci" && props.userType === "costumer") continue;
         alert(`Preencha o campo ${field}!`);
-        return;
+        return false;
       }
+    }
+
+    if (formData.cpf.length !== 11) {
+      alert("CPF inválido!");
+      return false;
+    }
+
+    if (formData.telephone.ddd.length !== 2) {
+      alert("DDD inválido!");
+      return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
       alert("As senhas não coincidem!");
-      return;
+      return false;
     }
 
     if (
@@ -122,7 +154,7 @@ const SignUpForm = () => {
       formData["perguntaDois"] === formData["perguntaTres"]
     ) {
       alert("Perguntas de segurança repetidas!");
-      return;
+      return false;
     }
 
     const securityQuestions = ["perguntaUm", "perguntaDois", "perguntaTres"];
@@ -132,54 +164,96 @@ const SignUpForm = () => {
       if (!question || !answer) {
         console.log(question, answer);
         alert(`Preencha a pergunta e a resposta correspondente!`);
-        return;
+        return false;
       }
     }
 
-    console.log("Data validation successful!");
+    return true;
+  };
+
+  const handleSave = () => {
+    if (validateData()) {
+      const body = {
+        name: formData.name,
+        cpf: formData.cpf,
+        email: formData.email,
+        password: formData.password,
+        date_of_birth: new Date(formData.date_of_birth).toISOString(),
+        telephone: {
+          DDD: formData.telephone.ddd,
+          number: formData.telephone.number,
+        },
+        ...(props.userType === "realtor" && { creci: formData.creci }),
+      };
+
+      fetch("http://localhost:8080/realtors/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((json) => {
+          console.log(json);
+          // Handle successful response
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle error, log additional details if available
+        });
+    }
   };
 
   return (
     <Form>
       <TextFieldStyled
-        id="nome"
-        label="Nome"
+        id="name"
+        label="Nome Completo"
         variant="outlined"
         margin="normal"
         fullWidth={false}
-        value={formData.nome}
-        onChange={handleInputChange("nome")}
+        value={formData.name}
+        onChange={handleInputChange("name")}
       />
       <TextFieldStyled
-        id="sobrenome"
-        label="Sobrenome"
+        id="ddd"
+        label="DDD"
+        type="text"
         variant="outlined"
         margin="normal"
         fullWidth={false}
-        value={formData.sobrenome}
-        onChange={handleInputChange("sobrenome")}
+        value={formData.telephone.ddd}
+        onChange={handleInputChange("telephone", "ddd")}
       />
       <TextFieldStyled
+        helperText="Digite apenas os números"
         id="telefone"
         label="Telefone"
         type="text"
         variant="outlined"
         margin="normal"
         fullWidth={false}
-        value={formData.telefone}
-        onChange={handleInputChange("telefone")}
+        value={formData.telephone.number}
+        onChange={handleInputChange("telephone", "number")}
       />
       <TextFieldStyled
-        id="dataNascimento"
+        id="date_of_birth"
         label="Data de nascimento"
         type="date"
         variant="outlined"
         margin="normal"
         fullWidth={false}
-        value={formData.dataNascimento}
-        onChange={handleInputChange("dataNascimento")}
+        value={formData.date_of_birth}
+        onChange={handleInputChange("date_of_birth")}
       />
       <TextFieldStyled
+        helperText="Digite apenas os números"
         id="cpf"
         label="CPF"
         variant="outlined"
@@ -188,7 +262,7 @@ const SignUpForm = () => {
         value={formData.cpf}
         onChange={handleInputChange("cpf")}
       />
-      {userType === "realtor" && (
+      {props.userType === "realtor" && (
         <TextFieldStyled
           id="creci"
           label="CRECI"
@@ -315,7 +389,7 @@ const SignUpForm = () => {
           type="button"
           variant="contained"
           color="primary"
-          onClick={validateData}
+          onClick={handleSave}
         >
           <span>Cadastrar</span>
         </ButtonStyled>

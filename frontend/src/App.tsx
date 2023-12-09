@@ -39,8 +39,12 @@ const router = createBrowserRouter([
     element: <ResetPassword />,
   },
   {
-    path: "/signup",
-    element: <SignUp />,
+    path: "/realtor-signup",
+    element: <SignUp userType="realtor" />,
+  },
+  {
+    path: "/costumer-signup",
+    element: <SignUp userType="costumer" />,
   },
 ]);
 
