@@ -9,31 +9,29 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-
-type Broker = {
-  id: number;
-  name: string;
-  position: { lat: number; lng: number };
-};
+import { RealtorType } from "types/RealtorType";
 
 function renderRow(
-  item: Broker,
+  item: RealtorType,
   setSearchMapCenter: (position: { lat: number; lng: number }) => void
 ) {
   const handleListItemClick = () => {
-    setSearchMapCenter(item.position);
+    setSearchMapCenter({
+      lat: Number(item.realtor_location.latitude),
+      lng: Number(item.realtor_location.longitude),
+    });
   };
 
   return (
     <ListItem
-      key={item.id}
+      key={item.real_id}
       alignItems="flex-start"
       component="div"
       disablePadding
     >
       <ListItemButton sx={{ height: "100%" }} onClick={handleListItemClick}>
         <ListItemAvatar>
-          <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} src="a" />
+          <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.user.name} src="" />
         </ListItemAvatar>
         <ListItemText
           primary={
@@ -44,7 +42,7 @@ function renderRow(
                 variant="h5"
                 color="text.primary"
               >
-                {item.name}
+                {item.user.name}
               </Typography>
             </React.Fragment>
           }
@@ -69,10 +67,10 @@ export default function BrokerList({
   data,
   setSearchMapCenter,
 }: {
-  data: Broker[];
+  data: RealtorType[];
   setSearchMapCenter: any;
 }) {
-  const [localData, setLocalData] = useState<Broker[]>([]);
+  const [localData, setLocalData] = useState<RealtorType[]>([]);
 
   useEffect(() => {
     setLocalData(data);

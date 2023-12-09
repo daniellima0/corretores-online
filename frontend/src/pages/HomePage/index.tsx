@@ -16,6 +16,7 @@ import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import BrokerList from "./components/BrokerLIst";
 import CorretoresMap from "./components/CorretoresMap";
+import { RealtorType } from "types/RealtorType";
 
 const libraries: any = ["places"];
 
@@ -109,13 +110,7 @@ const HomePage = () => {
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
   }, []);
 
-  type Broker = {
-    id: number;
-    name: string;
-    position: { lat: number; lng: number };
-  };
-
-  const testData = [
+  /* const testData = [
     {
       id: 1,
       name: "Bernardo Serravalle",
@@ -148,14 +143,17 @@ const HomePage = () => {
         lng: -38.532670253972434,
       },
     },
-  ];
+  ]; */
+
+  const [onlineRealtors, setOnlineRealtors] = useState<RealtorType[]>([]);
   const initialSearchBias = {
     lat: -12.98767014046349,
     lng: -38.48548147475881,
   };
   const [open, setOpen] = useState(true);
   const handleClose = () => setOpen(false);
-  const [filteredData, setFilteredData] = useState<Broker[]>(testData);
+  const [filteredData, setFilteredData] =
+    useState<RealtorType[]>(onlineRealtors);
   const [searchInputBias, setSearchInputBias] = useState<
     | {
         north: number;
@@ -199,6 +197,23 @@ const HomePage = () => {
       });
     }
   }, [searchMapCenter]);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/realtors/?is_online=true")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        return response.json();
+      })
+      .then((json) => {
+        console.log(json);
+        setOnlineRealtors(json);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
 
   const autocompleteOptions = {
     bounds: searchInputBias,
@@ -258,7 +273,7 @@ const HomePage = () => {
       <Navbar />
       <div className="BodyContainer" style={bodyContainerStyle}>
         <BrokerList
-          key={testData.length}
+          key={onlineRealtors.length}
           data={filteredData}
           setSearchMapCenter={setSearchMapCenter}
         />
@@ -295,7 +310,7 @@ const HomePage = () => {
           </CapsulaInutil>
 
           <CorretoresMap
-            data={testData}
+            data={onlineRealtors}
             searchMapCenter={searchMapCenter}
             dataFilter={setFilteredData}
           />

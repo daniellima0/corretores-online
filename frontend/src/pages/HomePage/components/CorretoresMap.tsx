@@ -3,16 +3,11 @@ import { Avatar, Button } from "@mui/material";
 import { useRef, useState, useEffect } from "react";
 import { Root, createRoot } from "react-dom/client";
 import HiddenComponent from "./HiddenComponent";
-
-type Broker = {
-  id: number;
-  name: string;
-  position: { lat: number; lng: number };
-};
+import { RealtorType } from "types/RealtorType";
 
 type MapProps = {
   map: google.maps.Map | undefined;
-  data: Broker[];
+  data: RealtorType[];
 };
 
 export default function CorretoresMap({
@@ -20,7 +15,7 @@ export default function CorretoresMap({
   searchMapCenter,
   dataFilter,
 }: {
-  data: Broker[];
+  data: RealtorType[];
   searchMapCenter: { lat: number; lng: number } | null;
   dataFilter: any;
 }) {
@@ -44,15 +39,15 @@ function Map({
   searchMapCenter,
   dataFilter,
 }: {
-  data: Broker[];
+  data: RealtorType[];
   searchMapCenter: { lat: number; lng: number } | null;
   dataFilter: any;
 }) {
   const [map, setMap] = useState<google.maps.Map>();
   const [circle, setCircle] = useState<google.maps.Circle | null>();
-  const [brokersInCircle, setBrokersInCircle] = useState<Broker[] | undefined>(
-    data
-  );
+  const [brokersInCircle, setBrokersInCircle] = useState<
+    RealtorType[] | undefined
+  >(data);
 
   const ref = useRef<HTMLDivElement>(null);
   const mapOptions = {
@@ -80,12 +75,15 @@ function Map({
         const brokersInCircleData = data
           .map((broker) => {
             let distance = spherical.computeDistanceBetween(
-              new google.maps.LatLng(broker.position),
+              new google.maps.LatLng({
+                lat: Number(broker.realtor_location.latitude),
+                lng: Number(broker.realtor_location.longitude),
+              }),
               new google.maps.LatLng(searchMapCenter)
             );
             return distance <= 2000 ? broker : null;
           })
-          .filter((broker): broker is Broker => broker !== null);
+          .filter((broker): broker is RealtorType => broker !== null);
         setBrokersInCircle(brokersInCircleData);
         dataFilter(brokersInCircleData);
       } else {
@@ -138,8 +136,8 @@ function Map({
 
 function Broker(props: MapProps) {
   const { map, data } = props;
-  const [brokerData, setBrokerData] = useState<Broker[]>(data);
-  const [hover, setHover] = useState<number | null>(null);
+  const [brokerData, setBrokerData] = useState<RealtorType[]>(data);
+  const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
     setBrokerData(data);
@@ -149,14 +147,17 @@ function Broker(props: MapProps) {
     <>
       {brokerData.map((broker) => (
         <Marker
-          key={broker.id}
+          key={broker.real_id}
           map={map}
-          position={broker.position}
+          position={{
+            lat: Number(broker.realtor_location.latitude),
+            lng: Number(broker.realtor_location.longitude),
+          }}
           onClick={() => {
-            setHover(broker.id);
+            setHover(broker.real_id);
           }}
         >
-          <HiddenComponent hidden={broker.id === hover}>
+          <HiddenComponent hidden={broker.real_id === hover}>
             <div
               style={{
                 backgroundColor: "#ffffff",
@@ -169,12 +170,12 @@ function Broker(props: MapProps) {
                 alignItems: "center",
                 gap: "11px",
               }}
-              onMouseEnter={() => setHover(broker.id)}
+              onMouseEnter={() => setHover(broker.real_id)}
               onMouseLeave={() => setHover(null)}
             >
               <Avatar
-                alt={broker.name}
-                src="/static/images/avatar/1.jpg"
+                alt={broker.user.name}
+                src=""
                 sx={{
                   width: 24,
                   height: 24,
@@ -184,7 +185,7 @@ function Broker(props: MapProps) {
               />
             </div>
           </HiddenComponent>
-          <HiddenComponent hidden={broker.id != hover}>
+          <HiddenComponent hidden={broker.real_id != hover}>
             <div
               style={{
                 backgroundColor: "#fff",
@@ -197,19 +198,19 @@ function Broker(props: MapProps) {
                 alignItems: "center",
                 gap: "11px",
               }}
-              onMouseEnter={() => setHover(broker.id)}
+              onMouseEnter={() => setHover(broker.real_id)}
               onMouseLeave={() => setHover(null)}
             >
               <Avatar
+                alt={broker.user.name}
+                src=""
                 sx={{
                   width: 24,
                   height: 24,
                   fontSize: "15px",
                   bgcolor: "#FF5E00",
                 }}
-              >
-                {broker.name.charAt(0)}
-              </Avatar>
+              />
               <div
                 style={{
                   display: "flex",
@@ -219,7 +220,7 @@ function Broker(props: MapProps) {
                   gap: "3px",
                 }}
               >
-                {broker.name}
+                {broker.user.name}
                 <Button
                   style={{
                     width: "100px",

@@ -83,6 +83,7 @@ const SignUpForm = () => {
     nome: "",
     sobrenome: "",
     telefone: "",
+    dataNascimento: "",
     cpf: "",
     creci: "",
     email: "",
@@ -167,6 +168,16 @@ const SignUpForm = () => {
         fullWidth={false}
         value={formData.telefone}
         onChange={handleInputChange("telefone")}
+      />
+      <TextFieldStyled
+        id="dataNascimento"
+        label="Data de nascimento"
+        type="date"
+        variant="outlined"
+        margin="normal"
+        fullWidth={false}
+        value={formData.dataNascimento}
+        onChange={handleInputChange("dataNascimento")}
       />
       <TextFieldStyled
         id="cpf"
