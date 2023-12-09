@@ -14,11 +14,22 @@ import Tooltip from "@mui/material/Tooltip";
 import logo from "../assets/logo-black.svg";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
-
-const pages = ["Item 1", "Item 2", "Item 3", "Item 4"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+import { useContext } from "react";
+import { UserTypeContext } from "../App";
 
 function NavBar() {
+  const { userType } = useContext(UserTypeContext);
+
+  const pages = [];
+
+  if (userType == "realtor") {
+    pages.push("Mapa", "Configurações", "Meu Perfil");
+  } else if (userType == "costumer") {
+    pages.push("Mapa", "Configurações");
+  }
+
+  const settings = ["Sair"];
+
   const LogoStyled = styled("img")(() => ({
     height: "45px",
   }));

@@ -41,16 +41,12 @@ const Title = styled(Typography)`
   font-size: 1.8rem;
 `;
 
-interface SignUpProps {
-  userType: "realtor" | "costumer";
-}
-
-const SignUp: React.FC<SignUpProps> = (props) => {
+const SignUp = () => {
   return (
     <Div>
       <Card>
         <Title variant="h1">Crie sua conta</Title>
-        <SignUpForm userType={props.userType} />
+        <SignUpForm />
       </Card>
     </Div>
   );

@@ -5,8 +5,10 @@ import ProfilePicture from "../../../components/ProfilePicture";
 import SocialMediaInfo from "../../../components/SocialMediaInfo";
 import RoundedButton from "../../../components/RoundedButton";
 import { FormControlLabel, Switch, Typography } from "@mui/material";
-import React from "react";
+import React, { useContext } from "react";
 import QRCode from "react-qr-code";
+import { useTheme } from "@mui/material";
+import { UserTypeContext } from "../../../App";
 
 const Container = styled("div")`
   margin-top: 40px;
@@ -123,11 +125,11 @@ const AboutMeTitle = styled(Typography)`
 
 const Description = styled(Typography)``;
 
-interface SignUpFormProps {
-  userType: "realtor" | "costumer";
-}
+const RealtorInfo = () => {
+  const { userType } = useContext(UserTypeContext);
 
-const RealtorInfo: React.FC<SignUpFormProps> = (props) => {
+  const theme = useTheme();
+
   const realtor = {
     name: "Marcel Fonseca",
     bio: "Lorem ipsum Lorem ipsum Lorem ipsum",
@@ -173,7 +175,7 @@ const RealtorInfo: React.FC<SignUpFormProps> = (props) => {
             <FormControlLabel
               control={
                 <Switch
-                  disabled={props.userType === "realtor" ? false : true}
+                  disabled={userType === "realtor" ? false : true}
                   checked={checked}
                   onChange={handleChange}
                   inputProps={{ "aria-label": "controlled" }}
@@ -185,7 +187,6 @@ const RealtorInfo: React.FC<SignUpFormProps> = (props) => {
               labelPlacement="end"
             />
           </Header>
-
           <RegionsInfo>
             <RegionsTitle variant="h2">Regiōes</RegionsTitle>
             <RegionsList variant="body1">{realtor.regionsList}</RegionsList>
@@ -199,7 +200,10 @@ const RealtorInfo: React.FC<SignUpFormProps> = (props) => {
         <AboutMeTitle variant="h2">Sobre Mim</AboutMeTitle>
         <Description variant="body1">{realtor.description}</Description>
       </SecondSection>
-      <RoundedButton onClick={handleClick}>
+      <RoundedButton
+        buttonColor={userType == "realtor" ? theme.customPallete.realtor : ""}
+        onClick={handleClick}
+      >
         Quero entrar em contato
       </RoundedButton>
     </Container>

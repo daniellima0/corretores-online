@@ -7,9 +7,10 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import * as React from "react";
 import SelectQuestion from "./SelectQuestion";
+import { UserTypeContext } from "../../../App";
 
 const Form = styled("form")({
   width: "80%",
@@ -41,12 +42,10 @@ const Title = styled(Typography)`
   margin-top: 20px;
 `;
 
-interface SignUpFormProps {
-  userType: "realtor" | "costumer";
-}
+const SignUpForm = () => {
+  const { userType } = useContext(UserTypeContext);
 
-const SignUpForm: React.FC<SignUpFormProps> = (props) => {
-  const primaryColor = props.userType === "realtor" ? "#1C5E9F" : "#FF5E00";
+  const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
   const ButtonStyled = styled(Button)({
     boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
@@ -105,7 +104,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   const validateData = () => {
     for (const field in formData) {
       if (!formData[field]) {
-        if (field === "creci" && props.userType === "costumer") continue;
+        if (field === "creci" && userType === "costumer") continue;
         alert(`Preencha o campo ${field}!`);
         return;
       }
@@ -162,6 +161,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       <TextFieldStyled
         id="telefone"
         label="Telefone"
+        type="text"
         variant="outlined"
         margin="normal"
         fullWidth={false}
@@ -177,7 +177,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         value={formData.cpf}
         onChange={handleInputChange("cpf")}
       />
-      {props.userType === "realtor" && (
+      {userType === "realtor" && (
         <TextFieldStyled
           id="creci"
           label="CRECI"
@@ -191,6 +191,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       <TextFieldStyled
         id="email"
         label="Email"
+        type="email"
         variant="outlined"
         margin="normal"
         fullWidth={false}

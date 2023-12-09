@@ -2,7 +2,8 @@ import { styled } from "@mui/material/styles/";
 import { Avatar, Typography } from "@mui/material";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { UserTypeContext } from "../../../App";
 
 const Container = styled("div")`
   display: flex;
@@ -123,12 +124,10 @@ const ButtonGroup = styled("div")`
 //   bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
 // };
 
-interface SignUpFormProps {
-  userType: "realtor" | "costumer";
-}
+const Content = () => {
+  const { userType } = useContext(UserTypeContext);
 
-const Content: React.FC<SignUpFormProps> = (props) => {
-  const primaryColor = props.userType === "realtor" ? "#1C5E9F" : "#FF5E00";
+  const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
   const [profileData, setProfileData] = useState({
     name: "Marcel Fonseca",
