@@ -102,8 +102,8 @@ const HomePage = () => {
       });
     };
 
-    const errorCallback = (error: any) => {
-      console.error(error);
+    const errorCallback = () => {
+      return;
     };
 
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
@@ -142,70 +142,6 @@ const HomePage = () => {
     },
     {
       id: 4,
-      name: "Luca Villela",
-      position: {
-        lat: -13.00986936272844,
-        lng: -38.532670253972434,
-      },
-    },
-    {
-      id: 5,
-      name: "Bernardo Serravalle",
-      position: {
-        lat: -12.993966980061542,
-        lng: -38.44557003269835,
-      },
-    },
-    {
-      id: 6,
-      name: "Arthur Sant'Anna",
-      position: {
-        lat: -12.986820652837016,
-        lng: -38.4369292224266,
-      },
-    },
-    {
-      id: 7,
-      name: "Giulia Franca",
-      position: {
-        lat: -12.985937092644223,
-        lng: -38.44490330351072,
-      },
-    },
-    {
-      id: 8,
-      name: "Luca Villela",
-      position: {
-        lat: -13.00986936272844,
-        lng: -38.532670253972434,
-      },
-    },
-    {
-      id: 9,
-      name: "Bernardo Serravalle",
-      position: {
-        lat: -12.993966980061542,
-        lng: -38.44557003269835,
-      },
-    },
-    {
-      id: 10,
-      name: "Arthur Sant'Anna",
-      position: {
-        lat: -12.986820652837016,
-        lng: -38.4369292224266,
-      },
-    },
-    {
-      id: 11,
-      name: "Giulia Franca",
-      position: {
-        lat: -12.985937092644223,
-        lng: -38.44490330351072,
-      },
-    },
-    {
-      id: 12,
       name: "Luca Villela",
       position: {
         lat: -13.00986936272844,
@@ -271,7 +207,7 @@ const HomePage = () => {
   };
 
   const handleSearchButtonClick = () => {
-    handlePlaceChanged();
+    alert("Digite e escolha uma sugestão");
   };
 
   if (!isLoaded) {
@@ -337,6 +273,7 @@ const HomePage = () => {
             >
               <LocationInput
                 id="outlined-basic"
+                className="oi"
                 label="Procurar corretores em..."
                 variant="outlined"
                 InputProps={{

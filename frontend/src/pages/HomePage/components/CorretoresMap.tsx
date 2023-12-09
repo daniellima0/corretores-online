@@ -128,7 +128,6 @@ function Map({
         style={{
           width: "100%",
           height: "100%",
-          zIndex: "-1",
         }}
         ref={ref}
       />
@@ -174,15 +173,15 @@ function Broker(props: MapProps) {
               onMouseLeave={() => setHover(null)}
             >
               <Avatar
+                alt={broker.name}
+                src="/static/images/avatar/1.jpg"
                 sx={{
                   width: 24,
                   height: 24,
                   fontSize: "15px",
                   bgcolor: "#FF5E00",
                 }}
-              >
-                {broker.name.charAt(0)}
-              </Avatar>
+              />
             </div>
           </HiddenComponent>
           <HiddenComponent hidden={broker.id != hover}>

@@ -250,55 +250,59 @@ const Content = () => {
           </ProfilePictureWithButtonWrapper>
         </SectionContentWrapper>
       </Section>
-      <Section>
-        <SectionTitle variant="h2">Redes Sociais</SectionTitle>
-        <InputGroupWrapper>
-          <InputGroup
-            label="Instagram"
-            name="instagram"
-            type="text"
-            defaultValue="https://www.instagram.com/marcel.fonseca"
-            icon="/public/instagram.svg"
-            onChange={handleInputChange("instagram")}
-          />
-          <InputGroup
-            label="Facebook"
-            name="facebook"
-            type="text"
-            defaultValue="https://www.facebook.com/marcel.fonseca"
-            icon="/public/facebook.png"
-            onChange={handleInputChange("facebook")}
-          />
-          <InputGroup
-            label="WhatsApp"
-            name="whatsapp"
-            type="text"
-            defaultValue="+557198159-1481"
-            icon="/public/whatsapp.svg"
-            onChange={handleInputChange("whatsapp")}
-          />
-        </InputGroupWrapper>
-      </Section>
-      <Section>
-        <SectionTitle variant="h2">Biografia</SectionTitle>
-        <InputGroupWrapper>
-          <InputGroup
-            label="Regiões de Atuação"
-            name="regioes-de-atuacao"
-            type="text"
-            defaultValue="Barra, Pituba, Imbuí"
-            onChange={handleInputChange("regioesDeAtuacao")}
-          />
-          <InputGroup
-            label="Bio"
-            name="bio"
-            type="text"
-            defaultValue="Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas."
-            isTextField={true}
-            onChange={handleInputChange("bio")}
-          />
-        </InputGroupWrapper>
-      </Section>
+      {userType === "realtor" && (
+        <>
+          <Section>
+            <SectionTitle variant="h2">Redes Sociais</SectionTitle>
+            <InputGroupWrapper>
+              <InputGroup
+                label="Instagram"
+                name="instagram"
+                type="text"
+                defaultValue="https://www.instagram.com/marcel.fonseca"
+                icon="/public/instagram.svg"
+                onChange={handleInputChange("instagram")}
+              />
+              <InputGroup
+                label="Facebook"
+                name="facebook"
+                type="text"
+                defaultValue="https://www.facebook.com/marcel.fonseca"
+                icon="/public/facebook.png"
+                onChange={handleInputChange("facebook")}
+              />
+              <InputGroup
+                label="WhatsApp"
+                name="whatsapp"
+                type="text"
+                defaultValue="+557198159-1481"
+                icon="/public/whatsapp.svg"
+                onChange={handleInputChange("whatsapp")}
+              />
+            </InputGroupWrapper>
+          </Section>
+          <Section>
+            <SectionTitle variant="h2">Biografia</SectionTitle>
+            <InputGroupWrapper>
+              <InputGroup
+                label="Regiões de Atuação"
+                name="regioes-de-atuacao"
+                type="text"
+                defaultValue="Barra, Pituba, Imbuí"
+                onChange={handleInputChange("regioesDeAtuacao")}
+              />
+              <InputGroup
+                label="Bio"
+                name="bio"
+                type="text"
+                defaultValue="Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas."
+                isTextField={true}
+                onChange={handleInputChange("bio")}
+              />
+            </InputGroupWrapper>
+          </Section>
+        </>
+      )}
       <ButtonGroup>
         <CancelButton
           buttonColor={primaryColor}

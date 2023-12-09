@@ -5,7 +5,7 @@ import ProfilePicture from "../../../components/ProfilePicture";
 import SocialMediaInfo from "../../../components/SocialMediaInfo";
 import RoundedButton from "../../../components/RoundedButton";
 import { FormControlLabel, Switch, Typography } from "@mui/material";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import QRCode from "react-qr-code";
 import { useTheme } from "@mui/material";
 import { UserTypeContext } from "../../../App";
@@ -144,10 +144,32 @@ const RealtorInfo = () => {
     window.open(whatsappUrl, "_blank");
   };
 
-  const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = useState(false);
+  const [realtorLocation, setRealtorLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked);
+    if (event.target.checked) {
+      const successCallback = (position: any) => {
+        setRealtorLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      };
+
+      const errorCallback = () => {
+        setChecked(false);
+        alert("Compartilhe sua localização para ficar online");
+      };
+
+      navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    }
   };
+
+  console.log(realtorLocation);
 
   return (
     <Container>

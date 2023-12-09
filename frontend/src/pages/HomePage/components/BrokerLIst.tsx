@@ -33,7 +33,7 @@ function renderRow(
     >
       <ListItemButton sx={{ height: "100%" }} onClick={handleListItemClick}>
         <ListItemAvatar>
-          <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} />
+          <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} src="a" />
         </ListItemAvatar>
         <ListItemText
           primary={

@@ -16,6 +16,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
 import { useContext } from "react";
 import { UserTypeContext } from "../App";
+import { Link } from "react-router-dom";
 
 function NavBar() {
   const { userType } = useContext(UserTypeContext);
@@ -23,9 +24,16 @@ function NavBar() {
   const pages = [];
 
   if (userType == "realtor") {
-    pages.push("Mapa", "Configurações", "Meu Perfil");
+    pages.push(
+      { nickname: "Mapa", route: "home-page" },
+      { nickname: "Configurações", route: "settings" },
+      { nickname: "Meu Perfil", route: "profile" }
+    );
   } else if (userType == "costumer") {
-    pages.push("Mapa", "Configurações");
+    pages.push(
+      { nickname: "Mapa", route: "home-page" },
+      { nickname: "Configurações", route: "settings" }
+    );
   }
 
   const settings = ["Sair"];
@@ -115,9 +123,14 @@ function NavBar() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page.route} onClick={handleCloseNavMenu}>
                   <Typography color="black" textAlign="center">
-                    {page}
+                    <Link
+                      to={`/${page.route}`}
+                      style={{ textDecoration: "inherit", color: "inherit" }}
+                    >
+                      {page.nickname}
+                    </Link>
                   </Typography>
                 </MenuItem>
               ))}
@@ -154,11 +167,16 @@ function NavBar() {
           >
             {pages.map((page) => (
               <Button
-                key={page}
+                key={page.route}
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: "black", display: "block" }}
               >
-                {page}
+                <Link
+                  to={`/${page.route}`}
+                  style={{ textDecoration: "inherit", color: "inherit" }}
+                >
+                  {page.nickname}
+                </Link>
               </Button>
             ))}
           </Box>
