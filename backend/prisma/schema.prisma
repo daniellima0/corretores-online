@@ -25,6 +25,7 @@ model realtor {
   creci            String            @db.VarChar
   description      String?           @db.VarChar
   is_online        Boolean
+  avatar           String?           @db.VarChar(255)
   user             user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   realtor_location realtor_location?
   realtor_regions  realtor_regions[]
@@ -49,7 +50,7 @@ model realtor_regions {
 
 model regions_used {
   reus_id         String            @id @db.Uuid
-  region          String            @db.VarChar
+  region          String            @unique(map: "unique_regions") @db.VarChar
   realtor_regions realtor_regions[]
 }
 
@@ -91,11 +92,10 @@ model user {
   aust_id               String                  @db.Uuid
   name                  String                  @db.VarChar
   cpf                   String                  @db.VarChar
-  email                 String                  @db.VarChar
+  email                 String                  @unique(map: "unique_email") @db.VarChar
   password              String                  @db.VarChar
   created_at            DateTime                @default(now()) @db.Timestamptz(6)
   deleted_at            DateTime?               @db.Timestamptz(6)
-  deleted_by            String?                 @db.Uuid
   date_of_birth         DateTime                @db.Date
   telephone             Json
   realtor               realtor?
