@@ -1,5 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { Card, CardContent, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const InfoCard = styled(Card)(({ theme }) => ({
   boxShadow: "none",
@@ -33,35 +34,35 @@ interface MyCardProps {
 
 const MyCard: React.FC<MyCardProps> = (props) => {
   return (
-    <InfoCard
-      sx={{ maxWidth: 400 }}
-      onClick={() => {
-        location.href = "/realtor-profile";
-      }}
-    >
-      <CardContent>
-        <CardIcon>
-          <img src={props.card.icone} alt="icon" style={{ width: "150px" }} />
-        </CardIcon>
-        <Typography
-          gutterBottom
-          variant="h5"
-          component="div"
-          textAlign={"center"}
-          fontWeight={900}
-          fontSize={"30px"}
-        >
-          {props.card.title}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          textAlign={"center"}
-          fontSize={"16px"}
-        >
-          {props.card.description}
-        </Typography>
-      </CardContent>
+    <InfoCard sx={{ maxWidth: 400 }}>
+      <Link
+        to="/choose-signup"
+        style={{ textDecoration: "inherit", color: "inherit" }}
+      >
+        <CardContent>
+          <CardIcon>
+            <img src={props.card.icone} alt="icon" style={{ width: "150px" }} />
+          </CardIcon>
+          <Typography
+            gutterBottom
+            variant="h5"
+            component="div"
+            textAlign={"center"}
+            fontWeight={900}
+            fontSize={"30px"}
+          >
+            {props.card.title}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            textAlign={"center"}
+            fontSize={"16px"}
+          >
+            {props.card.description}
+          </Typography>
+        </CardContent>
+      </Link>
     </InfoCard>
   );
 };

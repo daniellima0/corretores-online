@@ -2,6 +2,7 @@ import { styled } from "@mui/material/styles";
 import { Button, Typography } from "@mui/material";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 const Container = styled("section")(({ theme }) => ({
   display: "flex",
@@ -79,12 +80,47 @@ type Broker = {
   position: { lat: number; lng: number };
 };
 
+const data = [
+  {
+    id: 1,
+    name: "Bernardo Serravalle",
+    position: {
+      lat: -12.993966980061542,
+      lng: -38.44557003269835,
+    },
+  },
+  {
+    id: 2,
+    name: "Arthur Sant'Anna",
+    position: {
+      lat: -12.986820652837016,
+      lng: -38.4369292224266,
+    },
+  },
+  {
+    id: 3,
+    name: "Giulia Franca",
+    position: {
+      lat: -12.985937092644223,
+      lng: -38.44490330351072,
+    },
+  },
+  {
+    id: 4,
+    name: "Luca Villela",
+    position: {
+      lat: -13.00986936272844,
+      lng: -38.532670253972434,
+    },
+  },
+];
+
 const MapView = () => {
-  const numero = "18";
+  const numero = data.length;
 
   return (
     <>
-      <Container>
+      <Container id="mapa">
         <MapWrapper />
         <MapTextContainer>
           <Title>
@@ -92,11 +128,21 @@ const MapView = () => {
             agora
           </Title>
           <MapTextButton fullWidth type="submit">
-            Acesse a plataforma
+            <Link
+              to="/choose-signup"
+              style={{ textDecoration: "inherit", color: "inherit" }}
+            >
+              Acesse a plataforma
+            </Link>
           </MapTextButton>
           <CreateAcount>
-            Não tem uma conta?
-            <a href="https://www.homehost.com.br/"> Cadastre-se</a>
+            Não tem uma conta?{" "}
+            <Link
+              to="/choose-signup"
+              style={{ textDecoration: "underline", color: "blue" }}
+            >
+              Cadastre-se
+            </Link>
           </CreateAcount>
         </MapTextContainer>
       </Container>
@@ -116,40 +162,6 @@ function MapWrapper() {
 }
 
 const Map = () => {
-  const data = [
-    {
-      id: 1,
-      name: "Bernardo Serravalle",
-      position: {
-        lat: -12.993966980061542,
-        lng: -38.44557003269835,
-      },
-    },
-    {
-      id: 2,
-      name: "Arthur Sant'Anna",
-      position: {
-        lat: -12.986820652837016,
-        lng: -38.4369292224266,
-      },
-    },
-    {
-      id: 3,
-      name: "Giulia Franca",
-      position: {
-        lat: -12.985937092644223,
-        lng: -38.44490330351072,
-      },
-    },
-    {
-      id: 4,
-      name: "Luca Villela",
-      position: {
-        lat: -13.00986936272844,
-        lng: -38.532670253972434,
-      },
-    },
-  ];
   const mapOptions = {
     mapId: "abc9203fc784d845",
     center: { lat: -12.979947718368807, lng: -38.48555740869868 },

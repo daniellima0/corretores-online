@@ -1,5 +1,6 @@
 import { Typography, styled } from "@mui/material";
 import LoginForm from "./components/LoginForm";
+import { Link } from "react-router-dom";
 
 const Div = styled("div")({
   display: "flex",
@@ -39,24 +40,32 @@ const Title = styled(Typography)`
   font-size: 1.8rem;
 `;
 
-interface LoginPageProps {
-  userType: "realtor" | "costumer";
-}
-
-const LoginPage: React.FC<LoginPageProps> = (props) => {
+const LoginPage = () => {
   return (
     <Div>
       <Card>
         <Title variant="h1">Bem-vindo de volta!</Title>
-        <LoginForm userType={props.userType} />
+        <LoginForm />
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <Typography variant="subtitle1">
             <span>
-              Esqueceu sua senha, <a href="/login-page">clique aqui</a>
+              Esqueceu sua senha,{" "}
+              <Link
+                to="/reset-password"
+                style={{ textDecoration: "underline", color: "blue" }}
+              >
+                clique aqui
+              </Link>
             </span>
           </Typography>
           <Typography variant="subtitle1">
-            Não possui uma conta? <a href="/login-page">Cadastre-se</a>
+            Não possui uma conta?{" "}
+            <Link
+              to="/choose-signup"
+              style={{ textDecoration: "underline", color: "blue" }}
+            >
+              Cadastre-se
+            </Link>
           </Typography>
         </div>
       </Card>

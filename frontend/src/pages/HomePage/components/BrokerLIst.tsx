@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
 import {
   Avatar,
   Box,
@@ -18,56 +17,51 @@ type Broker = {
 };
 
 function renderRow(
-  props: ListChildComponentProps & { setSearchMapCenter: any }
+  item: Broker,
+  setSearchMapCenter: (position: { lat: number; lng: number }) => void
 ) {
-  const { index, style, data, setSearchMapCenter } = props;
-  const item = data[index];
-
   const handleListItemClick = () => {
     setSearchMapCenter(item.position);
   };
 
   return (
-    <div style={{ overflowX: "hidden" }}>
-      <ListItem
-        alignItems="flex-start"
-        style={style}
-        key={index}
-        component="div"
-        disablePadding
-      >
-        <ListItemButton sx={{ height: "100%" }} onClick={handleListItemClick}>
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} />
-          </ListItemAvatar>
-          <ListItemText
-            primary={
-              <React.Fragment>
-                <Typography
-                  sx={{ display: "inline" }}
-                  component={"span"}
-                  variant="h5"
-                  color="text.primary"
-                >
-                  {item.name}
-                </Typography>
-              </React.Fragment>
-            }
-            secondary={
-              <React.Fragment>
-                <Typography
-                  sx={{ display: "inline" }}
-                  component={"span"}
-                  variant="h6"
-                  color="text.primary"
-                ></Typography>
-                Visitar perfil
-              </React.Fragment>
-            }
-          />
-        </ListItemButton>
-      </ListItem>
-    </div>
+    <ListItem
+      key={item.id}
+      alignItems="flex-start"
+      component="div"
+      disablePadding
+    >
+      <ListItemButton sx={{ height: "100%" }} onClick={handleListItemClick}>
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} src="a" />
+        </ListItemAvatar>
+        <ListItemText
+          primary={
+            <React.Fragment>
+              <Typography
+                sx={{ display: "inline" }}
+                component={"span"}
+                variant="h5"
+                color="text.primary"
+              >
+                {item.name}
+              </Typography>
+            </React.Fragment>
+          }
+          secondary={
+            <React.Fragment>
+              <Typography
+                sx={{ display: "inline" }}
+                component={"span"}
+                variant="h6"
+                color="text.primary"
+              ></Typography>
+              Visitar perfil
+            </React.Fragment>
+          }
+        />
+      </ListItemButton>
+    </ListItem>
   );
 }
 
@@ -86,7 +80,7 @@ export default function BrokerList({
 
   const ListBox = styled(Box)(({ theme }) => ({
     width: "25%",
-    height: "100%",
+    height: "fit-parent",
     bgcolor: "background.paper",
     overflow: "hidden",
     boxShadow: "10px 0px 10px -10px rgba(0, 0, 0, 0.2)",
@@ -104,6 +98,8 @@ export default function BrokerList({
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          flexDirection: "column",
+          height: "100%",
         }}
       >
         <Typography
@@ -111,33 +107,26 @@ export default function BrokerList({
           component="h4"
           sx={{
             padding: "20px",
-            boxShadow: "0 1px 10px 0px rgba(0, 0, 0, 0.2)",
-            height: "100%",
           }}
         >
           {data.length > 1
-            ? `Foram encontrados ${data.length} corretores nessa área:`
+            ? `Foram encontrados ${localData.length} corretores nessa área:`
             : data.length === 1
-            ? `Foi encontrado ${data.length} corretor nessa área:`
+            ? `Foi encontrado ${localData.length} corretor nessa área:`
             : `Não foram encontrados corretores nessa área.`}
         </Typography>
-      </div>
 
-      <FixedSizeList
-        height={data.length * 100}
-        width={""}
-        itemSize={100}
-        itemCount={data.length}
-        itemData={data}
-        overscanCount={0}
-        style={{
-          width: "100%",
-          height: "75%",
-          overflowX: "hidden",
-        }}
-      >
-        {(props) => renderRow({ ...props, setSearchMapCenter })}
-      </FixedSizeList>
+        <div
+          id="luca"
+          style={{
+            overflowY: "auto",
+            flexGrow: 1,
+            width: "100%",
+          }}
+        >
+          {localData.map((item) => renderRow(item, setSearchMapCenter))}
+        </div>
+      </div>
     </ListBox>
   );
 }

@@ -4,9 +4,15 @@ import profilePicture from "../../../assets/profile-picture.jpeg";
 import ProfilePicture from "../../../components/ProfilePicture";
 import SocialMediaInfo from "../../../components/SocialMediaInfo";
 import RoundedButton from "../../../components/RoundedButton";
-import { Typography } from "@mui/material";
+import { FormControlLabel, Switch, Typography } from "@mui/material";
+import React, { useContext, useState } from "react";
+import QRCode from "react-qr-code";
+import { useTheme } from "@mui/material";
+import { UserTypeContext } from "../../../App";
 
 const Container = styled("div")`
+  margin-top: 40px;
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -28,6 +34,9 @@ const FirstSection = styled("section")`
 
 const ImagesContainer = styled("div")`
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 `;
 
 const Banner = styled("img")`
@@ -67,11 +76,19 @@ const Name = styled(Typography)`
   }
 `;
 
-const Bio = styled(Typography)``;
-
 const RegionsInfo = styled("div")`
   grid-row: 2;
   align-self: center;
+`;
+
+const QRCodeWrapper = styled("div")`
+  width: "50px";
+  height: "50px";
+  position: absolute;
+  margin-right: 20px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 10px;
 `;
 
 const RegionsTitle = styled(Typography)`
@@ -109,6 +126,10 @@ const AboutMeTitle = styled(Typography)`
 const Description = styled(Typography)``;
 
 const RealtorInfo = () => {
+  const { userType } = useContext(UserTypeContext);
+
+  const theme = useTheme();
+
   const realtor = {
     name: "Marcel Fonseca",
     bio: "Lorem ipsum Lorem ipsum Lorem ipsum",
@@ -123,10 +144,43 @@ const RealtorInfo = () => {
     window.open(whatsappUrl, "_blank");
   };
 
+  const [checked, setChecked] = useState(false);
+  const [realtorLocation, setRealtorLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(event.target.checked);
+    if (event.target.checked) {
+      const successCallback = (position: any) => {
+        setRealtorLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      };
+
+      const errorCallback = () => {
+        setChecked(false);
+        alert("Compartilhe sua localização para ficar online");
+      };
+
+      navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    }
+  };
+
+  console.log(realtorLocation);
+
   return (
     <Container>
       <FirstSection>
         <ImagesContainer>
+          <QRCodeWrapper>
+            <QRCode
+              style={{ height: "120px", width: "120px" }}
+              value="https://www.google.com"
+            />
+          </QRCodeWrapper>
           <Banner src={defaultBanner} />
           <ProfilePictureWrapper>
             <ProfilePicture
@@ -140,7 +194,20 @@ const RealtorInfo = () => {
         <TextContainer>
           <Header>
             <Name variant="h2">{realtor.name}</Name>
-            <Bio variant="body1">{realtor.bio}</Bio>
+            <FormControlLabel
+              control={
+                <Switch
+                  disabled={userType === "realtor" ? false : true}
+                  checked={checked}
+                  onChange={handleChange}
+                  inputProps={{ "aria-label": "controlled" }}
+                  size="medium"
+                  color="success"
+                />
+              }
+              label={checked ? "Online" : "Offline"}
+              labelPlacement="end"
+            />
           </Header>
           <RegionsInfo>
             <RegionsTitle variant="h2">Regiōes</RegionsTitle>
@@ -155,7 +222,10 @@ const RealtorInfo = () => {
         <AboutMeTitle variant="h2">Sobre Mim</AboutMeTitle>
         <Description variant="body1">{realtor.description}</Description>
       </SecondSection>
-      <RoundedButton onClick={handleClick}>
+      <RoundedButton
+        buttonColor={userType == "realtor" ? theme.customPallete.realtor : ""}
+        onClick={handleClick}
+      >
         Quero entrar em contato
       </RoundedButton>
     </Container>

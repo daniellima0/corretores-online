@@ -1,17 +1,16 @@
 import { styled } from "@mui/material/styles/";
-import { Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import ProfilePicture from "../../../components/ProfilePicture";
+import { Avatar, Typography } from "@mui/material";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
-import ProfilePictureWithButton from "../../../components/ProfilePictureWithButton";
-// import { useState } from "react";
+import { useContext, useState } from "react";
+import { UserTypeContext } from "../../../App";
 
 const Container = styled("div")`
   display: flex;
   flex-direction: column;
   gap: 40px;
   padding: 0 40px;
+  margin-bottom: 40px;
 `;
 
 const UserInfo = styled("div")`
@@ -50,6 +49,10 @@ const Description = styled(Typography)`
 const Section = styled("section")`
   margin-top: 20px;
 `;
+
+const CancelButton = styled(RoundedButton)``;
+
+const SaveButton = styled(RoundedButton)``;
 
 const SectionTitle = styled(Typography)`
   font-size: 1rem;
@@ -93,10 +96,6 @@ const ButtonGroup = styled("div")`
   justify-content: space-between;
 `;
 
-const CancelButton = styled(RoundedButton)``;
-
-const SaveButton = styled(RoundedButton)``;
-
 // interface ProfileFormState {
 //   name: string;
 //   email: string;
@@ -126,23 +125,66 @@ const SaveButton = styled(RoundedButton)``;
 // };
 
 const Content = () => {
-  const theme = useTheme();
+  const { userType } = useContext(UserTypeContext);
 
-  // const [profileData, setProfileData] =
-  //   useState<ProfileFormState>(initialProfileState);
+  const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
-  // const handleInputChange = (name: keyof ProfileFormState, value: string) => {
-  //   setProfileData((prevData) => ({
-  //     ...prevData,
-  //     [name]: value,
-  //   }));
-  // };
+  const [profileData, setProfileData] = useState({
+    name: "Marcel Fonseca",
+    email: "marcel.fonseca@gmail.com",
+    telefone: "+557198159-1481",
+    apelido: "marcel.fonseca",
+    senha: "senhadousuario",
+    confirmarSenha: "",
+    instagram: "https://www.instagram.com/marcel.fonseca",
+    facebook: "https://www.facebook.com/marcel.fonseca",
+    whatsapp: "+557198159-1481",
+    regioesDeAtuacao: "Barra, Pituba, Imbuí",
+    bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
+  });
+
+  const validateData = () => {
+    if (
+      !profileData.name ||
+      !profileData.email ||
+      !profileData.telefone ||
+      !profileData.apelido ||
+      !profileData.senha
+    ) {
+      alert("Preencha todos os campos obrigatórios!");
+      return false;
+    }
+    if (profileData.senha !== profileData.confirmarSenha) {
+      alert("As senhas não coincidem!");
+      return;
+    }
+    return true;
+  };
+
+  const handleInputChange =
+    (field: string) => (event: { target: { value: any } }) => {
+      setProfileData({ ...profileData, [field]: event.target.value });
+    };
+
+  const handleSave = () => {
+    if (validateData()) {
+      console.log("Dados válidos, salvando...");
+    }
+  };
+
+  const refreshPage = () => {
+    window.location.reload();
+  };
 
   return (
     <Container>
       <UserInfo>
         <ProfilePictureWrapper>
-          <ProfilePicture width="50px" />
+          <Avatar
+            alt="Marcel Fonseca"
+            src="/static/images/avatar/1.jpg"
+            sx={{ width: "50px", height: "50px" }}
+          />
         </ProfilePictureWrapper>
         <NameWrapper>
           <Name variant="body1">Marcel Fonseca</Name>
@@ -159,97 +201,117 @@ const Content = () => {
               name="name"
               type="text"
               defaultValue="Marcel Fonseca"
+              onChange={handleInputChange("name")}
             />
             <InputGroup
               label="Email"
               name="email"
               type="text"
               defaultValue="marcel.fonseca@gmail.com"
+              onChange={handleInputChange("email")}
             />
             <InputGroup
               label="Telefone"
               name="telefone"
               type="text"
               defaultValue="+557198159-1481"
+              onChange={handleInputChange("telefone")}
             />
             <InputGroup
               label="Apelido"
               name="apelido"
               type="text"
               defaultValue="marcel.fonseca"
+              onChange={handleInputChange("apelido")}
             />
             <InputGroup
               label="Senha"
               name="senha"
               type="password"
               defaultValue="senhadousuario"
+              onChange={handleInputChange("senha")}
             />
             <InputGroup
               label="Confirme a mudança de senha"
               type="password"
-              defaultValue=""
+              defaultValue="senhadousuario"
+              onChange={handleInputChange("confirmarSenha")}
             />
           </InputGroupWrapper>
           <ProfilePictureWithButtonWrapper>
             <ProfilePictureWithButtonDescription variant="body1">
               Foto de Perfil
             </ProfilePictureWithButtonDescription>
-            <ProfilePictureWithButton width="130px" />
+            <Avatar
+              alt="Marcel Fonseca"
+              src="/static/images/avatar/1.jpg"
+              sx={{ width: "130px", height: "130px", fontSize: "60px" }}
+            />
           </ProfilePictureWithButtonWrapper>
         </SectionContentWrapper>
       </Section>
-      <Section>
-        <SectionTitle variant="h2">Redes Sociais</SectionTitle>
-        <InputGroupWrapper>
-          <InputGroup
-            label="Instagram"
-            name="instagram"
-            type="text"
-            defaultValue="https://www.instagram.com/marcel.fonseca"
-            icon="/public/instagram.svg"
-          />
-          <InputGroup
-            label="Facebook"
-            name="facebook"
-            type="text"
-            defaultValue="https://www.facebook.com/marcel.fonseca"
-            icon="/public/facebook.png"
-          />
-          <InputGroup
-            label="WhatsApp"
-            name="whatsapp"
-            type="text"
-            defaultValue="+557198159-1481"
-            icon="/public/whatsapp.svg"
-          />
-        </InputGroupWrapper>
-      </Section>
-      <Section>
-        <SectionTitle variant="h2">Biografia</SectionTitle>
-        <InputGroupWrapper>
-          <InputGroup
-            label="Regiões de Atuação"
-            name="regioes-de-atuacao"
-            type="text"
-            defaultValue="Barra, Pituba, Imbuí"
-          />
-          <InputGroup
-            label="Bio"
-            name="bio"
-            type="text"
-            defaultValue="Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas."
-            isTextField={true}
-          />
-        </InputGroupWrapper>
-      </Section>
+      {userType === "realtor" && (
+        <>
+          <Section>
+            <SectionTitle variant="h2">Redes Sociais</SectionTitle>
+            <InputGroupWrapper>
+              <InputGroup
+                label="Instagram"
+                name="instagram"
+                type="text"
+                defaultValue="https://www.instagram.com/marcel.fonseca"
+                icon="/public/instagram.svg"
+                onChange={handleInputChange("instagram")}
+              />
+              <InputGroup
+                label="Facebook"
+                name="facebook"
+                type="text"
+                defaultValue="https://www.facebook.com/marcel.fonseca"
+                icon="/public/facebook.png"
+                onChange={handleInputChange("facebook")}
+              />
+              <InputGroup
+                label="WhatsApp"
+                name="whatsapp"
+                type="text"
+                defaultValue="+557198159-1481"
+                icon="/public/whatsapp.svg"
+                onChange={handleInputChange("whatsapp")}
+              />
+            </InputGroupWrapper>
+          </Section>
+          <Section>
+            <SectionTitle variant="h2">Biografia</SectionTitle>
+            <InputGroupWrapper>
+              <InputGroup
+                label="Regiões de Atuação"
+                name="regioes-de-atuacao"
+                type="text"
+                defaultValue="Barra, Pituba, Imbuí"
+                onChange={handleInputChange("regioesDeAtuacao")}
+              />
+              <InputGroup
+                label="Bio"
+                name="bio"
+                type="text"
+                defaultValue="Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas."
+                isTextField={true}
+                onChange={handleInputChange("bio")}
+              />
+            </InputGroupWrapper>
+          </Section>
+        </>
+      )}
       <ButtonGroup>
         <CancelButton
-          buttonColor={theme.customPallete.costumer}
+          buttonColor={primaryColor}
           invertColor={true}
+          onClick={refreshPage}
         >
           Cancelar
         </CancelButton>
-        <SaveButton buttonColor={theme.customPallete.costumer}>
+        <SaveButton buttonColor={primaryColor} onClick={handleSave}>
           Salvar
         </SaveButton>
       </ButtonGroup>

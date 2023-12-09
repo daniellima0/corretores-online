@@ -124,7 +124,13 @@ function Map({
 
   return (
     <>
-      <div style={{ width: "100%", height: "100%" }} ref={ref} />
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+        ref={ref}
+      />
       {map && <Broker {...props} />}
     </>
   );
@@ -167,15 +173,15 @@ function Broker(props: MapProps) {
               onMouseLeave={() => setHover(null)}
             >
               <Avatar
+                alt={broker.name}
+                src="/static/images/avatar/1.jpg"
                 sx={{
                   width: 24,
                   height: 24,
                   fontSize: "15px",
                   bgcolor: "#FF5E00",
                 }}
-              >
-                {broker.name.charAt(0)}
-              </Avatar>
+              />
             </div>
           </HiddenComponent>
           <HiddenComponent hidden={broker.id != hover}>
@@ -253,9 +259,10 @@ function Marker({
 
   useEffect(() => {
     async function importMarkerElement() {
-      const { AdvancedMarkerElement } = (await google.maps.importLibrary(
-        "marker"
-      )) as google.maps.MarkerLibrary;
+      const { AdvancedMarkerElement, CollisionBehavior } =
+        (await google.maps.importLibrary(
+          "marker"
+        )) as google.maps.MarkerLibrary;
 
       if (!rootRef.current && !markerRef.current) {
         const container = document.createElement("div");
@@ -264,6 +271,8 @@ function Marker({
           map: map,
           position: position,
           content: container,
+          collisionBehavior:
+            CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY,
         });
       }
     }

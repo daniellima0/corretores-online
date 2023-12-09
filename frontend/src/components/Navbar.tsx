@@ -14,11 +14,30 @@ import Tooltip from "@mui/material/Tooltip";
 import logo from "../assets/logo-black.svg";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
-
-const pages = ["Item 1", "Item 2", "Item 3", "Item 4"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+import { useContext } from "react";
+import { UserTypeContext } from "../App";
+import { Link } from "react-router-dom";
 
 function NavBar() {
+  const { userType } = useContext(UserTypeContext);
+
+  const pages = [];
+
+  if (userType == "realtor") {
+    pages.push(
+      { nickname: "Mapa", route: "home-page" },
+      { nickname: "Configurações", route: "settings" },
+      { nickname: "Meu Perfil", route: "profile" }
+    );
+  } else if (userType == "costumer") {
+    pages.push(
+      { nickname: "Mapa", route: "home-page" },
+      { nickname: "Configurações", route: "settings" }
+    );
+  }
+
+  const settings = ["Sair"];
+
   const LogoStyled = styled("img")(() => ({
     height: "45px",
   }));
@@ -46,7 +65,10 @@ function NavBar() {
   };
 
   return (
-    <AppBar position="static" sx={{ bgcolor: "white" }}>
+    <AppBar
+      position="static"
+      sx={{ bgcolor: "white", boxShadow: "0 1px 10px 0px rgba(0, 0, 0, 0.2)" }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <LogoStyled
@@ -101,9 +123,14 @@ function NavBar() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page.route} onClick={handleCloseNavMenu}>
                   <Typography color="black" textAlign="center">
-                    {page}
+                    <Link
+                      to={`/${page.route}`}
+                      style={{ textDecoration: "inherit", color: "inherit" }}
+                    >
+                      {page.nickname}
+                    </Link>
                   </Typography>
                 </MenuItem>
               ))}
@@ -140,11 +167,16 @@ function NavBar() {
           >
             {pages.map((page) => (
               <Button
-                key={page}
+                key={page.route}
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: "black", display: "block" }}
               >
-                {page}
+                <Link
+                  to={`/${page.route}`}
+                  style={{ textDecoration: "inherit", color: "inherit" }}
+                >
+                  {page.nickname}
+                </Link>
               </Button>
             ))}
           </Box>

@@ -1,12 +1,13 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Homepage from "./pages/HomePage";
-import RealtorProfile from "./pages/RealtorProfile";
+import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import Choice from "./pages/Choice";
+import ChooseSignup from "./pages/ChooseSignup";
 import LoginPage from "./pages/LoginPage";
 import ResetPassword from "./pages/ResetPassword";
 import SignUp from "./pages/SignUp";
+import { createContext, useEffect, useState } from "react";
 
 const router = createBrowserRouter([
   {
@@ -18,28 +19,20 @@ const router = createBrowserRouter([
     element: <Homepage />,
   },
   {
-    path: "/realtor-profile",
-    element: <RealtorProfile />,
+    path: "/profile",
+    element: <Profile />,
   },
   {
     path: "/settings",
     element: <Settings />,
   },
   {
-    path: "/choose-login",
-    element: <Choice componentType="login" />,
-  },
-  {
     path: "/choose-signup",
-    element: <Choice componentType="signup" />,
+    element: <ChooseSignup />,
   },
   {
-    path: "/realtor-login",
-    element: <LoginPage userType="realtor" />,
-  },
-  {
-    path: "/costumer-login",
-    element: <LoginPage userType="costumer" />,
+    path: "/login",
+    element: <LoginPage />,
   },
   {
     path: "/reset-password",
@@ -51,8 +44,30 @@ const router = createBrowserRouter([
   },
 ]);
 
+type UserType = "realtor" | "costumer" | null;
+
+export const UserTypeContext = createContext<{
+  userType: UserType;
+  setUserType: React.Dispatch<React.SetStateAction<UserType>>;
+}>({
+  userType: null,
+  setUserType: () => {},
+});
+
 function App() {
-  return <RouterProvider router={router} />;
+  const [userType, setUserType] = useState<UserType>(null);
+
+  useEffect(() => {
+    const userType = localStorage.getItem("userType") as UserType;
+    setUserType(userType);
+    console.log(userType);
+  }, [userType]);
+
+  return (
+    <UserTypeContext.Provider value={{ userType, setUserType }}>
+      <RouterProvider router={router} />
+    </UserTypeContext.Provider>
+  );
 }
 
 export default App;
