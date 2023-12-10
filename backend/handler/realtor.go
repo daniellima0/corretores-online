@@ -64,6 +64,10 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
 	}
 
+	if len(strings.TrimSpace(request.Password)) < 8 {
+		return c.JSON(http.StatusBadRequest, "Password must be at least 8 characters")
+	}
+
 	if request.DateOfBirth.IsZero() {
 		return echo.NewHTTPError(http.StatusBadRequest, "DateOfBirth is required")
 	}
@@ -419,6 +423,10 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 
 	if strings.TrimSpace(request.Password) == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
+	}
+
+	if len(strings.TrimSpace(request.Password)) < 8 {
+		return c.JSON(http.StatusBadRequest, "Password must be at least 8 characters")
 	}
 
 	if request.DateOfBirth.IsZero() {
