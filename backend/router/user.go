@@ -13,5 +13,6 @@ func UserRouter(e *echo.Echo, dbClient *db.PrismaClient) {
 	g.POST("", h.Create)
 	g.GET(":user_id", h.Get)
 	g.DELETE(":user_id", h.Delete)
+	g.PUT(":user_id", h.Update)
 
 }

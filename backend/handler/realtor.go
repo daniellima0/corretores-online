@@ -10,10 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RealtorHandler struct {
@@ -26,9 +28,10 @@ type RealtorResponse struct {
 
 type RequestBody struct {
 	db.UserModel
-	Description *string           `json:"description"`
-	Creci       string            `json:"creci"`
-	Telephone   service.Telephone `json:"telephone"`
+	Description         *string                     `json:"description"`
+	Creci               string                      `json:"creci"`
+	Telephone           service.Telephone           `json:"telephone"`
+	SafetyQuestionsUser service.SafetyQuestionsUser `json:"safety_questions"`
 }
 
 func NewRealtorHandler(client *db.PrismaClient) *RealtorHandler {
@@ -61,12 +64,20 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
 	}
 
+	if len(strings.TrimSpace(request.Password)) < 8 {
+		return c.JSON(http.StatusBadRequest, "Password must be at least 8 characters")
+	}
+
 	if request.DateOfBirth.IsZero() {
 		return echo.NewHTTPError(http.StatusBadRequest, "DateOfBirth is required")
 	}
 
 	if strings.TrimSpace(request.Telephone.DDD) == "" || strings.TrimSpace(request.Telephone.Number) == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Telephone is required")
+	}
+
+	if len(request.SafetyQuestionsUser.QuestionAnswer) != 3 {
+		return echo.NewHTTPError(http.StatusBadRequest, "SafetyQuestions is required")
 	}
 
 	telephoneJson, err := json.Marshal(request.Telephone)
@@ -81,15 +92,56 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return err
 	}
 
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[1].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	userCreated := h.client.User.CreateOne(
 		db.User.UserID.Set(request.UserID),
 		db.User.Name.Set(request.Name),
 		db.User.Cpf.Set(request.Cpf),
 		db.User.Email.Set(request.Email),
-		db.User.Password.Set(request.Password),
+		db.User.Password.Set(string(encryptedPassword)),
 		db.User.DateOfBirth.Set(request.DateOfBirth),
 		db.User.Telephone.Set(telephoneJson),
 		db.User.AuthStatus.Link(db.AuthStatus.AustID.Equals(auth_status.AustID)),
+	).Tx()
+
+	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
+	).Tx()
+
+	second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[1].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
+	).Tx()
+
+	third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
 	).Tx()
 
 	var realtor db.RealtorModel
@@ -108,38 +160,32 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 
-	if err := h.client.Prisma.Transaction(userCreated, realtorCreated).Exec(ctx); err != nil {
+	if err := h.client.Prisma.Transaction(userCreated, first_safety_questions, second_safety_questions, third_safety_questions, realtorCreated).Exec(ctx); err != nil {
 		return err
 	}
 
-	description, _ := realtorCreated.Result().Description()
-
-	telephoneBytes := userCreated.Result().Telephone
-	telephoneResponse := service.Telephone{}
-	if err := json.Unmarshal(telephoneBytes, &telephoneResponse); err != nil {
-		return err
-	}
-
-	response := service.Realtor{
-		RealID:      realtorCreated.Result().RealID,
-		Creci:       realtorCreated.Result().Creci,
-		IsOnline:    realtorCreated.Result().IsOnline,
-		Description: description,
-		User: service.User{
-			UserID:      userCreated.Result().UserID,
-			Name:        userCreated.Result().Name,
-			Cpf:         userCreated.Result().Cpf,
-			Email:       userCreated.Result().Email,
-			DateOfBirth: userCreated.Result().DateOfBirth,
-			Telephone:   telephoneResponse,
-		},
-	}
-
-	return c.JSON(http.StatusCreated, response)
+	return c.JSON(http.StatusCreated, "Corretor cadastrado com sucesso!")
 }
 
 func (h *RealtorHandler) List(c echo.Context) error {
 	ctx := context.Background()
+
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
 
 	isOnline := c.QueryParam("is_online")
 
@@ -172,17 +218,19 @@ func (h *RealtorHandler) List(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var realtorsFiltered []service.Realtor
+	var realtorsFiltered []service.RealtorGet
 	for _, realtor := range realtors {
-		var realtorFiltered service.Realtor
+		var realtorFiltered service.RealtorGet
+		realtorFiltered.RealID = realtor.RealID
 		realtorFiltered.Creci = realtor.Creci
 		realtorFiltered.IsOnline = realtor.IsOnline
 		realtorFiltered.Description, _ = realtor.Description()
-		realtorFiltered.User.Name = realtor.User().Name
-		realtorFiltered.User.Cpf = realtor.User().Cpf
-		realtorFiltered.User.Email = realtor.User().Email
-		realtorFiltered.User.DateOfBirth = realtor.User().DateOfBirth
-		json.Unmarshal(realtor.User().Telephone, &realtorFiltered.User.Telephone)
+		realtorFiltered.UserGet.UserID = realtor.User().UserID
+		realtorFiltered.UserGet.Name = realtor.User().Name
+		realtorFiltered.UserGet.Cpf = realtor.User().Cpf
+		realtorFiltered.UserGet.Email = realtor.User().Email
+		realtorFiltered.UserGet.DateOfBirth = realtor.User().DateOfBirth
+		json.Unmarshal(realtor.User().Telephone, &realtorFiltered.UserGet.Telephone)
 
 		if realtor.SocialsRealtor() != nil {
 			for _, social := range realtor.SocialsRealtor() {
@@ -218,6 +266,23 @@ func (h *RealtorHandler) List(c echo.Context) error {
 func (h *RealtorHandler) Get(c echo.Context) error {
 	ctx := context.Background()
 
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
 	realtor, err := h.client.Realtor.FindUnique(
 		db.Realtor.RealID.Equals(c.Param("real_id"))).With(
 		db.Realtor.User.Fetch(),
@@ -235,15 +300,17 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var realtorFiltered service.Realtor
+	var realtorFiltered service.RealtorGet
+	realtorFiltered.RealID = realtor.RealID
 	realtorFiltered.Creci = realtor.Creci
 	realtorFiltered.IsOnline = realtor.IsOnline
 	realtorFiltered.Description, _ = realtor.Description()
-	realtorFiltered.User.Name = realtor.User().Name
-	realtorFiltered.User.Cpf = realtor.User().Cpf
-	realtorFiltered.User.Email = realtor.User().Email
-	realtorFiltered.User.DateOfBirth = realtor.User().DateOfBirth
-	json.Unmarshal(realtor.User().Telephone, &realtorFiltered.User.Telephone)
+	realtorFiltered.UserGet.UserID = realtor.User().UserID
+	realtorFiltered.UserGet.Name = realtor.User().Name
+	realtorFiltered.UserGet.Cpf = realtor.User().Cpf
+	realtorFiltered.UserGet.Email = realtor.User().Email
+	realtorFiltered.UserGet.DateOfBirth = realtor.User().DateOfBirth
+	json.Unmarshal(realtor.User().Telephone, &realtorFiltered.UserGet.Telephone)
 
 	if realtor.SocialsRealtor() != nil {
 		for _, social := range realtor.SocialsRealtor() {
@@ -276,11 +343,32 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 func (h *RealtorHandler) Delete(c echo.Context) error {
 	ctx := context.Background()
 
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
 	realtor, err := h.client.Realtor.FindUnique(
 		db.Realtor.RealID.Equals(c.Param("real_id")),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if realtor.UserID != claims["userId"].(string) {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para deletar este corretor")
 	}
 
 	deleted, err := h.client.User.FindMany(
@@ -298,6 +386,23 @@ func (h *RealtorHandler) Delete(c echo.Context) error {
 
 func (h *RealtorHandler) Update(c echo.Context) error {
 	ctx := context.Background()
+
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
 
 	var request RequestBody
 	if err := c.Bind(&request); err != nil {
@@ -318,6 +423,10 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 
 	if strings.TrimSpace(request.Password) == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
+	}
+
+	if len(strings.TrimSpace(request.Password)) < 8 {
+		return c.JSON(http.StatusBadRequest, "Password must be at least 8 characters")
 	}
 
 	if request.DateOfBirth.IsZero() {
@@ -344,6 +453,10 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
+	if realtor.UserID != claims["userId"].(string) {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para editar este corretor")
+	}
+
 	realtorUpdated := h.client.Realtor.FindUnique(
 		db.Realtor.RealID.Equals(realtor.RealID),
 	).Update(
@@ -367,60 +480,5 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 		return err
 	}
 
-	response, err := h.client.Realtor.FindUnique(
-		db.Realtor.RealID.Equals(c.Param("real_id")),
-	).With(
-		db.Realtor.User.Fetch(),
-		db.Realtor.SocialsRealtor.Fetch().With(
-			db.SocialsRealtor.SocialsOptions.Fetch().With(
-				db.SocialsOptions.ContactOptions.Fetch(),
-			),
-		),
-		db.Realtor.RealtorLocation.Fetch(),
-		db.Realtor.RealtorRegions.Fetch().With(
-			db.RealtorRegions.RegionsUsed.Fetch(),
-		),
-	).Exec(ctx)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	responseFiltered := service.Realtor{}
-	responseFiltered.RealID = response.RealID
-	responseFiltered.Creci = response.Creci
-	responseFiltered.IsOnline = response.IsOnline
-	responseFiltered.Description, _ = response.Description()
-	responseFiltered.User.UserID = response.User().UserID
-	responseFiltered.User.Name = response.User().Name
-	responseFiltered.User.Cpf = response.User().Cpf
-	responseFiltered.User.Email = response.User().Email
-	responseFiltered.User.DateOfBirth = response.User().DateOfBirth
-	json.Unmarshal(response.User().Telephone, &responseFiltered.User.Telephone)
-
-	if response.SocialsRealtor() != nil {
-		for _, social := range response.SocialsRealtor() {
-			var socialFiltered service.RealtorSocials
-			socialFiltered.ContactInfo = social.ContactInfo
-			socialFiltered.Options.Name = social.SocialsOptions().Name
-			socialFiltered.Options.Icon = social.SocialsOptions().Icon
-			socialFiltered.Options.Contact.Type = social.SocialsOptions().ContactOptions().Type
-			responseFiltered.RealtorSocials = append(responseFiltered.RealtorSocials, socialFiltered)
-		}
-	}
-	if response.RealtorRegions() != nil {
-		for _, region := range response.RealtorRegions() {
-			if region.RegionsUsed() != nil {
-				var regionFiltered service.RealtorRegions
-				regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
-				responseFiltered.RealtorRegions = append(responseFiltered.RealtorRegions, regionFiltered)
-			}
-		}
-	}
-	realtorLocation, ok := response.RealtorLocation()
-	if ok {
-		responseFiltered.RealtorLocation.Latitude, _ = realtorLocation.Latitude()
-		responseFiltered.RealtorLocation.Longitude, _ = realtorLocation.Longitude()
-	}
-
-	return c.JSON(http.StatusOK, responseFiltered)
+	return c.JSON(http.StatusOK, "Corretor atualizado com sucesso!")
 }
