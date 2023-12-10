@@ -2,7 +2,7 @@ import { styled } from "@mui/material/styles/";
 import { Avatar, Typography } from "@mui/material";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserTypeContext } from "../../../App";
 
 const Container = styled("div")`
@@ -96,38 +96,32 @@ const ButtonGroup = styled("div")`
   justify-content: space-between;
 `;
 
-// interface ProfileFormState {
-//   name: string;
-//   email: string;
-//   telefone: string;
-//   apelido: string;
-//   senha: string;
-//   confirmarSenha: string;
-//   instagram: string;
-//   facebook: string;
-//   whatsapp: string;
-//   regioesDeAtuacao: string;
-//   bio: string;
-// }
-
-// const initialProfileState: ProfileFormState = {
-//   name: "Marcel Fonseca",
-//   email: "marcel.fonseca@gmail.com",
-//   telefone: "+557198159-1481",
-//   apelido: "marcel.fonseca",
-//   senha: "senhadousuario",
-//   confirmarSenha: "",
-//   instagram: "https://www.instagram.com/marcel.fonseca",
-//   facebook: "https://www.facebook.com/marcel.fonseca",
-//   whatsapp: "+557198159-1481",
-//   regioesDeAtuacao: "Barra, Pituba, Imbuí",
-//   bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
-// };
-
 const Content = () => {
   const { userType } = useContext(UserTypeContext);
 
   const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
+
+  // auth check pending
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:8080/auth/check");
+  //       console.log(response);
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch research data");
+  //       }
+  //       const json = await response.json();
+  //       console.log(json);
+  //     } catch (error) {
+  //       console.error(error);
+  //       navigator("/login");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [navigator]);
 
   const [profileData, setProfileData] = useState({
     name: "Marcel Fonseca",
