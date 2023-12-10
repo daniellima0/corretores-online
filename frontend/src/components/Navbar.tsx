@@ -63,7 +63,10 @@ function NavBar() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
-    fetch("http://localhost:8080/auth/logout")
+    fetch("http://localhost:8080/auth/logout", {
+      method: "GET",
+      credentials: "include",
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch research data");

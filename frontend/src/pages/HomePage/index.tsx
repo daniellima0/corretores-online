@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -17,10 +16,40 @@ import Navbar from "../../components/Navbar";
 import BrokerList from "./components/BrokerLIst";
 import CorretoresMap from "./components/CorretoresMap";
 import { RealtorType } from "types/RealtorType";
+import LoadingSpinner from "../../components/Loading";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const libraries: any = ["places"];
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
@@ -109,41 +138,6 @@ const HomePage = () => {
 
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
   }, []);
-
-  /* const testData = [
-    {
-      id: 1,
-      name: "Bernardo Serravalle",
-      position: {
-        lat: -12.993966980061542,
-        lng: -38.44557003269835,
-      },
-    },
-    {
-      id: 2,
-      name: "Arthur Sant'Anna",
-      position: {
-        lat: -12.986820652837016,
-        lng: -38.4369292224266,
-      },
-    },
-    {
-      id: 3,
-      name: "Giulia Franca",
-      position: {
-        lat: -12.985937092644223,
-        lng: -38.44490330351072,
-      },
-    },
-    {
-      id: 4,
-      name: "Luca Villela",
-      position: {
-        lat: -13.00986936272844,
-        lng: -38.532670253972434,
-      },
-    },
-  ]; */
 
   const [onlineRealtors, setOnlineRealtors] = useState<RealtorType[]>([]);
   const initialSearchBias = {
@@ -238,6 +232,10 @@ const HomePage = () => {
         <Footer />
       </div>
     );
+  }
+
+  if (loading) {
+    return <LoadingSpinner />;
   }
 
   return (
