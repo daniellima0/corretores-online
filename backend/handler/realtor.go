@@ -76,9 +76,9 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Telephone is required")
 	}
 
-	if len(request.SafetyQuestionsUser.QuestionAnswer) != 3 {
+	/* if len(request.SafetyQuestionsUser.QuestionAnswer) != 3 {
 		return echo.NewHTTPError(http.StatusBadRequest, "SafetyQuestions is required")
-	}
+	} */
 
 	telephoneJson, err := json.Marshal(request.Telephone)
 	if err != nil {
@@ -97,7 +97,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
+	/* encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -110,7 +110,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
+	} */
 
 	userCreated := h.client.User.CreateOne(
 		db.User.UserID.Set(request.UserID),
@@ -123,7 +123,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.User.AuthStatus.Link(db.AuthStatus.AustID.Equals(auth_status.AustID)),
 	).Tx()
 
-	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+	/* first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
 		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
 		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
@@ -142,7 +142,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
 		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
 		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
-	).Tx()
+	).Tx() */
 
 	var realtor db.RealtorModel
 	realtor.RealID = uuid.New().String()
@@ -160,7 +160,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 
-	if err := h.client.Prisma.Transaction(userCreated, first_safety_questions, second_safety_questions, third_safety_questions, realtorCreated).Exec(ctx); err != nil {
+	if err := h.client.Prisma.Transaction(userCreated, /* first_safety_questions, second_safety_questions, third_safety_questions, */ realtorCreated).Exec(ctx); err != nil {
 		return err
 	}
 

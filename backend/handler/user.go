@@ -270,7 +270,7 @@ func (h *UserHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Email is required")
 	}
 
-	if strings.TrimSpace(user.Password) == "" {
+	/* if strings.TrimSpace(user.Password) == "" {
 		return c.JSON(http.StatusBadRequest, "Password is required")
 	}
 
@@ -283,8 +283,8 @@ func (h *UserHandler) Update(c echo.Context) error {
 	}
 
 	if strings.TrimSpace(user.DateOfBirth.String()) == "" {
-		return c.JSON(http.StatusBadRequest, "Date of birth is required")
-	}
+		return c.JSON(http.StatusBadRequest, "Date of birth is required") }*/
+	
 
 	if strings.TrimSpace(user.Telephone.DDD) == "" || strings.TrimSpace(user.Telephone.Number) == "" {
 		return c.JSON(http.StatusBadRequest, "Telephone is required")
@@ -300,10 +300,10 @@ func (h *UserHandler) Update(c echo.Context) error {
 		db.User.DeletedAt.IsNull(),
 	).Update(
 		db.User.Name.Set(user.Name),
-		db.User.Cpf.Set(user.Cpf),
+/* 		db.User.Cpf.Set(user.Cpf), */
 		db.User.Email.Set(user.Email),
-		db.User.Password.Set(user.Password),
-		db.User.DateOfBirth.Set(user.DateOfBirth),
+/* 		db.User.Password.Set(user.Password),
+		db.User.DateOfBirth.Set(user.DateOfBirth), */
 		db.User.Telephone.Set(telephoneJson),
 	).Exec(ctx)
 	if err != nil {

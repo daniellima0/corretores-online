@@ -1,11 +1,9 @@
 import { styled } from "@mui/material/styles";
 import defaultBanner from "../../../assets/default-banner.png";
-import profilePicture from "../../../assets/profile-picture.jpeg";
-import ProfilePicture from "../../../components/ProfilePicture";
 import SocialMediaInfo from "../../../components/SocialMediaInfo";
 import RoundedButton from "../../../components/RoundedButton";
-import { FormControlLabel, Switch, Typography } from "@mui/material";
-import React, { useContext, useState } from "react";
+import { Avatar, FormControlLabel, Switch, Typography } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useTheme } from "@mui/material";
 import { UserTypeContext } from "../../../App";
@@ -125,33 +123,69 @@ const AboutMeTitle = styled(Typography)`
 
 const Description = styled(Typography)``;
 
-const RealtorInfo = () => {
+interface RealtorInfoProps {
+  userId: string;
+}
+
+const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
   const { userType } = useContext(UserTypeContext);
 
   const theme = useTheme();
 
-  const realtor = {
-    name: "Marcel Fonseca",
-    bio: "Lorem ipsum Lorem ipsum Lorem ipsum",
-    regionsList: "Lorem ipsum, Lorem ipsum, Lorem ipsum, Lorem ipsum",
-    description:
-      "Lorem ipsum dolor sit amet consectetur. Mi enim acadipiscing malesuada malesuada scelerisque. Viverra non ametviverra semper elementum imperdiet. In enim nulla vitae seddictum orci molestie interdum nunc. Aliquet risus gravida accongue arcu quam scelerisque. Lorem ipsum dolor sit ametconsectetur. Mi enim ac adipiscing malesuada malesuadascelerisque. Viverra non amet viverra semper elementumimperdiet. In enim nulla vitae sed dictum orci molestieinterdum nunc. Aliquet risus gravida ac congue arcu quamscelerisque. Lorem ipsum dolor sit amet consectetur. Mi enimac adipiscing malesuada malesuada scelerisque. Viverra nonamet viverra semper elementum imperdiet. In enim nulla vitaesed dictum orci molestie interdum nunc. Aliquet risusgravida ac congue arcu quam scelerisque.",
-    phone: "+55998786550",
-  };
+  const url = "http://localhost:8080/realtors/" + props.userId;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        console.log(json);
+        setProfileData(json);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const [profileData, setProfileData] = useState({
+    real_id: "",
+    creci: "",
+    is_online: false,
+    description: "",
+    user: {
+      user_id: "",
+      name: "",
+      cpf: "",
+      email: "",
+      date_of_birth: "",
+      telephone: { DDD: "", number: "" },
+    },
+    socials_realtor: null,
+    realtor_location: { latitude: "0", longitude: "0" },
+    realtor_regions: null,
+  });
 
   const handleClick = () => {
-    const whatsappUrl = `https://wa.me/${realtor.phone}`;
+    const whatsappUrl = `https://wa.me/${profileData.user.telephone.DDD}${profileData.user.telephone.number}`;
     window.open(whatsappUrl, "_blank");
   };
 
-  const [checked, setChecked] = useState(false);
   const [realtorLocation, setRealtorLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked(event.target.checked);
+    //setChecked(event.target.checked);
     if (event.target.checked) {
       const successCallback = (position: any) => {
         setRealtorLocation({
@@ -161,7 +195,7 @@ const RealtorInfo = () => {
       };
 
       const errorCallback = () => {
-        setChecked(false);
+        //setChecked(false);
         alert("Compartilhe sua localização para ficar online");
       };
 
@@ -183,44 +217,51 @@ const RealtorInfo = () => {
           </QRCodeWrapper>
           <Banner src={defaultBanner} />
           <ProfilePictureWrapper>
-            <ProfilePicture
-              src={profilePicture}
-              width="160px"
-              borderColor="white"
-              borderWidth="4px"
+            <Avatar
+              alt={profileData.user.name}
+              src="/static/images/avatar/1.jpg"
+              sx={{
+                width: "160px",
+                height: "160px",
+                borderColor: "white",
+                borderWidth: "4px",
+                fontSize: "70px",
+              }}
             />
           </ProfilePictureWrapper>
         </ImagesContainer>
         <TextContainer>
           <Header>
-            <Name variant="h2">{realtor.name}</Name>
+            <Name variant="h2">{profileData.user.name}</Name>
             <FormControlLabel
               control={
                 <Switch
                   disabled={userType === "realtor" ? false : true}
-                  checked={checked}
+                  checked={profileData.is_online}
                   onChange={handleChange}
                   inputProps={{ "aria-label": "controlled" }}
                   size="medium"
                   color="success"
                 />
               }
-              label={checked ? "Online" : "Offline"}
+              label={profileData.is_online ? "Online" : "Offline"}
               labelPlacement="end"
             />
           </Header>
           <RegionsInfo>
             <RegionsTitle variant="h2">Regiōes</RegionsTitle>
-            <RegionsList variant="body1">{realtor.regionsList}</RegionsList>
+            <RegionsList variant="body1">
+              {profileData.realtor_regions}
+            </RegionsList>
           </RegionsInfo>
           <SocialMediaInfoWrapper>
-            <SocialMediaInfo />
+            <SocialMediaInfo realtorData={profileData} />
           </SocialMediaInfoWrapper>
         </TextContainer>
       </FirstSection>
       <SecondSection>
         <AboutMeTitle variant="h2">Sobre Mim</AboutMeTitle>
-        <Description variant="body1">{realtor.description}</Description>
+        <Description variant="body1">{profileData.description}</Description>
       </SecondSection>
       <RoundedButton
         buttonColor={userType == "realtor" ? theme.customPallete.realtor : ""}

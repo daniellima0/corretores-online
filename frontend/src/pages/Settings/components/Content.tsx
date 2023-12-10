@@ -93,6 +93,26 @@ const ButtonGroup = styled("div")`
 `;
 
 const Content = () => {
+  const [profileData, setProfileData] = useState({
+    description: "",
+    user: {
+      name: "",
+      email: "",
+      telephone: {
+        DDD: "",
+        number: "",
+      },
+    },
+    socials_realtor: [
+      {
+        contact_info: "",
+        socials_options: {
+          name: "",
+          icon: "",
+        },
+      },
+    ],
+  });
   const [userId, setUserId] = useState("");
 
   const { userType } = useContext(UserTypeContext);
@@ -143,26 +163,7 @@ const Content = () => {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
-        setProfileData({
-          user: {
-            name: json.user?.name || "",
-            email: json.user?.email || "",
-            telephone: {
-              DDD: json.user?.telephone?.DDD || "",
-              number: json.user?.telephone?.number || "",
-            },
-          },
-          description: json.description || "",
-          socials_realtor: json.socials_realtor || [
-            {
-              contact_info: "",
-              socials_options: {
-                name: "",
-                icon: "",
-              },
-            },
-          ],
-        });
+        setProfileData(json);
         console.log(json);
       } catch (error) {
         console.error(error);
@@ -183,27 +184,6 @@ const Content = () => {
       }));
     };
 
-  const [profileData, setProfileData] = useState({
-    description: "",
-    user: {
-      name: "",
-      email: "",
-      telephone: {
-        DDD: "",
-        number: "",
-      },
-    },
-    socials_realtor: [
-      {
-        contact_info: "",
-        socials_options: {
-          name: "",
-          icon: "",
-        },
-      },
-    ],
-  });
-
   const validateData = () => {
     if (
       !profileData.user.name ||
@@ -220,8 +200,41 @@ const Content = () => {
 
   const handleSave = () => {
     if (validateData()) {
-      console.log("Dados válidos, salvando...");
     }
+  };
+
+  const handleSaveUser = () => {
+    const data = {
+      name: profileData.user.name,
+      email: profileData.user.email,
+      telephone: {
+        DDD: profileData.user.telephone.DDD,
+        number: profileData.user.telephone.number,
+      },
+    };
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/user/" + userId, {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        console.log(json);
+        console.log("User updated successfully!");
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
   };
 
   const refreshPage = () => {
@@ -239,7 +252,7 @@ const Content = () => {
           />
         </ProfilePictureWrapper>
         <NameWrapper>
-          <Name variant="body1">Marcel Fonseca</Name>
+          <Name variant="body1">{profileData.user.name}</Name>
         </NameWrapper>
         <Description variant="body2">Sua conta pessoal</Description>
       </UserInfo>
@@ -262,12 +275,31 @@ const Content = () => {
               onChange={handleInputChange("email")}
             />
             <InputGroup
-              label="Telefone"
-              name="telefone"
+              label="DDD"
+              name="ddd"
               type="text"
-              value={profileData.user.telephone.DDD}
-              onChange={handleInputChange("telefone")}
+              value={`(${profileData.user.telephone.DDD})`}
+              onChange={handleInputChange("ddd")}
             />
+            <InputGroup
+              label="Telefone"
+              name="telephone"
+              type="text"
+              value={profileData.user.telephone.number}
+              onChange={handleInputChange("telephone")}
+            />
+            <ButtonGroup>
+              <CancelButton
+                buttonColor={primaryColor}
+                invertColor={true}
+                onClick={refreshPage}
+              >
+                Cancelar
+              </CancelButton>
+              <SaveButton buttonColor={primaryColor} onClick={handleSaveUser}>
+                Salvar
+              </SaveButton>
+            </ButtonGroup>
           </InputGroupWrapper>
           <ProfilePictureWithButtonWrapper>
             <ProfilePictureWithButtonDescription variant="body1">

@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 const Profile = () => {
   const navigator = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,6 +22,7 @@ const Profile = () => {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
+        setUserId(json.user_id);
         console.log(json);
       } catch (error) {
         console.error(error);
@@ -40,7 +42,7 @@ const Profile = () => {
   return (
     <>
       <Navbar />
-      <RealtorInfo />
+      <RealtorInfo userId={userId} />
       <Footer />
     </>
   );
