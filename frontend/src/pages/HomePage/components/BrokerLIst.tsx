@@ -107,10 +107,10 @@ export default function BrokerList({
             padding: "20px",
           }}
         >
-          {data.length > 1
-            ? `Foram encontrados ${localData.length} corretores nessa área:`
-            : data.length === 1
-            ? `Foi encontrado ${localData.length} corretor nessa área:`
+          {data
+            ? data.length > 1
+              ? `Foram encontrados ${localData.length} corretores nessa área:`
+              : `Foi encontrado ${localData.length} corretor nessa área:`
             : `Não foram encontrados corretores nessa área.`}
         </Typography>
 
@@ -122,7 +122,8 @@ export default function BrokerList({
             width: "100%",
           }}
         >
-          {localData.map((item) => renderRow(item, setSearchMapCenter))}
+          {localData &&
+            localData.map((item) => renderRow(item, setSearchMapCenter))}
         </div>
       </div>
     </ListBox>

@@ -68,26 +68,29 @@ function Map({
 
   useEffect(() => {
     async function getBrokersInCircle() {
-      if (searchMapCenter) {
-        const { spherical } = (await google.maps.importLibrary(
-          "geometry"
-        )) as google.maps.GeometryLibrary;
-        const brokersInCircleData = data
-          .map((broker) => {
-            let distance = spherical.computeDistanceBetween(
-              new google.maps.LatLng({
-                lat: Number(broker.realtor_location.latitude),
-                lng: Number(broker.realtor_location.longitude),
-              }),
-              new google.maps.LatLng(searchMapCenter)
-            );
-            return distance <= 2000 ? broker : null;
-          })
-          .filter((broker): broker is RealtorType => broker !== null);
-        setBrokersInCircle(brokersInCircleData);
-        dataFilter(brokersInCircleData);
-      } else {
-        setBrokersInCircle(data);
+      if (data) {
+        if (searchMapCenter) {
+          const { spherical } = (await google.maps.importLibrary(
+            "geometry"
+          )) as google.maps.GeometryLibrary;
+
+          const brokersInCircleData = data
+            .map((broker) => {
+              const distance = spherical.computeDistanceBetween(
+                new google.maps.LatLng({
+                  lat: Number(broker.realtor_location.latitude),
+                  lng: Number(broker.realtor_location.longitude),
+                }),
+                new google.maps.LatLng(searchMapCenter)
+              );
+              return distance <= 2000 ? broker : null;
+            })
+            .filter((broker): broker is RealtorType => broker !== null);
+          setBrokersInCircle(brokersInCircleData);
+          dataFilter(brokersInCircleData);
+        } else {
+          setBrokersInCircle(data);
+        }
       }
     }
     if (circle) {
@@ -115,7 +118,7 @@ function Map({
     dataFilter(brokersInCircle);
   }, [brokersInCircle, dataFilter]);
 
-  let props = {
+  const props = {
     map: map,
     data: data,
   };
@@ -145,99 +148,100 @@ function Broker(props: MapProps) {
 
   return (
     <>
-      {brokerData.map((broker) => (
-        <Marker
-          key={broker.real_id}
-          map={map}
-          position={{
-            lat: Number(broker.realtor_location.latitude),
-            lng: Number(broker.realtor_location.longitude),
-          }}
-          onClick={() => {
-            setHover(broker.real_id);
-          }}
-        >
-          <HiddenComponent hidden={broker.real_id === hover}>
-            <div
-              style={{
-                backgroundColor: "#ffffff",
-                padding: "10px",
-                borderRadius: "5px",
-                display: "flex",
-                flexDirection: "row",
-                boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
-                justifyContent: "flex-start",
-                alignItems: "center",
-                gap: "11px",
-              }}
-              onMouseEnter={() => setHover(broker.real_id)}
-              onMouseLeave={() => setHover(null)}
-            >
-              <Avatar
-                alt={broker.user.name}
-                src=""
-                sx={{
-                  width: 24,
-                  height: 24,
-                  fontSize: "15px",
-                  bgcolor: "#FF5E00",
-                }}
-              />
-            </div>
-          </HiddenComponent>
-          <HiddenComponent hidden={broker.real_id != hover}>
-            <div
-              style={{
-                backgroundColor: "#fff",
-                padding: "10px",
-                borderRadius: "5px",
-                display: "flex",
-                flexDirection: "row",
-                boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
-                justifyContent: "flex-start",
-                alignItems: "center",
-                gap: "11px",
-              }}
-              onMouseEnter={() => setHover(broker.real_id)}
-              onMouseLeave={() => setHover(null)}
-            >
-              <Avatar
-                alt={broker.user.name}
-                src=""
-                sx={{
-                  width: 24,
-                  height: 24,
-                  fontSize: "15px",
-                  bgcolor: "#FF5E00",
-                }}
-              />
+      {data &&
+        brokerData.map((broker) => (
+          <Marker
+            key={broker.real_id}
+            map={map}
+            position={{
+              lat: Number(broker.realtor_location.latitude),
+              lng: Number(broker.realtor_location.longitude),
+            }}
+            onClick={() => {
+              setHover(broker.real_id);
+            }}
+          >
+            <HiddenComponent hidden={broker.real_id === hover}>
               <div
                 style={{
+                  backgroundColor: "#ffffff",
+                  padding: "10px",
+                  borderRadius: "5px",
                   display: "flex",
+                  flexDirection: "row",
+                  boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
+                  justifyContent: "flex-start",
                   alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  gap: "3px",
+                  gap: "11px",
                 }}
+                onMouseEnter={() => setHover(broker.real_id)}
+                onMouseLeave={() => setHover(null)}
               >
-                {broker.user.name}
-                <Button
-                  style={{
-                    width: "100px",
-                    height: "30px",
-                    fontSize: "9px",
-                    backgroundColor: "#1C5E9F",
-                    boxShadow: "none",
+                <Avatar
+                  alt={broker.user.name}
+                  src=""
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    fontSize: "15px",
+                    bgcolor: "#FF5E00",
                   }}
-                  variant="contained"
-                >
-                  Visitar perfil
-                </Button>
+                />
               </div>
-            </div>
-          </HiddenComponent>
-        </Marker>
-      ))}
+            </HiddenComponent>
+            <HiddenComponent hidden={broker.real_id != hover}>
+              <div
+                style={{
+                  backgroundColor: "#fff",
+                  padding: "10px",
+                  borderRadius: "5px",
+                  display: "flex",
+                  flexDirection: "row",
+                  boxShadow: "0 0 10px 0px rgba(0, 0, 0, 0.2)",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  gap: "11px",
+                }}
+                onMouseEnter={() => setHover(broker.real_id)}
+                onMouseLeave={() => setHover(null)}
+              >
+                <Avatar
+                  alt={broker.user.name}
+                  src=""
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    fontSize: "15px",
+                    bgcolor: "#FF5E00",
+                  }}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    gap: "3px",
+                  }}
+                >
+                  {broker.user.name}
+                  <Button
+                    style={{
+                      width: "100px",
+                      height: "30px",
+                      fontSize: "9px",
+                      backgroundColor: "#1C5E9F",
+                      boxShadow: "none",
+                    }}
+                    variant="contained"
+                  >
+                    Visitar perfil
+                  </Button>
+                </div>
+              </div>
+            </HiddenComponent>
+          </Marker>
+        ))}
     </>
   );
 }

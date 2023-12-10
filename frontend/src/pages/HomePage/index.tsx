@@ -271,9 +271,10 @@ const HomePage = () => {
       </Modal>
 
       <Navbar />
+
       <div className="BodyContainer" style={bodyContainerStyle}>
         <BrokerList
-          key={onlineRealtors.length}
+          key={onlineRealtors ? onlineRealtors.length : 0}
           data={filteredData}
           setSearchMapCenter={setSearchMapCenter}
         />
