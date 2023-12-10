@@ -73,6 +73,8 @@ func (h *AuthHandler) CheckUserLoggedIn(c echo.Context) error {
 
 	userDb, err := h.client.User.FindUnique(
 		db.User.UserID.Equals(userId),
+	).With(
+		db.User.AuthStatus.Fetch(),
 	).Exec(context.Background())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())

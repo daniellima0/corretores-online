@@ -12,7 +12,10 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:8080/auth/check");
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
         console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");

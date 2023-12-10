@@ -18,7 +18,10 @@ func main() {
 	}
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:8080"},
+		AllowCredentials: true,
+	}))
 
 	client := db.NewClient()
 	if err := client.Prisma.Connect(); err != nil {
