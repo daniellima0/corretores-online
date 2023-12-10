@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -40,12 +41,37 @@ func NewSocialsRealtorHandler(client *db.PrismaClient) *SocialsRealtorHandler {
 func (h *SocialsRealtorHandler) Create(c echo.Context) error {
 	ctx := context.Background()
 
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "Token inválido")
+	}
+
+	userId, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, "Token JWT não contém userId")
+	}
+
+	realtor, err := h.client.Realtor.FindUnique(
+		db.Realtor.UserID.Equals(userId),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	var socials_realtor db.SocialsRealtorModel
 	if err := c.Bind(&socials_realtor); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	socials_realtor.SociID = uuid.New().String()
+	socials_realtor.RealID = realtor.RealID
 
 	if strings.TrimSpace(socials_realtor.ContactInfo) == "" {
 		return c.JSON(http.StatusBadRequest, "Contact info is required")
@@ -59,7 +85,7 @@ func (h *SocialsRealtorHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Socials options ID is required")
 	}
 
-	created, err := h.client.SocialsRealtor.CreateOne(
+	_, err = h.client.SocialsRealtor.CreateOne(
 		db.SocialsRealtor.SociID.Set(socials_realtor.SociID),
 		db.SocialsRealtor.ContactInfo.Set(socials_realtor.ContactInfo),
 		db.SocialsRealtor.Realtor.Link(db.Realtor.RealID.Equals(socials_realtor.RealID)),
@@ -69,33 +95,38 @@ func (h *SocialsRealtorHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	pickCreated, err := h.client.SocialsRealtor.FindUnique(
-		db.SocialsRealtor.SociID.Equals(created.SociID),
-	).With(
-		db.SocialsRealtor.SocialsOptions.Fetch().With(
-			db.SocialsOptions.ContactOptions.Fetch(),
-		),
-	).Exec(ctx)
-
-	createdFiltered := SocialsRealtor{
-		ContactInfo: pickCreated.ContactInfo,
-		SocialsOptions: SocialsOptions{
-			Icon: pickCreated.SocialsOptions().Icon,
-			Name: pickCreated.SocialsOptions().Name,
-			ContactOption: ContactOptions{
-				Type: pickCreated.SocialsOptions().ContactOptions().Type,
-			},
-		},
-	}
-
-	return c.JSON(http.StatusCreated, createdFiltered)
+	return c.JSON(http.StatusCreated, "Rede social criada com sucesso")
 }
 
 func (h *SocialsRealtorHandler) List(c echo.Context) error {
 	ctx := context.Background()
 
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "Token inválido")
+	}
+
+	userId, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, "Token JWT não contém userId")
+	}
+
+	realtor, err := h.client.Realtor.FindUnique(
+		db.Realtor.UserID.Equals(userId),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	socials_realtor, err := h.client.SocialsRealtor.FindMany(
-		db.SocialsRealtor.RealID.Equals(c.QueryParam("real_id")),
+		db.SocialsRealtor.RealID.Equals(realtor.RealID),
 	).With(
 		db.SocialsRealtor.SocialsOptions.Fetch().With(
 			db.SocialsOptions.ContactOptions.Fetch(),
