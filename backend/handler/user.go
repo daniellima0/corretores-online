@@ -21,7 +21,8 @@ type UserHandler struct {
 
 type UserResponse struct {
 	db.UserModel
-	Telephone service.Telephone `json:"telephone"`
+	Telephone           service.Telephone           `json:"telephone"`
+	SafetyQuestionsUser service.SafetyQuestionsUser `json:"safety_questions"`
 }
 
 func NewUserHandler(client *db.PrismaClient) *UserHandler {
@@ -37,6 +38,21 @@ func (h *UserHandler) Create(c echo.Context) error {
 	}
 
 	var encryptedPassword, err = bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[1].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -67,7 +83,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	created, err := h.client.User.CreateOne(
+	created := h.client.User.CreateOne(
 		db.User.UserID.Set(user.UserID),
 		db.User.Name.Set(user.Name),
 		db.User.Cpf.Set(user.Cpf),
@@ -76,12 +92,34 @@ func (h *UserHandler) Create(c echo.Context) error {
 		db.User.DateOfBirth.Set(user.DateOfBirth),
 		db.User.Telephone.Set(telephoneJson),
 		db.User.AuthStatus.Link(db.AuthStatus.AustID.Equals(authStatus.AustID)),
-	).Exec(ctx)
-	if err != nil {
+	).Tx()
+
+	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	).Tx()
+
+	second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[1].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	).Tx()
+
+	third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	).Tx()
+
+	if err := h.client.Prisma.Transaction(created, first_safety_questions, second_safety_questions, third_safety_questions).Exec(ctx); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, created)
+	return c.JSON(http.StatusCreated, "Usuário criado com sucesso!")
 }
 
 func (h *UserHandler) Delete(c echo.Context) error {
