@@ -94,12 +94,25 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     email: "",
     password: "",
     confirmPassword: "",
-    perguntaUm: "",
-    respostaUm: "",
-    perguntaDois: "",
-    respostaDois: "",
-    perguntaTres: "",
-    respostaTres: "",
+    safety_questions: {
+      question_answer: [
+        {
+          saqu_id: "",
+          question: "",
+          answer: "",
+        },
+        {
+          saqu_id: "",
+          question: "",
+          answer: "",
+        },
+        {
+          saqu_id: "",
+          question: "",
+          answer: "",
+        },
+      ],
+    },
   });
 
   /*  const handleInputChange =

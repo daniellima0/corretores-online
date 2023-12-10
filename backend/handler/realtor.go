@@ -278,13 +278,13 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Login Inválido")
 	}
 
-	_, ok := claims["userId"].(string)
+	userID, ok := claims["userId"].(string)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
 	}
 
 	realtor, err := h.client.Realtor.FindUnique(
-		db.Realtor.RealID.Equals(c.Param("real_id"))).With(
+		db.Realtor.UserID.Equals(userID)).With(
 		db.Realtor.User.Fetch(),
 		db.Realtor.SocialsRealtor.Fetch().With(
 			db.SocialsRealtor.SocialsOptions.Fetch().With(

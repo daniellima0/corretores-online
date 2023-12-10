@@ -37,6 +37,7 @@ interface InputGroupProps {
   defaultValue?: string;
   icon?: string;
   isTextField?: boolean;
+  value?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -53,6 +54,7 @@ const InputGroup: React.FC<InputGroupProps> = (props) => {
           as={props.isTextField ? "textarea" : "input"}
           isTextField={props.isTextField ? "true" : "false"}
           onChange={props.onChange}
+          value={props.value}
         />
       </InputWrapper>
     </Container>

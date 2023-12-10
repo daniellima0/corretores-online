@@ -143,7 +143,26 @@ const Content = () => {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
-        setProfileData(json);
+        setProfileData({
+          user: {
+            name: json.user?.name || "",
+            email: json.user?.email || "",
+            telephone: {
+              DDD: json.user?.telephone?.DDD || "",
+              number: json.user?.telephone?.number || "",
+            },
+          },
+          description: json.description || "",
+          socials_realtor: json.socials_realtor || [
+            {
+              contact_info: "",
+              socials_options: {
+                name: "",
+                icon: "",
+              },
+            },
+          ],
+        });
         console.log(json);
       } catch (error) {
         console.error(error);
@@ -151,40 +170,53 @@ const Content = () => {
     };
 
     fetchData();
-  }, []);
+  }, [fetchUrl]);
+
+  const handleInputChange =
+    (field: string) => (event: { target: { value: any } }) => {
+      setProfileData((prevProfileData) => ({
+        ...prevProfileData,
+        user: {
+          ...prevProfileData.user,
+          [field]: event.target.value,
+        },
+      }));
+    };
 
   const [profileData, setProfileData] = useState({
-    Name: "",
-    Cpf: "",
-    Email: "",
-    Dob: "",
-    Telephone: "",
-
-    // instagram: "https://www.instagram.com/marcel.fonseca",
-    // facebook: "https://www.facebook.com/marcel.fonseca",
-    // whatsapp: "+557198159-1481",
-    // regioesDeAtuacao: "Barra, Pituba, Imbuí",
-    // bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
+    description: "",
+    user: {
+      name: "",
+      email: "",
+      telephone: {
+        DDD: "",
+        number: "",
+      },
+    },
+    socials_realtor: [
+      {
+        contact_info: "",
+        socials_options: {
+          name: "",
+          icon: "",
+        },
+      },
+    ],
   });
 
   const validateData = () => {
     if (
-      !profileData.Name ||
-      !profileData.Cpf ||
-      !profileData.Email ||
-      !profileData.Dob ||
-      !profileData.Telephone
+      !profileData.user.name ||
+      !profileData.user.email ||
+      !profileData.user.telephone.DDD ||
+      !profileData.user.telephone.number ||
+      !profileData.description
     ) {
       alert("Preencha todos os campos obrigatórios!");
       return false;
     }
     return true;
   };
-
-  const handleInputChange =
-    (field: string) => (event: { target: { value: any } }) => {
-      setProfileData({ ...profileData, [field]: event.target.value });
-    };
 
   const handleSave = () => {
     if (validateData()) {
@@ -219,21 +251,21 @@ const Content = () => {
               label="Nome"
               name="name"
               type="text"
-              defaultValue="Marcel Fonseca"
+              value={profileData.user.name}
               onChange={handleInputChange("name")}
             />
             <InputGroup
               label="Email"
               name="email"
               type="text"
-              defaultValue="marcel.fonseca@gmail.com"
+              value={profileData.user.email}
               onChange={handleInputChange("email")}
             />
             <InputGroup
               label="Telefone"
               name="telefone"
               type="text"
-              defaultValue="+557198159-1481"
+              value={profileData.user.telephone.DDD}
               onChange={handleInputChange("telefone")}
             />
           </InputGroupWrapper>

@@ -216,11 +216,11 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	filteredUser := struct {
-		Name      string
-		Cpf       string
-		Email     string
-		Dob       time.Time
-		Telephone types.JSON
+		Name      string     `json:"name"`
+		Cpf       string     `json:"cpf"`
+		Email     string     `json:"email"`
+		Dob       time.Time  `json:"date_of_birth"`
+		Telephone types.JSON `json:"telephone"`
 	}{
 		Name:      user.Name,
 		Cpf:       user.Cpf,
