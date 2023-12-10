@@ -159,27 +159,24 @@ const Content = () => {
     Email: "",
     Dob: "",
     Telephone: "",
-    
-    instagram: "https://www.instagram.com/marcel.fonseca",
-    facebook: "https://www.facebook.com/marcel.fonseca",
-    whatsapp: "+557198159-1481",
-    regioesDeAtuacao: "Barra, Pituba, Imbuí",
-    bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
+
+    // instagram: "https://www.instagram.com/marcel.fonseca",
+    // facebook: "https://www.facebook.com/marcel.fonseca",
+    // whatsapp: "+557198159-1481",
+    // regioesDeAtuacao: "Barra, Pituba, Imbuí",
+    // bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
   });
 
   const validateData = () => {
     if (
-      !profileData.name ||
-      !profileData.email ||
-      !profileData.telefone ||
-      !profileData.senha
+      !profileData.Name ||
+      !profileData.Cpf ||
+      !profileData.Email ||
+      !profileData.Dob ||
+      !profileData.Telephone
     ) {
       alert("Preencha todos os campos obrigatórios!");
       return false;
-    }
-    if (profileData.senha !== profileData.confirmarSenha) {
-      alert("As senhas não coincidem!");
-      return;
     }
     return true;
   };
@@ -238,19 +235,6 @@ const Content = () => {
               type="text"
               defaultValue="+557198159-1481"
               onChange={handleInputChange("telefone")}
-            />
-            <InputGroup
-              label="Senha"
-              name="senha"
-              type="password"
-              defaultValue="senhadousuario"
-              onChange={handleInputChange("senha")}
-            />
-            <InputGroup
-              label="Confirme a mudança de senha"
-              type="password"
-              defaultValue="senhadousuario"
-              onChange={handleInputChange("confirmarSenha")}
             />
           </InputGroupWrapper>
           <ProfilePictureWithButtonWrapper>
