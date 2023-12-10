@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
@@ -165,6 +166,23 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 func (h *RealtorHandler) List(c echo.Context) error {
 	ctx := context.Background()
 
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
 	isOnline := c.QueryParam("is_online")
 
 	var isOnlineBool *bool
@@ -242,6 +260,23 @@ func (h *RealtorHandler) List(c echo.Context) error {
 func (h *RealtorHandler) Get(c echo.Context) error {
 	ctx := context.Background()
 
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
 	realtor, err := h.client.Realtor.FindUnique(
 		db.Realtor.RealID.Equals(c.Param("real_id"))).With(
 		db.Realtor.User.Fetch(),
@@ -300,11 +335,32 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 func (h *RealtorHandler) Delete(c echo.Context) error {
 	ctx := context.Background()
 
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
 	realtor, err := h.client.Realtor.FindUnique(
 		db.Realtor.RealID.Equals(c.Param("real_id")),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if realtor.UserID != claims["userId"].(string) {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para deletar este corretor")
 	}
 
 	deleted, err := h.client.User.FindMany(
@@ -322,6 +378,23 @@ func (h *RealtorHandler) Delete(c echo.Context) error {
 
 func (h *RealtorHandler) Update(c echo.Context) error {
 	ctx := context.Background()
+
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
 
 	var request RequestBody
 	if err := c.Bind(&request); err != nil {
@@ -366,6 +439,10 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if realtor.UserID != claims["userId"].(string) {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para editar este corretor")
 	}
 
 	realtorUpdated := h.client.Realtor.FindUnique(
