@@ -69,3 +69,23 @@ type Realtor struct {
 	RealtorLocation RealtorLocation  `json:"realtor_location"`
 	RealtorRegions  []RealtorRegions `json:"realtor_regions"`
 }
+
+type UserGet struct {
+	UserID      string    `json:"user_id"`
+	Name        string    `json:"name"`
+	Cpf         string    `json:"cpf"`
+	Email       string    `json:"email"`
+	DateOfBirth time.Time `json:"date_of_birth"`
+	Telephone   Telephone `json:"telephone"`
+}
+
+type RealtorGet struct {
+	RealID          string           `json:"real_id"`
+	Creci           string           `json:"creci"`
+	IsOnline        bool             `json:"is_online"`
+	Description     string           `json:"description"`
+	UserGet         UserGet          `json:"user"`
+	RealtorSocials  []RealtorSocials `json:"socials_realtor"`
+	RealtorLocation RealtorLocation  `json:"realtor_location"`
+	RealtorRegions  []RealtorRegions `json:"realtor_regions"`
+}

@@ -214,17 +214,19 @@ func (h *RealtorHandler) List(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var realtorsFiltered []service.Realtor
+	var realtorsFiltered []service.RealtorGet
 	for _, realtor := range realtors {
-		var realtorFiltered service.Realtor
+		var realtorFiltered service.RealtorGet
+		realtorFiltered.RealID = realtor.RealID
 		realtorFiltered.Creci = realtor.Creci
 		realtorFiltered.IsOnline = realtor.IsOnline
 		realtorFiltered.Description, _ = realtor.Description()
-		realtorFiltered.User.Name = realtor.User().Name
-		realtorFiltered.User.Cpf = realtor.User().Cpf
-		realtorFiltered.User.Email = realtor.User().Email
-		realtorFiltered.User.DateOfBirth = realtor.User().DateOfBirth
-		json.Unmarshal(realtor.User().Telephone, &realtorFiltered.User.Telephone)
+		realtorFiltered.UserGet.UserID = realtor.User().UserID
+		realtorFiltered.UserGet.Name = realtor.User().Name
+		realtorFiltered.UserGet.Cpf = realtor.User().Cpf
+		realtorFiltered.UserGet.Email = realtor.User().Email
+		realtorFiltered.UserGet.DateOfBirth = realtor.User().DateOfBirth
+		json.Unmarshal(realtor.User().Telephone, &realtorFiltered.UserGet.Telephone)
 
 		if realtor.SocialsRealtor() != nil {
 			for _, social := range realtor.SocialsRealtor() {
@@ -294,15 +296,17 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var realtorFiltered service.Realtor
+	var realtorFiltered service.RealtorGet
+	realtorFiltered.RealID = realtor.RealID
 	realtorFiltered.Creci = realtor.Creci
 	realtorFiltered.IsOnline = realtor.IsOnline
 	realtorFiltered.Description, _ = realtor.Description()
-	realtorFiltered.User.Name = realtor.User().Name
-	realtorFiltered.User.Cpf = realtor.User().Cpf
-	realtorFiltered.User.Email = realtor.User().Email
-	realtorFiltered.User.DateOfBirth = realtor.User().DateOfBirth
-	json.Unmarshal(realtor.User().Telephone, &realtorFiltered.User.Telephone)
+	realtorFiltered.UserGet.UserID = realtor.User().UserID
+	realtorFiltered.UserGet.Name = realtor.User().Name
+	realtorFiltered.UserGet.Cpf = realtor.User().Cpf
+	realtorFiltered.UserGet.Email = realtor.User().Email
+	realtorFiltered.UserGet.DateOfBirth = realtor.User().DateOfBirth
+	json.Unmarshal(realtor.User().Telephone, &realtorFiltered.UserGet.Telephone)
 
 	if realtor.SocialsRealtor() != nil {
 		for _, social := range realtor.SocialsRealtor() {
