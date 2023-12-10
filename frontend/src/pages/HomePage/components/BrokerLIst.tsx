@@ -63,13 +63,15 @@ function renderRow(
   );
 }
 
+interface BrokerListProps {
+  data: RealtorType[];
+  setSearchMapCenter: (position: { lat: number; lng: number }) => void;
+}
+
 export default function BrokerList({
   data,
   setSearchMapCenter,
-}: {
-  data: RealtorType[];
-  setSearchMapCenter: any;
-}) {
+}: BrokerListProps) {
   const [localData, setLocalData] = useState<RealtorType[]>([]);
 
   useEffect(() => {

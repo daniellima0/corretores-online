@@ -5,20 +5,17 @@ import { Root, createRoot } from "react-dom/client";
 import HiddenComponent from "./HiddenComponent";
 import { RealtorType } from "types/RealtorType";
 
-type MapProps = {
-  map: google.maps.Map | undefined;
+interface CorretoresMapProps {
   data: RealtorType[];
-};
+  searchMapCenter: { lat: number; lng: number } | null;
+  dataFilter: React.Dispatch<React.SetStateAction<RealtorType[]>>;
+}
 
 export default function CorretoresMap({
   data,
   searchMapCenter,
   dataFilter,
-}: {
-  data: RealtorType[];
-  searchMapCenter: { lat: number; lng: number } | null;
-  dataFilter: any;
-}) {
+}: CorretoresMapProps) {
   return (
     <Wrapper
       apiKey={import.meta.env.VITE_GOOGLE_API_KEY}
@@ -34,15 +31,13 @@ export default function CorretoresMap({
   );
 }
 
-function Map({
-  data,
-  searchMapCenter,
-  dataFilter,
-}: {
+interface MapProps2 {
   data: RealtorType[];
   searchMapCenter: { lat: number; lng: number } | null;
-  dataFilter: any;
-}) {
+  dataFilter: React.Dispatch<React.SetStateAction<RealtorType[]>>;
+}
+
+function Map({ data, searchMapCenter, dataFilter }: MapProps2) {
   const [map, setMap] = useState<google.maps.Map>();
   const [circle, setCircle] = useState<google.maps.Circle | null>();
   const [brokersInCircle, setBrokersInCircle] = useState<
@@ -136,6 +131,11 @@ function Map({
     </>
   );
 }
+
+type MapProps = {
+  map: google.maps.Map | undefined;
+  data: RealtorType[];
+};
 
 function Broker(props: MapProps) {
   const { map, data } = props;
