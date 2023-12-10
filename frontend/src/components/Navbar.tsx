@@ -30,7 +30,7 @@ function NavBar() {
       { nickname: "Configurações", route: "settings" },
       { nickname: "Meu Perfil", route: "profile" }
     );
-  } else if (userType == "costumer") {
+  } else if (userType == "user") {
     pages.push(
       { nickname: "Mapa", route: "home-page" },
       { nickname: "Configurações", route: "settings" }

@@ -43,12 +43,12 @@ const router = createBrowserRouter([
     element: <SignUp userType="realtor" />,
   },
   {
-    path: "/costumer-signup",
-    element: <SignUp userType="costumer" />,
+    path: "/user-signup",
+    element: <SignUp userType="user" />,
   },
 ]);
 
-type UserType = "realtor" | "costumer" | null;
+type UserType = "realtor" | "user" | null;
 
 export const UserTypeContext = createContext<{
   userType: UserType;
@@ -62,10 +62,26 @@ function App() {
   const [userType, setUserType] = useState<UserType>(null);
 
   useEffect(() => {
-    const userType = localStorage.getItem("userType") as UserType;
-    setUserType(userType);
-    console.log(userType);
-  }, [userType]);
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setUserType(json.auth_status);
+        console.log(json.auth_status);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <UserTypeContext.Provider value={{ userType, setUserType }}>

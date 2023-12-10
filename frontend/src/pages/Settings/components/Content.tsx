@@ -37,10 +37,6 @@ const Name = styled(Typography)`
   font-family: ${(props) => props.theme.customTypography.semiBold};
 `;
 
-const Username = styled(Typography)`
-  color: ${(props) => props.theme.customPallete.grey};
-`;
-
 const Description = styled(Typography)`
   grid-column: 2/2;
   color: ${(props) => props.theme.customPallete.grey};
@@ -97,39 +93,73 @@ const ButtonGroup = styled("div")`
 `;
 
 const Content = () => {
+  const [userId, setUserId] = useState("");
+
   const { userType } = useContext(UserTypeContext);
 
   const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
-  // auth check pending
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:8080/auth/check");
-  //       console.log(response);
-  //       if (!response.ok) {
-  //         throw new Error("Failed to fetch research data");
-  //       }
-  //       const json = await response.json();
-  //       console.log(json);
-  //     } catch (error) {
-  //       console.error(error);
-  //       navigator("/login");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  // Checking if user trying to access this page is logged in.
+  // If true, store its id in a state
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setUserId(json.user_id);
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-  //   fetchData();
-  // }, [navigator]);
+    fetchData();
+  }, []);
+
+  const fetchUrl =
+    userType === "realtor"
+      ? "http://localhost:8080/realtors/" + userId
+      : userType === "user"
+      ? "http://localhost:8080/user/" + userId
+      : "";
+
+  // With the user id, fetch its data from the database and store it in a state
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(fetchUrl, {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setProfileData(json);
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const [profileData, setProfileData] = useState({
-    name: "Marcel Fonseca",
-    email: "marcel.fonseca@gmail.com",
-    telefone: "+557198159-1481",
-    apelido: "marcel.fonseca",
-    senha: "senhadousuario",
-    confirmarSenha: "",
+    Name: "",
+    Cpf: "",
+    Email: "",
+    Dob: "",
+    Telephone: "",
+    
     instagram: "https://www.instagram.com/marcel.fonseca",
     facebook: "https://www.facebook.com/marcel.fonseca",
     whatsapp: "+557198159-1481",
@@ -142,7 +172,6 @@ const Content = () => {
       !profileData.name ||
       !profileData.email ||
       !profileData.telefone ||
-      !profileData.apelido ||
       !profileData.senha
     ) {
       alert("Preencha todos os campos obrigatórios!");
@@ -182,7 +211,6 @@ const Content = () => {
         </ProfilePictureWrapper>
         <NameWrapper>
           <Name variant="body1">Marcel Fonseca</Name>
-          <Username variant="body1">(marcel.fonseca)</Username>
         </NameWrapper>
         <Description variant="body2">Sua conta pessoal</Description>
       </UserInfo>
@@ -210,13 +238,6 @@ const Content = () => {
               type="text"
               defaultValue="+557198159-1481"
               onChange={handleInputChange("telefone")}
-            />
-            <InputGroup
-              label="Apelido"
-              name="apelido"
-              type="text"
-              defaultValue="marcel.fonseca"
-              onChange={handleInputChange("apelido")}
             />
             <InputGroup
               label="Senha"

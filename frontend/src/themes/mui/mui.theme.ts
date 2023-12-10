@@ -12,7 +12,7 @@ declare module "@mui/material/styles/" {
             bold: string;
         };
         customPallete: {
-            costumer: string;
+            user: string;
             realtor: string;
             admin: string;
             grey: string;
@@ -24,7 +24,7 @@ declare module "@mui/material/styles/" {
             bold?: string;
         };
         customPallete?: {
-            costumer?: string;
+            user?: string;
             realtor?: string;
             admin?: string;
             grey?: string;
@@ -41,7 +41,7 @@ const theme = createTheme({
         bold: "Montserrat-Bold",
     },
     customPallete: {
-        costumer: "#FF5E00",
+        user: "#FF5E00",
         realtor: "#1C5E9F",
         admin: "#148E88",
         grey: "#3A3B3C",

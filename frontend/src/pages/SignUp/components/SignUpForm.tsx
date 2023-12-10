@@ -43,7 +43,7 @@ const Title = styled(Typography)`
 `;
 
 interface SignUpFormProps {
-  userType: "realtor" | "costumer";
+  userType: "realtor" | "user";
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = (props) => {
@@ -129,7 +129,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     console.log(formData.date_of_birth);
     for (const field in formData) {
       if (!formData[field]) {
-        if (field === "creci" && props.userType === "costumer") continue;
+        if (field === "creci" && props.userType === "user") continue;
         alert(`Preencha o campo ${field}!`);
         return false;
       }
@@ -147,6 +147,11 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
 
     if (formData.password !== formData.confirmPassword) {
       alert("As senhas não coincidem!");
+      return false;
+    }
+
+    if (formData.password.length < 8) {
+      alert("A senha deve ter no mínimo 8 caracteres!");
       return false;
     }
 
@@ -249,8 +254,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         onChange={handleInputChange("telephone", "number")}
       />
       <TextFieldStyled
+        helperText="Digite sua data de nascimento"
         id="date_of_birth"
-        label="Data de nascimento"
         type="date"
         variant="outlined"
         margin="normal"
@@ -292,6 +297,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       <TextFieldStyled
         type={showPassword ? "text" : "password"}
         id="password"
+        helperText="Senha de no mínimo 8 caracteres"
         label="Senha"
         variant="outlined"
         margin="normal"
