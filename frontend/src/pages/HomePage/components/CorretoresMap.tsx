@@ -146,6 +146,10 @@ function Broker(props: MapProps) {
     setBrokerData(data);
   }, [props.data]);
 
+  const handleProfileVisit = () => {
+    console.log("Visitando perfil");
+  };
+
   return (
     <>
       {data &&
@@ -234,6 +238,7 @@ function Broker(props: MapProps) {
                       boxShadow: "none",
                     }}
                     variant="contained"
+                    onClick={handleProfileVisit}
                   >
                     Visitar perfil
                   </Button>

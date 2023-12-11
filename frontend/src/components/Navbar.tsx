@@ -13,13 +13,35 @@ import Tooltip from "@mui/material/Tooltip";
 import logo from "../assets/logo-black.svg";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { UserTypeContext } from "../App";
 import { Link, useNavigate } from "react-router-dom";
 
 function NavBar() {
   const { userType } = useContext(UserTypeContext);
   const navigator = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        //setUserType(json.auth_status);
+        console.log(json.auth_status);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const pages = [];
 
@@ -145,7 +167,7 @@ function NavBar() {
                 <MenuItem key={page.route} onClick={handleCloseNavMenu}>
                   <Typography color="black" textAlign="center">
                     <Link
-                      to={`/${page.route}`}
+                      to={`/${page.route}/`}
                       style={{ textDecoration: "inherit", color: "inherit" }}
                     >
                       {page.nickname}
