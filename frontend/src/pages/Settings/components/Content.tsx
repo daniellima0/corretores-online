@@ -93,8 +93,13 @@ const ButtonGroup = styled("div")`
 `;
 
 const Content = () => {
+  const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState({
     description: "",
+    regions: "",
+    realtorInstagram: "",
+    realtorFacebook: "",
+    realtorWhatsapp: "",
     user: {
       name: "",
       email: "",
@@ -103,15 +108,6 @@ const Content = () => {
         number: "",
       },
     },
-    socials_realtor: [
-      {
-        contact_info: "",
-        socials_options: {
-          name: "",
-          icon: "",
-        },
-      },
-    ],
   });
   const [userId, setUserId] = useState("");
 
@@ -123,6 +119,7 @@ const Content = () => {
   // If true, store its id in a state
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await fetch("http://localhost:8080/auth/check", {
           method: "GET",
@@ -134,9 +131,11 @@ const Content = () => {
         }
         const json = await response.json();
         setUserId(json.user_id);
+        setLoading(false);
         console.log(json);
       } catch (error) {
         console.error(error);
+        setLoading(false);
       }
     };
 
@@ -152,6 +151,7 @@ const Content = () => {
 
   // With the user id, fetch its data from the database and store it in a state
   useEffect(() => {
+    setLoading(true);
     const fetchData = async () => {
       try {
         const response = await fetch(fetchUrl, {
@@ -164,25 +164,33 @@ const Content = () => {
         }
         const json = await response.json();
         setProfileData(json);
+        setLoading(false);
         console.log(json);
       } catch (error) {
         console.error(error);
+        setLoading(false);
       }
     };
 
     fetchData();
   }, [fetchUrl]);
 
-  const handleInputChange =
-    (field: string) => (event: { target: { value: any } }) => {
-      setProfileData((prevProfileData) => ({
-        ...prevProfileData,
+  const handleInputChange = (field: any) => (event: any) => {
+    if (field in profileData.user) {
+      setProfileData({
+        ...profileData,
         user: {
-          ...prevProfileData.user,
+          ...profileData.user,
           [field]: event.target.value,
         },
-      }));
-    };
+      });
+    } else {
+      setProfileData({
+        ...profileData,
+        [field]: event.target.value,
+      });
+    }
+  };
 
   const validateData = () => {
     if (
@@ -198,9 +206,38 @@ const Content = () => {
     return true;
   };
 
-  const handleSave = () => {
-    if (validateData()) {
-    }
+  const handleSaveRealtor = () => {
+    const data = {
+      regions: profileData.regions,
+      description: profileData.description,
+    };
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/realtors/" + userId,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        console.log(json);
+        console.log("Realtor updated successfully!");
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
   };
 
   const handleSaveUser = () => {
@@ -237,9 +274,47 @@ const Content = () => {
     fetchData();
   };
 
+  const HandleSaveSocials = () => {
+    const data = {
+      realtor_instagram: profileData.realtorInstagram,
+      realtor_facebook: profileData.realtorFacebook,
+      realtor_whatsapp: profileData.realtorWhatsapp,
+    };
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/realtors/" + userId,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        console.log(json);
+        console.log("Socials updated successfully!");
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  };
+
   const refreshPage = () => {
     window.location.reload();
   };
+
+  if (loading || !profileData || !profileData.user) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Container>
@@ -320,28 +395,43 @@ const Content = () => {
             <InputGroupWrapper>
               <InputGroup
                 label="Instagram"
-                name="instagram"
+                name="realtorInstagram"
                 type="text"
-                defaultValue="https://www.instagram.com/marcel.fonseca"
                 icon="/public/instagram.svg"
-                onChange={handleInputChange("instagram")}
+                value={profileData.realtorInstagram}
+                onChange={handleInputChange("realtorInstagram")}
               />
               <InputGroup
                 label="Facebook"
-                name="facebook"
+                name="realtorFacebook"
                 type="text"
-                defaultValue="https://www.facebook.com/marcel.fonseca"
+                value={profileData.realtorFacebook}
                 icon="/public/facebook.png"
-                onChange={handleInputChange("facebook")}
+                onChange={handleInputChange("realtorFacebook")}
               />
               <InputGroup
                 label="WhatsApp"
-                name="whatsapp"
+                name="realtorWhatsapp"
                 type="text"
-                defaultValue="+557198159-1481"
+                value={profileData.realtorWhatsapp}
                 icon="/public/whatsapp.svg"
-                onChange={handleInputChange("whatsapp")}
+                onChange={handleInputChange("realtorWhatsapp")}
               />
+              <ButtonGroup>
+                <CancelButton
+                  buttonColor={primaryColor}
+                  invertColor={true}
+                  onClick={refreshPage}
+                >
+                  Cancelar
+                </CancelButton>
+                <SaveButton
+                  buttonColor={primaryColor}
+                  onClick={HandleSaveSocials}
+                >
+                  Salvar
+                </SaveButton>
+              </ButtonGroup>
             </InputGroupWrapper>
           </Section>
           <Section>
@@ -349,18 +439,18 @@ const Content = () => {
             <InputGroupWrapper>
               <InputGroup
                 label="Regiões de Atuação"
-                name="regioes-de-atuacao"
+                name="regions"
+                value={profileData.regions}
                 type="text"
-                defaultValue="Barra, Pituba, Imbuí"
-                onChange={handleInputChange("regioesDeAtuacao")}
+                onChange={handleInputChange("regions")}
               />
               <InputGroup
                 label="Bio"
-                name="bio"
+                name="description"
                 type="text"
-                defaultValue="Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas."
+                value={profileData.description}
                 isTextField={true}
-                onChange={handleInputChange("bio")}
+                onChange={handleInputChange("description")}
               />
             </InputGroupWrapper>
           </Section>
@@ -374,7 +464,7 @@ const Content = () => {
         >
           Cancelar
         </CancelButton>
-        <SaveButton buttonColor={primaryColor} onClick={handleSave}>
+        <SaveButton buttonColor={primaryColor} onClick={handleSaveRealtor}>
           Salvar
         </SaveButton>
       </ButtonGroup>

@@ -7,6 +7,7 @@ import React, { useContext, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useTheme } from "@mui/material";
 import { UserTypeContext } from "../../../App";
+import { TrySharp } from "@mui/icons-material";
 
 const Container = styled("div")`
   margin-top: 40px;
@@ -169,9 +170,11 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
       date_of_birth: "",
       telephone: { DDD: "", number: "" },
     },
-    socials_realtor: null,
     realtor_location: { latitude: "0", longitude: "0" },
-    realtor_regions: null,
+    regions: "",
+    realtor_instagram: "",
+    realtor_facebook: "",
+    realtor_whatsapp: "",
   });
 
   const handleClick = () => {
@@ -185,22 +188,60 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
   } | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //setChecked(event.target.checked);
-    if (event.target.checked) {
-      const successCallback = (position: any) => {
-        setRealtorLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      };
-
-      const errorCallback = () => {
-        //setChecked(false);
-        alert("Compartilhe sua localização para ficar online");
-      };
-
-      navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    try {
+      fetch(
+        "http://localhost:8080/realtors/set_status/" + profileData.user.user_id,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            is_online: event.target.checked,
+          }),
+        }
+      ).then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch. Status: ${response.status}`);
+        }
+      });
+      setProfileData({
+        ...profileData,
+        is_online: event.target.checked,
+      });
+    } catch (error) {
+      setProfileData({
+        ...profileData,
+        is_online: event.target.checked,
+      });
+      console.error(error);
     }
+
+    // if (event.target.checked) {
+    //   navigator.geolocation.getCurrentPosition(
+    //     (position) => {
+    //       fetch(
+    //         "http://localhost:8080/realtors/set_location/" +
+    //           profileData.user.user_id,
+    //         {
+    //           method: "POST",
+    //           credentials: "include",
+    //           headers: {
+    //             "Content-Type": "application/json",
+    //           },
+    //           body: JSON.stringify({
+    //             latitude: Number(position.coords.latitude.toFixed(6)),
+    //             longitude: Number(position.coords.longitude.toFixed(6)),
+    //           }),
+    //         }
+    //       );
+    //     },
+    //     () => {
+    //       alert("Compartilhe sua localização para ficar online");
+    //     }
+    //   );
+    // }
   };
 
   console.log(realtorLocation);
@@ -249,10 +290,8 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
             />
           </Header>
           <RegionsInfo>
-            <RegionsTitle variant="h2">Regiōes</RegionsTitle>
-            <RegionsList variant="body1">
-              {profileData.realtor_regions}
-            </RegionsList>
+            <RegionsTitle variant="h2">Regiōes de atuação</RegionsTitle>
+            <RegionsList variant="body1">{profileData.regions}</RegionsList>
           </RegionsInfo>
           <SocialMediaInfoWrapper>
             <SocialMediaInfo realtorData={profileData} />

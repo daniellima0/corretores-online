@@ -151,17 +151,17 @@ function Broker(props: MapProps) {
       {data &&
         brokerData.map((broker) => (
           <Marker
-            key={broker.real_id}
+            key={broker.user.user_id}
             map={map}
             position={{
               lat: Number(broker.realtor_location.latitude),
               lng: Number(broker.realtor_location.longitude),
             }}
             onClick={() => {
-              setHover(broker.real_id);
+              setHover(broker.user.user_id);
             }}
           >
-            <HiddenComponent hidden={broker.real_id === hover}>
+            <HiddenComponent hidden={broker.user.user_id === hover}>
               <div
                 style={{
                   backgroundColor: "#ffffff",
@@ -174,7 +174,7 @@ function Broker(props: MapProps) {
                   alignItems: "center",
                   gap: "11px",
                 }}
-                onMouseEnter={() => setHover(broker.real_id)}
+                onMouseEnter={() => setHover(broker.user.user_id)}
                 onMouseLeave={() => setHover(null)}
               >
                 <Avatar
@@ -189,7 +189,7 @@ function Broker(props: MapProps) {
                 />
               </div>
             </HiddenComponent>
-            <HiddenComponent hidden={broker.real_id != hover}>
+            <HiddenComponent hidden={broker.user.user_id != hover}>
               <div
                 style={{
                   backgroundColor: "#fff",
@@ -202,7 +202,7 @@ function Broker(props: MapProps) {
                   alignItems: "center",
                   gap: "11px",
                 }}
-                onMouseEnter={() => setHover(broker.real_id)}
+                onMouseEnter={() => setHover(broker.user.user_id)}
                 onMouseLeave={() => setHover(null)}
               >
                 <Avatar

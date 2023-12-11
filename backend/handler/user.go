@@ -68,29 +68,25 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Telephone is required")
 	}
 
-	if len(user.SafetyQuestionsUser.QuestionAnswer) != 3 {
-		return c.JSON(http.StatusBadRequest, "Safety questions is required")
-	}
-
 	var encryptedPassword, err = bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
+	// encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err.Error())
+	// }
 
-	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[1].Answer), 14)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
+	// encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[1].Answer), 14)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err.Error())
+	// }
 
-	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
+	// encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err.Error())
+	// }
 
 	telephoneJson, err := json.Marshal(user.Telephone)
 	if err != nil {
@@ -104,7 +100,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	created := h.client.User.CreateOne(
+	_, err = h.client.User.CreateOne(
 		db.User.UserID.Set(user.UserID),
 		db.User.Name.Set(user.Name),
 		db.User.Cpf.Set(user.Cpf),
@@ -113,32 +109,35 @@ func (h *UserHandler) Create(c echo.Context) error {
 		db.User.DateOfBirth.Set(user.DateOfBirth),
 		db.User.Telephone.Set(telephoneJson),
 		db.User.AuthStatus.Link(db.AuthStatus.AustID.Equals(authStatus.AustID)),
-	).Tx()
-
-	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
-		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
-	).Tx()
-
-	second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[1].SaquID)),
-		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
-	).Tx()
-
-	third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
-		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
-	).Tx()
-
-	if err := h.client.Prisma.Transaction(created, first_safety_questions, second_safety_questions, third_safety_questions).Exec(ctx); err != nil {
+	).Exec(ctx)
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
+	// first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+	// 	db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+	// 	db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
+	// 	db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
+	// 	db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	// ).Tx()
+
+	// second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+	// 	db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+	// 	db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
+	// 	db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[1].SaquID)),
+	// 	db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	// ).Tx()
+
+	// third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+	// 	db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+	// 	db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
+	// 	db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
+	// 	db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	// ).Tx()
+
+	// if err := h.client.Prisma.Transaction(created, first_safety_questions, second_safety_questions, third_safety_questions).Exec(ctx); err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err.Error())
+	// }
 
 	return c.JSON(http.StatusCreated, "Usuário criado com sucesso!")
 }
@@ -284,7 +283,6 @@ func (h *UserHandler) Update(c echo.Context) error {
 
 	if strings.TrimSpace(user.DateOfBirth.String()) == "" {
 		return c.JSON(http.StatusBadRequest, "Date of birth is required") }*/
-	
 
 	if strings.TrimSpace(user.Telephone.DDD) == "" || strings.TrimSpace(user.Telephone.Number) == "" {
 		return c.JSON(http.StatusBadRequest, "Telephone is required")
@@ -300,10 +298,10 @@ func (h *UserHandler) Update(c echo.Context) error {
 		db.User.DeletedAt.IsNull(),
 	).Update(
 		db.User.Name.Set(user.Name),
-/* 		db.User.Cpf.Set(user.Cpf), */
+		/* 		db.User.Cpf.Set(user.Cpf), */
 		db.User.Email.Set(user.Email),
-/* 		db.User.Password.Set(user.Password),
-		db.User.DateOfBirth.Set(user.DateOfBirth), */
+		/* 		db.User.Password.Set(user.Password),
+		   		db.User.DateOfBirth.Set(user.DateOfBirth), */
 		db.User.Telephone.Set(telephoneJson),
 	).Exec(ctx)
 	if err != nil {

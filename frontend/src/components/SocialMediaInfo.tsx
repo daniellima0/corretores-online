@@ -61,11 +61,13 @@ interface SocialMediaInfoProps {
         number: string;
       };
     };
-    socials_realtor: null;
+    realtor_instagram: string;
+    realtor_facebook: string;
+    realtor_whatsapp: string;
     realtor_location: {
       // ...
     };
-    realtor_regions: null;
+    regions: string;
   };
 }
 

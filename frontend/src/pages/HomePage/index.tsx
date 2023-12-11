@@ -193,7 +193,10 @@ const HomePage = () => {
   }, [searchMapCenter]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/realtors/?is_online=true")
+    fetch("http://localhost:8080/realtors/?is_online=true", {
+      method: "GET",
+      credentials: "include",
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
