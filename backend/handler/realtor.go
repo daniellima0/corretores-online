@@ -13,6 +13,7 @@ import (
 	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/service"
+	"github.com/steebchen/prisma-client-go/runtime/types"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -453,32 +454,42 @@ func (h *RealtorHandler) SetLocation(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Login Inválido")
 	}
 
-	userID, ok := claims["userId"].(string)
+	_, ok := claims["userId"].(string)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
 	}
 
-	if userID != c.Param("user_id") {
-		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para editar este corretor")
+	if claims["userId"].(string) != c.Param("user_id") {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissãasjlakjsflkgdslif")
 	}
 
 	type SetLocationRequest struct {
-		Latitude  string `json:"latitude"`
-		Longitude string `json:"longitude"`
+		Latitude  types.Decimal `json:"latitude"`
+		Longitude types.Decimal `json:"longitude"`
 	}
+	//AQUI
 	var req SetLocationRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid request body")
 	}
 
-	_, err = h.client.Realtor.FindUnique(
+	realtor, err := h.client.Realtor.FindUnique(
 		db.Realtor.UserID.Equals(c.Param("user_id")),
-	).Update(
-		db.Realtor.RealtorLocation.Link(db.RealtorLocation.RealID.Equals(c.Param("real_id"))),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+	_, err = h.client.RealtorLocation.UpsertOne(
+		db.RealtorLocation.RealID.Equals(realtor.RealID),
+	).Create(
+		db.RealtorLocation.ReloID.Set(uuid.New().String()),
+		db.RealtorLocation.Realtor.Link(db.Realtor.RealID.Equals(realtor.RealID)),
+		db.RealtorLocation.Latitude.Set(req.Latitude),
+		db.RealtorLocation.Longitude.Set(req.Longitude),
+	).Update(
+		db.RealtorLocation.Latitude.Set(req.Latitude),
+		db.RealtorLocation.Longitude.Set(req.Longitude),
+	).Exec(ctx)
 
 	return c.JSON(http.StatusOK, "Localização atualizada!")
 }

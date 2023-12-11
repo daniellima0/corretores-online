@@ -11,8 +11,8 @@ func RealtorRouter(e *echo.Echo, dbClient *db.PrismaClient) {
 
 	g := e.Group("/realtors/")
 	g.POST("", h.Create)
-	g.POST("set_status/:user_id", h.SetOnline)
-	g.POST("set_location/:user_id", h.SetLocation)
+	g.PUT("set_status/:user_id", h.SetOnline)
+	g.PUT("set_location/:user_id", h.SetLocation)
 	g.GET("", h.List)
 	g.GET(":user_id", h.Get)
 	g.DELETE(":user_id", h.Delete)

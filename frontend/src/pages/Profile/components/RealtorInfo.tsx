@@ -8,6 +8,7 @@ import QRCode from "react-qr-code";
 import { useTheme } from "@mui/material";
 import { UserTypeContext } from "../../../App";
 import { TrySharp } from "@mui/icons-material";
+import { get } from "http";
 
 const Container = styled("div")`
   margin-top: 40px;
@@ -142,12 +143,12 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
           method: "GET",
           credentials: "include",
         });
-        console.log(response);
+
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
-        console.log(json);
+
         setProfileData(json);
       } catch (error) {
         console.error(error);
@@ -182,13 +183,74 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
     window.open(whatsappUrl, "_blank");
   };
 
-  const [realtorLocation, setRealtorLocation] = useState<{
+  /*   const [realtorLocation, setRealtorLocation] = useState<{
     lat: number;
     lng: number;
-  } | null>(null);
+  } | null>(null); */
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    try {
+    // Update the local state to reflect the new online/offline status
+    setProfileData((prevProfileData) => ({
+      ...prevProfileData,
+      is_online: event.target.checked,
+    }));
+
+    // Use navigator.geolocation.getCurrentPosition to get the current location
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Update the user's location in the backend
+        fetch(
+          "http://localhost:8080/realtors/set_location/" +
+            profileData.user.user_id,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              latitude: Number(position.coords.latitude),
+              longitude: Number(position.coords.longitude),
+            }),
+          }
+        )
+          .then(() => {
+            fetch(
+              "http://localhost:8080/realtors/set_status/" +
+                profileData.user.user_id,
+              {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  is_online: event.target.checked,
+                }),
+              }
+            )
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(
+                    `Failed to fetch. Status: ${response.status}`
+                  );
+                }
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      },
+      () => {
+        alert("Compartilhe sua localização para ficar online");
+      }
+    );
+  };
+
+  /* try {
       fetch(
         "http://localhost:8080/realtors/set_status/" + profileData.user.user_id,
         {
@@ -216,35 +278,32 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
         is_online: event.target.checked,
       });
       console.error(error);
-    }
+    } */
 
-    // if (event.target.checked) {
-    //   navigator.geolocation.getCurrentPosition(
-    //     (position) => {
-    //       fetch(
-    //         "http://localhost:8080/realtors/set_location/" +
-    //           profileData.user.user_id,
-    //         {
-    //           method: "POST",
-    //           credentials: "include",
-    //           headers: {
-    //             "Content-Type": "application/json",
-    //           },
-    //           body: JSON.stringify({
-    //             latitude: Number(position.coords.latitude.toFixed(6)),
-    //             longitude: Number(position.coords.longitude.toFixed(6)),
-    //           }),
-    //         }
-    //       );
-    //     },
-    //     () => {
-    //       alert("Compartilhe sua localização para ficar online");
-    //     }
-    //   );
-    // }
-  };
-
-  console.log(realtorLocation);
+  // if (event.target.checked) {
+  //   navigator.geolocation.getCurrentPosition(
+  //     (position) => {
+  //       fetch(
+  //         "http://localhost:8080/realtors/set_location/" +
+  //           profileData.user.user_id,
+  //         {
+  //           method: "POST",
+  //           credentials: "include",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             latitude: Number(position.coords.latitude.toFixed(6)),
+  //             longitude: Number(position.coords.longitude.toFixed(6)),
+  //           }),
+  //         }
+  //       );
+  //     },
+  //     () => {
+  //       alert("Compartilhe sua localização para ficar online");
+  //     }
+  //   );
+  // }
 
   return (
     <Container>

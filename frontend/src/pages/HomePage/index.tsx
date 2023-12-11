@@ -130,13 +130,22 @@ const HomePage = () => {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       });
+      console.log(position.coords.latitude);
+      console.log(position.coords.longitude);
     };
 
     const errorCallback = () => {
       return;
     };
+    const options = {
+      enableHighAccuracy: true,
+    };
 
-    navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    navigator.geolocation.getCurrentPosition(
+      successCallback,
+      errorCallback,
+      options
+    );
   }, []);
 
   const [onlineRealtors, setOnlineRealtors] = useState<RealtorType[]>([]);

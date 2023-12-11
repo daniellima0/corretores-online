@@ -4,6 +4,7 @@ import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
 import { useContext, useEffect, useState } from "react";
 import { UserTypeContext } from "../../../App";
+import LoadingSpinner from "../../../components/Loading";
 
 const Container = styled("div")`
   display: flex;
@@ -192,7 +193,7 @@ const Content = () => {
     }
   };
 
-  const validateData = () => {
+  /*  const validateData = () => {
     if (
       !profileData.user.name ||
       !profileData.user.email ||
@@ -204,7 +205,7 @@ const Content = () => {
       return false;
     }
     return true;
-  };
+  }; */
 
   const handleSaveRealtor = () => {
     const data = {
@@ -313,7 +314,7 @@ const Content = () => {
   };
 
   if (loading || !profileData || !profileData.user) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
@@ -321,8 +322,8 @@ const Content = () => {
       <UserInfo>
         <ProfilePictureWrapper>
           <Avatar
-            alt="Marcel Fonseca"
-            src="/static/images/avatar/1.jpg"
+            alt={profileData.user.name}
+            src="a"
             sx={{ width: "50px", height: "50px" }}
           />
         </ProfilePictureWrapper>
