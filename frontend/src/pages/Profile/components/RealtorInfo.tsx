@@ -182,16 +182,51 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked } = event.target;
+
     setProfileData((prevProfileData) => ({
       ...prevProfileData,
-      is_online: event.target.checked,
+      is_online: checked,
     }));
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const { latitude, longitude } = position.coords;
+        updateLocationAndStatus(checked, latitude, longitude);
+      },
+      () => {
+        setProfileData((prevProfileData) => ({
+          ...prevProfileData,
+          is_online: !checked,
+        }));
+
+        alert("Compartilhe sua localização para ficar online");
+      }
+    );
+  };
+
+  const updateLocationAndStatus = (
+    isOnline: boolean,
+    latitude: number,
+    longitude: number
+  ) => {
+    fetch(
+      `http://localhost:8080/realtors/set_location/${profileData.user.user_id}`,
+      {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+        }),
+      }
+    )
+      .then(() => {
         fetch(
-          "http://localhost:8080/realtors/set_location/" +
-            profileData.user.user_id,
+          `http://localhost:8080/realtors/set_status/${profileData.user.user_id}`,
           {
             method: "PUT",
             credentials: "include",
@@ -199,45 +234,22 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              latitude: Number(position.coords.latitude),
-              longitude: Number(position.coords.longitude),
+              is_online: isOnline,
             }),
           }
         )
-          .then(() => {
-            fetch(
-              "http://localhost:8080/realtors/set_status/" +
-                profileData.user.user_id,
-              {
-                method: "PUT",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  is_online: event.target.checked,
-                }),
-              }
-            )
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error(
-                    `Failed to fetch. Status: ${response.status}`
-                  );
-                }
-              })
-              .catch((error) => {
-                console.error(error);
-              });
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Failed to fetch. Status: ${response.status}`);
+            }
           })
           .catch((error) => {
             console.error(error);
           });
-      },
-      () => {
-        alert("Compartilhe sua localização para ficar online");
-      }
-    );
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
