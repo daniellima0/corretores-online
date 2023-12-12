@@ -11,6 +11,10 @@ import { useEffect, useState } from "react";
 import * as React from "react";
 import SelectQuestion from "./SelectQuestion";
 import { useNavigate } from "react-router-dom";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import { Link } from "react-router-dom";
 
 const Form = styled("form")({
   width: "80%",
@@ -113,6 +117,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     },
   });
 
+  const [areTermsAccepted, setAreTermsAccepted] = React.useState(false);
+
   /* const handleInputChange =
     (field: string, nestedField?: string, secondNestedField?: string) =>
     (event: { target: { value: any } }) => {
@@ -194,6 +200,11 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
 
     if (formData.password.length < 8) {
       alert("A senha deve ter no mínimo 8 caracteres!");
+      return false;
+    }
+
+    if (!areTermsAccepted) {
+      alert("Você deve aceitar os termos de uso para se cadastrar");
       return false;
     }
 
@@ -521,6 +532,26 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         )}
         sx={{ width: "100%", borderRadius: "15px" }}
       />
+      <FormGroup>
+        <FormControlLabel
+          checked={areTermsAccepted}
+          onChange={(event) => setAreTermsAccepted(event.target.checked)}
+          required
+          control={<Checkbox />}
+          label={
+            <span>
+              Eu li e concordo com os{" "}
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                to="/terms-and-conditions"
+              >
+                Termos de Uso
+              </Link>
+            </span>
+          }
+        />
+      </FormGroup>
       <div>
         <ButtonStyled
           fullWidth
