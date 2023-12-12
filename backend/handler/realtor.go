@@ -13,9 +13,9 @@ import (
 	"github.com/daniellima0/corretores-online/backend/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/service"
-	"github.com/steebchen/prisma-client-go/runtime/types"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/steebchen/prisma-client-go/runtime/types"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -162,6 +162,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.Realtor.RealID.Set(realtor.RealID),
 		db.Realtor.Creci.Set(realtor.Creci),
 		db.Realtor.IsOnline.Set(false),
+		db.Realtor.Uf.Set(""),
 		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 

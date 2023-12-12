@@ -20,12 +20,16 @@ model realtor {
   description       String?           @db.VarChar
   is_online         Boolean
   avatar            String?           @db.VarChar(255)
-  realtor_whatsapp  String?           @db.VarChar(255)
-  realtor_facebook  String?           @db.VarChar(255)
-  realtor_instagram String?           @db.VarChar(255)
   regions           String?           @db.VarChar(255)
+  realtor_instagram String?           @db.VarChar(255)
+  realtor_facebook  String?           @db.VarChar(255)
+  realtor_whatsapp  String?           @db.VarChar(255)
+  uf                String            @db.Uuid
   user              user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   realtor_location  realtor_location?
+  realtor_uf        realtor_uf?
+
+  @@unique([creci, uf], map: "unique_creci_uf_constraint")
 }
 
 model realtor_location {
@@ -65,4 +69,18 @@ model user {
   realtor               realtor?
   safety_questions_user safety_questions_user[]
   auth_status           auth_status             @relation(fields: [aust_id], references: [aust_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model realtor_uf {
+  reuf_id    String     @id @db.Uuid
+  ufop_id    String     @db.Uuid
+  real_id    String     @unique(map: "unique_uf_real_id") @db.Uuid
+  realtor    realtor    @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
+  uf_options uf_options @relation(fields: [ufop_id], references: [ufop_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model uf_options {
+  ufop_id    String       @id @db.Uuid
+  uf         String       @db.VarChar(2)
+  realtor_uf realtor_uf[]
 }
