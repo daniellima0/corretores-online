@@ -1,0 +1,1 @@
+alter table uf_options add constraint unique_uf unique(uf);
