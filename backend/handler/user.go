@@ -22,8 +22,11 @@ type UserHandler struct {
 
 type UserResponse struct {
 	db.UserModel
-	Telephone           service.Telephone           `json:"telephone"`
-	SafetyQuestionsUser service.SafetyQuestionsUser `json:"safety_questions"`
+	Telephone           service.Telephone `json:"telephone"`
+	SafetyQuestionsUser [3]struct {
+		Question string `json:"question"`
+		Answer   string `json:"answer"`
+	} `json:"safety_questions"`
 }
 
 func NewUserHandler(client *db.PrismaClient) *UserHandler {

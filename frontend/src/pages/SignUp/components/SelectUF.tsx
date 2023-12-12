@@ -17,6 +17,7 @@ export default function SelectQuestion({
 }) {
   const handleChange = (event: SelectChangeEvent) => {
     const selectedQuestion = event.target.value as string;
+
     setQuestion(selectedQuestion);
   };
 
@@ -40,8 +41,8 @@ export default function SelectQuestion({
           onChange={handleChange}
         >
           {possibleQuestions.map((question: any) => (
-            <MenuItem key={question.question} value={question.question}>
-              {question.question}
+            <MenuItem key={question} value={question}>
+              {question}
             </MenuItem>
           ))}
         </Select>
