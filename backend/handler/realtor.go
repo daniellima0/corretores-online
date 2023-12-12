@@ -166,7 +166,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.Realtor.RealID.Set(realtor.RealID),
 		db.Realtor.Creci.Set(realtor.Creci),
 		db.Realtor.IsOnline.Set(false),
-		db.Realtor.Uf.Set(""),
+		db.Realtor.UfOptions.Link(db.UfOptions.UfopID.Equals(realtor.UfID)),
 		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 

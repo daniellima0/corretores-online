@@ -73,6 +73,6 @@ model user {
 
 model uf_options {
   ufop_id String    @id @db.Uuid
-  uf      String    @db.VarChar(2)
+  uf      String    @unique(map: "unique_uf") @db.VarChar(2)
   realtor realtor[]
 }
