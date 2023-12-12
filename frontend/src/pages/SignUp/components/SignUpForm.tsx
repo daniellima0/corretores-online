@@ -7,7 +7,7 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import SelectQuestion from "./SelectQuestion";
 import { useNavigate } from "react-router-dom";
@@ -63,7 +63,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     },
   });
 
-  const questions = [
+  /*   const questions = [
     "Qual é o nome do seu primeiro animal de estimação?",
     "Em que cidade você nasceu?",
     "Qual é o nome do meio da sua mãe?",
@@ -74,9 +74,10 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     "Qual é o nome do seu personagem fictício favorito?",
     "Qual é o modelo do seu primeiro carro?",
     "Em que ano você se formou no ensino médio?",
-  ];
+  ]; */
 
   const [showPassword, setShowPassword] = useState(false);
+  const [safety_questions, setSafetyQuestions] = useState([]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -94,24 +95,65 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     email: "",
     password: "",
     confirmPassword: "",
-    perguntaUm: "",
-    respostaUm: "",
-    perguntaDois: "",
-    respostaDois: "",
-    perguntaTres: "",
-    respostaTres: "",
+    safety_questions: {
+      question_answer: [
+        {
+          perguntaUm: "",
+          respostaUm: "",
+        },
+        {
+          perguntaDois: "",
+          respostaDois: "",
+        },
+        {
+          perguntaTres: "",
+          respostaTres: "",
+        },
+      ],
+    },
   });
 
-  /*  const handleInputChange =
-    (field: string) => (event: { target: { value: any } }) => {
-      setFormData({ ...formData, [field]: event.target.value });
-    }; */
-
-  const handleInputChange =
-    (field: string, nestedField?: string) =>
+  /* const handleInputChange =
+    (field: string, nestedField?: string, secondNestedField?: string) =>
     (event: { target: { value: any } }) => {
       setFormData((prevFormData) => {
         if (nestedField) {
+          return {
+            ...prevFormData,
+            [field]: {
+              ...prevFormData[field],
+              [nestedField]: event.target.value,
+            },
+          };
+        } else {
+          return { ...prevFormData, [field]: event.target.value };
+        }
+      });
+    }; */
+
+  const handleInputChange =
+    (
+      field: string,
+      nestedField?: string,
+      secondNestedField?: string,
+      index?: number
+    ) =>
+    (event: { target: { value: any } }) => {
+      setFormData((prevFormData) => {
+        if (secondNestedField !== undefined && index !== undefined) {
+          return {
+            ...prevFormData,
+            [field]: {
+              ...prevFormData[field],
+              [nestedField]: prevFormData[field][nestedField].map(
+                (item: any, i: number) =>
+                  i === index
+                    ? { ...item, [secondNestedField]: event.target.value }
+                    : item
+              ),
+            },
+          };
+        } else if (nestedField) {
           return {
             ...prevFormData,
             [field]: {
@@ -156,9 +198,12 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     }
 
     if (
-      formData["perguntaUm"] === formData["perguntaDois"] ||
-      formData["perguntaUm"] === formData["perguntaTres"] ||
-      formData["perguntaDois"] === formData["perguntaTres"]
+      formData.safety_questions.question_answer["perguntaUm"] ===
+        formData.safety_questions.question_answer["perguntaDois"] ||
+      formData.safety_questions.question_answer["perguntaUm"] ===
+        formData.safety_questions.question_answer["perguntaTres"] ||
+      formData.safety_questions.question_answer["perguntaDois"] ===
+        formData.safety_questions.question_answer["perguntaTres"]
     ) {
       alert("Perguntas de segurança repetidas!");
       return false;
@@ -190,6 +235,24 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
           DDD: formData.telephone.ddd,
           number: formData.telephone.number,
         },
+        safety_questions: {
+          question_answer: [
+            {
+              question: formData.safety_questions.question_answer["perguntaUm"],
+              answer: formData.safety_questions.question_answer["respostaUm"],
+            },
+            {
+              question:
+                formData.safety_questions.question_answer["perguntaDois"],
+              answer: formData.safety_questions.question_answer["respostaDois"],
+            },
+            {
+              question:
+                formData.safety_questions.question_answer["perguntaTres"],
+              answer: formData.safety_questions.question_answer["respostaTres"],
+            },
+          ],
+        },
         ...(props.userType === "realtor" && { creci: formData.creci }),
       };
 
@@ -220,6 +283,33 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         });
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/safety_questions/",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setSafetyQuestions(json);
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <Form>
@@ -346,53 +436,89 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       </Title>
       <SelectQuestion
         placeholder={"Escolha a pergunta 1..."}
-        question={formData.perguntaUm}
+        question={formData.safety_questions.question_answer["perguntaUm"]}
         setQuestion={(value: any) =>
-          handleInputChange("perguntaUm")({ target: { value } })
+          handleInputChange(
+            "safety_questions",
+            "question_answer",
+            "perguntaUm",
+            0
+          )({ target: { value } })
         }
-        possibleQuestions={questions}
+        possibleQuestions={safety_questions.map(
+          (question: { question: string }) => question.question
+        )}
       />
       <TextFieldStyled
         id="respostaUm"
         label="Resposta 1"
         variant="outlined"
         margin="normal"
-        value={formData.respostaUm}
-        onChange={handleInputChange("respostaUm")}
+        value={formData.safety_questions.question_answer["respostaUm"]}
+        onChange={handleInputChange(
+          "safety_questions",
+          "question_answer",
+          "respostaUm",
+          0
+        )}
         style={{ width: "100%", borderRadius: "15px" }}
       />
       <SelectQuestion
         placeholder={"Escolha a pergunta 2..."}
-        question={formData.perguntaDois}
+        question={formData.safety_questions.question_answer["perguntaDois"]}
         setQuestion={(value: any) =>
-          handleInputChange("perguntaDois")({ target: { value } })
+          handleInputChange(
+            "safety_questions",
+            "question_answer",
+            "perguntaDois",
+            1
+          )({ target: { value } })
         }
-        possibleQuestions={questions}
+        possibleQuestions={safety_questions.map(
+          (question: { question: string }) => question.question
+        )}
       />
       <TextFieldStyled
         id="respostaDois"
         label="Resposta 2"
         variant="outlined"
         margin="normal"
-        value={formData.respostaDois}
-        onChange={handleInputChange("respostaDois")}
+        value={formData.safety_questions.question_answer["respostaDois"]}
+        onChange={handleInputChange(
+          "safety_questions",
+          "question_answer",
+          "respostaDois",
+          1
+        )}
         sx={{ width: "100%", borderRadius: "15px" }}
       />
       <SelectQuestion
         placeholder={"Escolha a pergunta 3..."}
-        question={formData.perguntaTres}
+        question={formData.safety_questions.question_answer["perguntaTres"]}
         setQuestion={(value: any) =>
-          handleInputChange("perguntaTres")({ target: { value } })
+          handleInputChange(
+            "safety_questions",
+            "question_answer",
+            "perguntaTres",
+            2
+          )({ target: { value } })
         }
-        possibleQuestions={questions}
+        possibleQuestions={safety_questions.map(
+          (question: { question: string }) => question.question
+        )}
       />
       <TextFieldStyled
         id="respostaTres"
         label="Resposta 3"
         variant="outlined"
         margin="normal"
-        value={formData.respostaTres}
-        onChange={handleInputChange("respostaTres")}
+        value={formData.safety_questions.question_answer["respostaTres"]}
+        onChange={handleInputChange(
+          "safety_questions",
+          "question_answer",
+          "respostaTres",
+          2
+        )}
         sx={{ width: "100%", borderRadius: "15px" }}
       />
       <div>

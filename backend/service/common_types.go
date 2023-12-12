@@ -12,7 +12,6 @@ type Telephone struct {
 }
 
 type QuestionAnswer struct {
-	SaquID   string `json:"saqu_id"`
 	Question string `json:"question"`
 	Answer   string `json:"answer"`
 }
