@@ -1,4 +1,4 @@
-alter table realtor add column UF uuid not null
+alter table realtor add column UF uuid not null;
 
 CREATE TABLE uf_options (
   ufop_id UUID PRIMARY KEY,
