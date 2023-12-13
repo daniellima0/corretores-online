@@ -1,7 +1,6 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Button,
-  Grid,
   IconButton,
   InputAdornment,
   TextField,
@@ -253,7 +252,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
           }
           return response.json();
         })
-        .then((json) => {
+        .then(() => {
           setLoading(false);
           navigate("/login");
         })

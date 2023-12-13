@@ -58,10 +58,83 @@ const DropdownInputStyled = styled(TextField)({
 
 const ResetForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const [formData, setFormData] = useState({
+    email: "",
+    safety_questions: [
+      {
+        question: "",
+        answer: "",
+      },
+      {
+        question: "",
+        answer: "",
+      },
+      {
+        question: "",
+        answer: "",
+      },
+    ],
+    password: "",
+  });
+
+  const handleInputChange =
+    (field: string, nestedField?: string, index?: number) =>
+    (event: { target: { value: any } }) => {
+      console.log(field, nestedField, index, event.target.value);
+      setFormData((prevFormData) => {
+        if (nestedField !== undefined && index !== undefined) {
+          return {
+            ...prevFormData,
+            [field]: prevFormData[field].map((item: any, i: number) =>
+              i === index
+                ? { ...item, [nestedField]: event.target.value }
+                : item
+            ),
+          };
+        } else if (nestedField) {
+          return {
+            ...prevFormData,
+            [field]: {
+              ...prevFormData[field],
+              [nestedField]: event.target.value,
+            },
+          };
+        } else {
+          return { ...prevFormData, [field]: event.target.value };
+        }
+      });
+    };
+
+  const validateData = () => {
+    const securityQuestions = formData.safety_questions.map(
+      (questionData, index) => {
+        const question = questionData.question;
+        const answer = questionData.answer;
+
+        if (!question || !answer) {
+          alert(
+            `Preencha a pergunta e a resposta correspondente para a pergunta ${
+              index + 1
+            }!`
+          );
+          return false;
+        }
+
+        return true;
+      }
+    );
+
+    if (securityQuestions.includes(false)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  
 
   return (
     <Form>
@@ -72,7 +145,18 @@ const ResetForm = () => {
         margin="normal"
         fullWidth={false}
       />
-      <DropdownInputStyled placeholder={"Escolha a pergunta 1..."} />
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 1..."}
+        question={formData.safety_questions[0].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            0
+          )({ target: { value: selectedQuestion } })
+        }
+        possibleQuestions={safety_questions}
+      />
       <TextFieldStyled
         id="respostaUm"
         label="Resposta 1"
