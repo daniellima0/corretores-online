@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
+
+
   const navigator = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");

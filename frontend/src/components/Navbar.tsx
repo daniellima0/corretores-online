@@ -90,6 +90,12 @@ function NavBar() {
     setAnchorElNav(null);
   };
 
+  const handleMyProfileClick = () => {
+    console.log("aaaaaaaaaaaaaa");
+    navigator(`/profile/${userId}`);
+    window.location.reload();
+  };
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
@@ -178,12 +184,21 @@ function NavBar() {
               {pages.map((page) => (
                 <MenuItem key={page.route} onClick={handleCloseNavMenu}>
                   <Typography color="black" textAlign="center">
-                    <Link
-                      to={`/${page.route}/`}
-                      style={{ textDecoration: "inherit", color: "inherit" }}
-                    >
-                      {page.nickname}
-                    </Link>
+                    {page.nickname == "Meu Perfil" ? (
+                      <a
+                        onClick={handleMyProfileClick}
+                        style={{ textDecoration: "inherit", color: "inherit" }}
+                      >
+                        {page.nickname}
+                      </a>
+                    ) : (
+                      <Link
+                        to={`/${page.route}/`}
+                        style={{ textDecoration: "inherit", color: "inherit" }}
+                      >
+                        {page.nickname}
+                      </Link>
+                    )}
                   </Typography>
                 </MenuItem>
               ))}
@@ -224,12 +239,21 @@ function NavBar() {
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: "black", display: "block" }}
               >
-                <Link
-                  to={`/${page.route}`}
-                  style={{ textDecoration: "inherit", color: "inherit" }}
-                >
-                  {page.nickname}
-                </Link>
+                {page.nickname == "Meu Perfil" ? (
+                  <a
+                    onClick={handleMyProfileClick}
+                    style={{ textDecoration: "inherit", color: "inherit" }}
+                  >
+                    {page.nickname}
+                  </a>
+                ) : (
+                  <Link
+                    to={`/${page.route}`}
+                    style={{ textDecoration: "inherit", color: "inherit" }}
+                  >
+                    {page.nickname}
+                  </Link>
+                )}
               </Button>
             ))}
           </Box>
