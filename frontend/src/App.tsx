@@ -12,7 +12,7 @@ import { createContext, useEffect, useState } from "react";
 
 const router = createBrowserRouter([
   {
-    path: "/landing-page",
+    path: "/",
     element: <LandingPage />,
   },
   {
