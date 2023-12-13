@@ -35,6 +35,7 @@ type RequestBody struct {
 	RealtorWhatsapp     *string           `json:"realtor_whatsapp"`
 	Creci               string            `json:"creci"`
 	Telephone           service.Telephone `json:"telephone"`
+	UF                  string            `json:"uf"`
 	SafetyQuestionsUser [3]struct {
 		Question string `json:"question"`
 		Answer   string `json:"answer"`
@@ -129,7 +130,14 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.SafetyQuestions.Question.In(questions),
 	).Exec(ctx)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	uf_option, err := h.client.UfOptions.FindUnique(
+		db.UfOptions.Uf.Equals(request.UF),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	userCreated := h.client.User.CreateOne(
@@ -176,7 +184,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.Realtor.RealID.Set(uuid.New().String()),
 		db.Realtor.Creci.Set(realtor.Creci),
 		db.Realtor.IsOnline.Set(false),
-		db.Realtor.UfOptions.Link(db.UfOptions.UfopID.Equals("f1b3287b-753d-46c6-b6af-8904c93af43a")),
+		db.Realtor.UfOptions.Link(db.UfOptions.UfopID.Equals(uf_option.UfopID)),
 		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 

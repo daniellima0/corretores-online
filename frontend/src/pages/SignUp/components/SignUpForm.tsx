@@ -1,6 +1,7 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Button,
+  Grid,
   IconButton,
   InputAdornment,
   TextField,
@@ -12,6 +13,7 @@ import * as React from "react";
 import SelectQuestion from "./SelectQuestion";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../../components/Loading";
+import SelectUf from "./SelectUF";
 
 const Form = styled("form")({
   width: "80%",
@@ -79,6 +81,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [safety_questions, setSafetyQuestions] = useState([]);
+  const [ufOptions, setUfOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -97,6 +100,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     email: "",
     password: "",
     confirmPassword: "",
+    uf: "",
     safety_questions: [
       { question: "", answer: "" },
       { question: "", answer: "" },
@@ -200,8 +204,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   };
 
   const handleSave = () => {
-    console.log(formData.safety_questions);
     if (validateData()) {
+      setLoading(true);
       const body = {
         name: formData.name,
         cpf: formData.cpf,
@@ -216,7 +220,10 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
           question: item.question,
           answer: item.answer,
         })),
-        ...(props.userType === "realtor" && { creci: formData.creci }),
+        ...(props.userType === "realtor" && {
+          creci: formData.creci,
+          uf: formData.uf,
+        }),
       };
 
       let signUpUrl =
@@ -239,41 +246,72 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         })
         .then((json) => {
           console.log(json);
-          navigate("/login");
         })
         .catch((error) => {
           console.error(error);
+        })
+        .finally(() => {
+          setLoading(false);
+          navigate("/login");
         });
     }
   };
 
-  useEffect(() => {
-    const fetchSafetyQuestions = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          "http://localhost:8080/safety_questions/",
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+  const fetchSafetyQuestions = async () => {
+    setLoading(true);
+    try {
+      const responseSafetyQuestion = await fetch(
+        "http://localhost:8080/safety_questions/",
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-        const json = await response.json();
-        setSafetyQuestions(json);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        console.error(error);
+      );
+
+      if (!responseSafetyQuestion.ok) {
+        throw new Error("Failed to fetch research data");
       }
-    };
+      const jsonSafetyQuestion = await responseSafetyQuestion.json();
+      setSafetyQuestions(jsonSafetyQuestion);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUfOptions = async () => {
+    setLoading(true);
+    try {
+      const responseUfOptions = await fetch(
+        "http://localhost:8080/uf_options/",
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!responseUfOptions.ok) {
+        throw new Error("Failed to fetch UF options data");
+      }
+      const jsonUfOptions = await responseUfOptions.json();
+      setUfOptions(jsonUfOptions);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSafetyQuestions();
+    fetchUfOptions();
   }, []);
 
   if (loading) {
@@ -333,15 +371,29 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         onChange={handleInputChange("cpf")}
       />
       {props.userType === "realtor" && (
-        <TextFieldStyled
-          id="creci"
-          label="CRECI"
-          variant="outlined"
-          margin="normal"
-          fullWidth={false}
-          value={formData.creci}
-          onChange={handleInputChange("creci")}
-        />
+        <Grid container spacing={2} alignItems="center" direction="row">
+          <Grid item xs={8}>
+            <TextFieldStyled
+              id="creci"
+              label="CRECI"
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              value={formData.creci}
+              onChange={handleInputChange("creci")}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <SelectUf
+              placeholder={"UF"}
+              uf={formData.uf}
+              setUf={(selectedUf: any) =>
+                handleInputChange("uf")({ target: { value: selectedUf } })
+              }
+              possibleUfs={ufOptions}
+            />
+          </Grid>
+        </Grid>
       )}
       <TextFieldStyled
         id="email"

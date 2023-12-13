@@ -50,6 +50,7 @@ type Realtor struct {
 	IsOnline        bool             `json:"is_online"`
 	Description     string           `json:"description"`
 	User            User             `json:"user"`
+	UF              string           `json:"uf"`
 	RealtorSocials  []RealtorSocials `json:"socials_realtor"`
 	RealtorLocation RealtorLocation  `json:"realtor_location"`
 }

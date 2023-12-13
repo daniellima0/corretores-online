@@ -4,21 +4,20 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
-export default function SelectQuestion({
+export default function SelectUf({
   placeholder,
-  question,
-  setQuestion,
-  possibleQuestions,
+  uf,
+  setUf,
+  possibleUfs,
 }: {
   placeholder: string;
-  question: string;
-  setQuestion: any;
-  possibleQuestions: any;
+  uf: string;
+  setUf: any;
+  possibleUfs: any;
 }) {
   const handleChange = (event: SelectChangeEvent) => {
-    const selectedQuestion = event.target.value as string;
-
-    setQuestion(selectedQuestion);
+    const selectedUf = event.target.value as string;
+    setUf(selectedUf);
   };
 
   return (
@@ -36,13 +35,13 @@ export default function SelectQuestion({
           fullWidth
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={question}
+          value={uf}
           label={placeholder}
           onChange={handleChange}
         >
-          {possibleQuestions.map((question: any) => (
-            <MenuItem key={question} value={question}>
-              {question}
+          {possibleUfs.map((uf: any) => (
+            <MenuItem key={uf.uf} value={uf.uf}>
+              {uf.uf}
             </MenuItem>
           ))}
         </Select>
