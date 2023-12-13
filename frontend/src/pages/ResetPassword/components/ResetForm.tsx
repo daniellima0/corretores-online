@@ -5,7 +5,6 @@ import {
   InputAdornment,
   TextField,
   styled,
-  MenuItem,
 } from "@mui/material";
 import SelectQuestion from "../../SignUp/components/SelectQuestion";
 import { useEffect, useState } from "react";
@@ -46,18 +45,6 @@ const TextFieldStyled = styled(TextField)({
   },
 });
 
-const DropdownInputStyled = styled(TextField)({
-  marginTop: "14px",
-  marginBottom: "8px",
-  width: "100%",
-
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderRadius: "15px",
-    },
-  },
-});
-
 const ResetForm = () => {
   const [loading, setLoading] = useState(false);
   const [safety_questions, setSafetyQuestions] = useState([]);
@@ -69,21 +56,12 @@ const ResetForm = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: "",
     safety_questions: [
-      {
-        question: "",
-        answer: "",
-      },
-      {
-        question: "",
-        answer: "",
-      },
-      {
-        question: "",
-        answer: "",
-      },
+      { question: "", answer: "" },
+      { question: "", answer: "" },
+      { question: "", answer: "" },
     ],
+    confirmPassword: "",
   });
 
   const handleInputChange =
@@ -120,6 +98,13 @@ const ResetForm = () => {
         const question = questionData.question;
         const answer = questionData.answer;
 
+        if (formData.password !== formData.confirmPassword) {
+          alert(
+            "As senhas não coincidem. Por favor, verifique e tente novamente."
+          );
+          return false;
+        }
+
         if (!question || !answer) {
           alert(
             `Preencha a pergunta e a resposta correspondente para a pergunta ${
@@ -143,17 +128,36 @@ const ResetForm = () => {
   const handleSave = () => {
     if (validateData()) {
       setLoading(true);
+      console.log(
+        formData.safety_questions.map((item) => ({
+          question: item.question,
+          answer: item.answer,
+        }))
+      );
       const body = {
         email: formData.email,
         password: formData.password,
-        safety_questions: formData.safety_questions.map((item) => ({
-          question: item.question,
-          answer: item.answer,
-        })),
+        safety_questions: [
+          {
+            question: formData.safety_questions[0].question,
+            answer: formData.safety_questions[0].answer,
+          },
+          {
+            question: formData.safety_questions[1].question,
+            answer: formData.safety_questions[1].answer,
+          },
+          {
+            question: formData.safety_questions[2].question,
+            answer: formData.safety_questions[2].answer,
+          },
+        ],
       };
+      console.log(body);
+      console.log(JSON.stringify(body));
 
       fetch("http://localhost:8080/auth/reset_password", {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -204,7 +208,7 @@ const ResetForm = () => {
       }
     };
     fetchSafetyQuestions();
-  });
+  }, []);
 
   if (loading) {
     return <LoadingSpinner />;

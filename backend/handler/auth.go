@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -99,13 +101,16 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
 func (h *AuthHandler) ResetPassword(c echo.Context) error {
 	ctx := context.Background()
 
 	var resetPassword service.ResetPasswordRequest
 	if err := c.Bind(&resetPassword); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, "Erro ao fazer bind do resetPassword")
 	}
+
+	fmt.Println(resetPassword)
 
 	if strings.TrimSpace(resetPassword.Email) == "" {
 		return c.JSON(http.StatusBadRequest, "Email is required")
@@ -115,31 +120,40 @@ func (h *AuthHandler) ResetPassword(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Password is required")
 	}
 
-	// Encontre o usuário pelo email
-	user, err := h.client.User.FindUnique(
-		db.User.Email.Equals(resetPassword.Email),
-	).Exec(ctx)
+	if len(resetPassword.SafetyQuestionsUser) == 0 {
+		return c.JSON(http.StatusBadRequest, "Safety questions are required")
+	}
+
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(resetPassword.Password), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	// Encontre as perguntas de segurança do usuário
+	user, err := h.client.User.FindUnique(
+		db.User.Email.Equals(resetPassword.Email),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.Wrap(err, "Erro ao encontrar usuário pelo email"))
+	}
+
 	safetyQuestions, err := h.client.SafetyQuestionsUser.FindMany(
 		db.SafetyQuestionsUser.UserID.Equals(user.UserID),
 	).With(
 		db.SafetyQuestionsUser.SafetyQuestions.Fetch(),
 	).Exec(ctx)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, errors.Wrap(err, "Erro ao encontrar perguntas de segurança do usuário"))
 	}
 
-	// Verifique se as perguntas e respostas fornecidas correspondem às registradas
 	for _, question := range resetPassword.SafetyQuestionsUser {
 		found := false
 		for _, safetyQuestion := range safetyQuestions {
-			if safetyQuestion.SafetyQuestions().Question == question.Question && safetyQuestion.Answer == question.Answer {
-				found = true
-				break
+			if safetyQuestion.SafetyQuestions().Question == question.Question {
+				err := bcrypt.CompareHashAndPassword([]byte(safetyQuestion.Answer), []byte(question.Answer))
+				if err == nil {
+					found = true
+					break
+				}
 			}
 		}
 		if !found {
@@ -147,14 +161,13 @@ func (h *AuthHandler) ResetPassword(c echo.Context) error {
 		}
 	}
 
-	// Atualize a senha do usuário
 	_, err = h.client.User.FindUnique(
 		db.User.UserID.Equals(user.UserID),
 	).Update(
-		db.User.Password.Set(resetPassword.Password),
+		db.User.Password.Set(string(encryptedPassword)),
 	).Exec(ctx)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, "Erro ao atualizar senha do usuário")
 	}
 
 	return c.JSON(http.StatusOK, "Senha atualizada com sucesso")

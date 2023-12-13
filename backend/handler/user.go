@@ -71,25 +71,35 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Telephone is required")
 	}
 
+	if len(user.SafetyQuestionsUser) < 3 {
+		return echo.NewHTTPError(http.StatusBadRequest, "SafetyQuestions is required")
+	}
+
+	questions := []string{
+		user.SafetyQuestionsUser[0].Question,
+		user.SafetyQuestionsUser[1].Question,
+		user.SafetyQuestionsUser[2].Question,
+	}
+
 	var encryptedPassword, err = bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	// encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err.Error())
-	// }
+	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser[0].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 
-	// encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[1].Answer), 14)
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err.Error())
-	// }
+	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser[1].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 
-	// encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err.Error())
-	// }
+	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser[2].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 
 	telephoneJson, err := json.Marshal(user.Telephone)
 	if err != nil {
@@ -103,7 +113,14 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	_, err = h.client.User.CreateOne(
+	safety_questions, err := h.client.SafetyQuestions.FindMany(
+		db.SafetyQuestions.Question.In(questions),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	created := h.client.User.CreateOne(
 		db.User.UserID.Set(user.UserID),
 		db.User.Name.Set(user.Name),
 		db.User.Cpf.Set(user.Cpf),
@@ -112,35 +129,32 @@ func (h *UserHandler) Create(c echo.Context) error {
 		db.User.DateOfBirth.Set(user.DateOfBirth),
 		db.User.Telephone.Set(telephoneJson),
 		db.User.AuthStatus.Link(db.AuthStatus.AustID.Equals(authStatus.AustID)),
-	).Exec(ctx)
-	if err != nil {
+	).Tx()
+
+	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[0].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	).Tx()
+
+	second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[1].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	).Tx()
+
+	third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
+		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
+		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[2].SaquID)),
+		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
+	).Tx()
+
+	if err := h.client.Prisma.Transaction(created, first_safety_questions, second_safety_questions, third_safety_questions).Exec(ctx); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-
-	// first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-	// 	db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-	// 	db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
-	// 	db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
-	// 	db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
-	// ).Tx()
-
-	// second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-	// 	db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-	// 	db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
-	// 	db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[1].SaquID)),
-	// 	db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
-	// ).Tx()
-
-	// third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-	// 	db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-	// 	db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
-	// 	db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
-	// 	db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
-	// ).Tx()
-
-	// if err := h.client.Prisma.Transaction(created, first_safety_questions, second_safety_questions, third_safety_questions).Exec(ctx); err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err.Error())
-	// }
 
 	return c.JSON(http.StatusCreated, "Usuário criado com sucesso!")
 }
