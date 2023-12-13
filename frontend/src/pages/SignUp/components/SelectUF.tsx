@@ -24,11 +24,10 @@ export default function SelectUf({
     <Box
       sx={{
         minWidth: 120,
-        width: "100%",
-        paddingTop: "20px",
+        width: "40%",
       }}
     >
-      <FormControl fullWidth>
+      <FormControl fullWidth margin="normal">
         <InputLabel id="demo-simple-select-label">{placeholder}</InputLabel>
         <Select
           sx={{ borderRadius: "15px" }}

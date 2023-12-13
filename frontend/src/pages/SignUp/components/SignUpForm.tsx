@@ -32,11 +32,21 @@ const Form = styled("form")({
 
 const TextFieldStyled = styled(TextField)({
   width: "100%",
+  padding: "0px",
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
       borderRadius: "15px",
     },
   },
+});
+
+const CreciBox = styled("div")({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  gap: "20px",
 });
 
 const Title = styled(Typography)`
@@ -245,14 +255,13 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
           return response.json();
         })
         .then((json) => {
-          console.log(json);
+          setLoading(false);
+          navigate("/login");
         })
         .catch((error) => {
           console.error(error);
-        })
-        .finally(() => {
           setLoading(false);
-          navigate("/login");
+          alert("Erro ao cadastrar usuário!");
         });
     }
   };
@@ -371,29 +380,25 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
         onChange={handleInputChange("cpf")}
       />
       {props.userType === "realtor" && (
-        <Grid container spacing={2} alignItems="center" direction="row">
-          <Grid item xs={8}>
-            <TextFieldStyled
-              id="creci"
-              label="CRECI"
-              variant="outlined"
-              margin="normal"
-              fullWidth
-              value={formData.creci}
-              onChange={handleInputChange("creci")}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <SelectUf
-              placeholder={"UF"}
-              uf={formData.uf}
-              setUf={(selectedUf: any) =>
-                handleInputChange("uf")({ target: { value: selectedUf } })
-              }
-              possibleUfs={ufOptions}
-            />
-          </Grid>
-        </Grid>
+        <CreciBox>
+          <TextFieldStyled
+            id="creci"
+            label="CRECI"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            value={formData.creci}
+            onChange={handleInputChange("creci")}
+          />
+          <SelectUf
+            placeholder={"UF"}
+            uf={formData.uf}
+            setUf={(selectedUf: any) =>
+              handleInputChange("uf")({ target: { value: selectedUf } })
+            }
+            possibleUfs={ufOptions}
+          />
+        </CreciBox>
       )}
       <TextFieldStyled
         id="email"
