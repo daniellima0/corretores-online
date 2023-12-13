@@ -13,16 +13,18 @@ import Tooltip from "@mui/material/Tooltip";
 import logo from "../assets/logo-black.svg";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
-import { useContext, useEffect } from "react";
-import { UserTypeContext } from "../App";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import LoadingSpinner from "./Loading";
 
 function NavBar() {
-  const { userType } = useContext(UserTypeContext);
+  const [userType, setUserType] = React.useState("user");
+  const [loading, setLoading] = React.useState(false);
   const navigator = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await fetch("http://localhost:8080/auth/check", {
           method: "GET",
@@ -33,10 +35,12 @@ function NavBar() {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
-        //setUserType(json.auth_status);
+        setUserType(json.auth_status);
         console.log(json.auth_status);
+        setLoading(false);
       } catch (error) {
         console.error(error);
+        setLoading(false);
       }
     };
 
@@ -104,6 +108,10 @@ function NavBar() {
         console.error(error);
       });
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <AppBar
