@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -9,17 +8,21 @@ import {
   Typography,
   styled,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { RealtorType } from "types/RealtorType";
 
 function renderRow(
   item: RealtorType,
-  setSearchMapCenter: (position: { lat: number; lng: number }) => void
+  setSearchMapCenter: (position: { lat: number; lng: number }) => void,
+  navigator: any
 ) {
   const handleListItemClick = () => {
-    setSearchMapCenter({
-      lat: Number(item.realtor_location.latitude),
-      lng: Number(item.realtor_location.longitude),
-    });
+    navigator(`/profile/${item.user.user_id}`);
+
+    // setSearchMapCenter({
+    //   lat: Number(item.realtor_location.latitude),
+    //   lng: Number(item.realtor_location.longitude),
+    // });
   };
 
   return (
@@ -35,7 +38,7 @@ function renderRow(
         </ListItemAvatar>
         <ListItemText
           primary={
-            <React.Fragment>
+            <>
               <Typography
                 sx={{ display: "inline" }}
                 component={"span"}
@@ -44,19 +47,9 @@ function renderRow(
               >
                 {item.user.name}
               </Typography>
-            </React.Fragment>
+            </>
           }
-          secondary={
-            <React.Fragment>
-              <Typography
-                sx={{ display: "inline" }}
-                component={"span"}
-                variant="h6"
-                color="text.primary"
-              ></Typography>
-              Visitar perfil
-            </React.Fragment>
-          }
+          secondary={<>Visitar perfil</>}
         />
       </ListItemButton>
     </ListItem>
@@ -72,11 +65,7 @@ export default function BrokerList({
   data,
   setSearchMapCenter,
 }: BrokerListProps) {
-  const [localData, setLocalData] = useState<RealtorType[]>([]);
-
-  useEffect(() => {
-    setLocalData(data);
-  }, [data]);
+  const navigator = useNavigate();
 
   const ListBox = styled(Box)(({ theme }) => ({
     width: "25%",
@@ -109,10 +98,10 @@ export default function BrokerList({
             padding: "20px",
           }}
         >
-          {data
+          {data && data.length != 0
             ? data.length > 1
-              ? `Foram encontrados ${localData.length} corretores nessa área:`
-              : `Foi encontrado ${localData.length} corretor nessa área:`
+              ? `Foram encontrados ${data.length} corretores nessa área:`
+              : `Foi encontrado ${data.length} corretor nessa área:`
             : `Não foram encontrados corretores nessa área.`}
         </Typography>
 
@@ -124,8 +113,8 @@ export default function BrokerList({
             width: "100%",
           }}
         >
-          {localData &&
-            localData.map((item) => renderRow(item, setSearchMapCenter))}
+          {data &&
+            data.map((item) => renderRow(item, setSearchMapCenter, navigator))}
         </div>
       </div>
     </ListBox>

@@ -7,6 +7,7 @@ import React, { useContext, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useTheme } from "@mui/material";
 import { UserTypeContext } from "../../../App";
+import { useParams } from "react-router-dom";
 
 const Container = styled("div")`
   margin-top: 40px;
@@ -124,7 +125,7 @@ const AboutMeTitle = styled(Typography)`
 const Description = styled(Typography)``;
 
 interface RealtorInfoProps {
-  userId: string;
+  loggedUserId: string;
 }
 
 const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
@@ -132,7 +133,11 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
 
   const theme = useTheme();
 
-  const url = "http://localhost:8080/realtors/" + props.userId;
+  const params = useParams();
+
+  console.log("user_id = ", params.user_id);
+
+  const url = "http://localhost:8080/realtors/" + params.user_id;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -259,7 +264,7 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
           <QRCodeWrapper>
             <QRCode
               style={{ height: "120px", width: "120px" }}
-              value="https://www.google.com"
+              value={`http://localhost:5173/profile/${params.user_id}`}
             />
           </QRCodeWrapper>
           <Banner src={defaultBanner} />
@@ -283,7 +288,12 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
             <FormControlLabel
               control={
                 <Switch
-                  disabled={userType === "realtor" ? false : true}
+                  disabled={
+                    userType === "realtor" &&
+                    props.loggedUserId == params.user_id
+                      ? false
+                      : true
+                  }
                   checked={profileData.is_online}
                   onChange={handleChange}
                   inputProps={{ "aria-label": "controlled" }}

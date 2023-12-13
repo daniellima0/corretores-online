@@ -231,22 +231,7 @@ const HomePage = () => {
     alert("Digite e escolha uma sugestão");
   };
 
-  if (!isLoaded) {
-    return (
-      <div>
-        <Navbar />
-        <div
-          className="BodyContainer"
-          style={{ width: "100%", height: "90vh" }}
-        >
-          Carregando Google Maps...
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (loading) {
+  if (loading || !isLoaded) {
     return <LoadingSpinner />;
   }
 

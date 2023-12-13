@@ -19,6 +19,7 @@ import LoadingSpinner from "./Loading";
 
 function NavBar() {
   const [userType, setUserType] = React.useState("user");
+  const [userId, setUserId] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const navigator = useNavigate();
 
@@ -35,6 +36,7 @@ function NavBar() {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
+        setUserId(json.user_id);
         setUserType(json.auth_status);
         console.log(json.auth_status);
         setLoading(false);
@@ -53,7 +55,7 @@ function NavBar() {
     pages.push(
       { nickname: "Mapa", route: "home-page" },
       { nickname: "Configurações", route: "settings" },
-      { nickname: "Meu Perfil", route: "profile" }
+      { nickname: "Meu Perfil", route: `profile/${userId}` }
     );
   } else if (userType == "user") {
     pages.push(
@@ -102,7 +104,7 @@ function NavBar() {
         }
       })
       .then(() => {
-        navigator("/landing-page");
+        navigator("/");
       })
       .catch((error) => {
         console.error(error);

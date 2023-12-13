@@ -42,7 +42,7 @@ const Profile = () => {
   return (
     <>
       <Navbar />
-      <RealtorInfo userId={userId} />
+      <RealtorInfo loggedUserId={userId} />
       <Footer />
     </>
   );

@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { Root, createRoot } from "react-dom/client";
 import HiddenComponent from "./HiddenComponent";
 import { RealtorType } from "types/RealtorType";
+import { useNavigate } from "react-router-dom";
 
 interface CorretoresMapProps {
   data: RealtorType[];
@@ -142,11 +143,15 @@ function Broker(props: MapProps) {
   const [brokerData, setBrokerData] = useState<RealtorType[]>(data);
   const [hover, setHover] = useState<string | null>(null);
 
+  const navigator = useNavigate();
+
   useEffect(() => {
     setBrokerData(data);
   }, [props.data]);
 
-  const handleProfileVisit = () => {
+  const handleProfileVisit = (user_id: string) => {
+    navigator(`/profile/${user_id}`);
+
     console.log("Visitando perfil");
   };
 
@@ -238,7 +243,7 @@ function Broker(props: MapProps) {
                       boxShadow: "none",
                     }}
                     variant="contained"
-                    onClick={handleProfileVisit}
+                    onClick={() => handleProfileVisit(broker.user.user_id)}
                   >
                     Visitar perfil
                   </Button>

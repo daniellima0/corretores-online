@@ -80,19 +80,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     },
   });
 
-  /*   const questions = [
-    "Qual é o nome do seu primeiro animal de estimação?",
-    "Em que cidade você nasceu?",
-    "Qual é o nome do meio da sua mãe?",
-    "Qual era o nome da sua escola primária?",
-    "Qual é o seu prato de comida favorito?",
-    "Qual é o nome do seu melhor amigo de infância?",
-    "Qual é o nome da rua em que você cresceu?",
-    "Qual é o nome do seu personagem fictício favorito?",
-    "Qual é o modelo do seu primeiro carro?",
-    "Em que ano você se formou no ensino médio?",
-  ]; */
-
   const [showPassword, setShowPassword] = useState(false);
   const [safety_questions, setSafetyQuestions] = useState([]);
   const [ufOptions, setUfOptions] = useState([]);
@@ -123,24 +110,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   });
 
   const [areTermsAccepted, setAreTermsAccepted] = React.useState(false);
-
-  /* const handleInputChange =
-    (field: string, nestedField?: string, secondNestedField?: string) =>
-    (event: { target: { value: any } }) => {
-      setFormData((prevFormData) => {
-        if (nestedField) {
-          return {
-            ...prevFormData,
-            [field]: {
-              ...prevFormData[field],
-              [nestedField]: event.target.value,
-            },
-          };
-        } else {
-          return { ...prevFormData, [field]: event.target.value };
-        }
-      });
-    }; */
 
   const handleInputChange =
     (field: string, nestedField?: string, index?: number) =>
@@ -174,7 +143,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     console.log(formData.date_of_birth);
     for (const field in formData) {
       if (!formData[field]) {
-        if (field === "creci" && props.userType === "user") continue;
+        if ((field === "creci" || field == "uf") && props.userType === "user")
+          continue;
         alert(`Preencha o campo ${field}!`);
         return false;
       }
