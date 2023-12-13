@@ -13,4 +13,5 @@ func AuthRouter(e *echo.Echo, dbClient *db.PrismaClient) {
 	g.POST("login", h.Login)
 	g.GET("check", h.CheckUserLoggedIn)
 	g.GET("logout", h.Logout)
+	g.PUT("reset_password", h.ResetPassword)
 }

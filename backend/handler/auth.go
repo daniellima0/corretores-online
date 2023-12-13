@@ -99,3 +99,63 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+func (h *AuthHandler) ResetPassword(c echo.Context) error {
+	ctx := context.Background()
+
+	var resetPassword service.ResetPasswordRequest
+	if err := c.Bind(&resetPassword); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	if strings.TrimSpace(resetPassword.Email) == "" {
+		return c.JSON(http.StatusBadRequest, "Email is required")
+	}
+
+	if strings.TrimSpace(resetPassword.Password) == "" {
+		return c.JSON(http.StatusBadRequest, "Password is required")
+	}
+
+	// Encontre o usuário pelo email
+	user, err := h.client.User.FindUnique(
+		db.User.Email.Equals(resetPassword.Email),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// Encontre as perguntas de segurança do usuário
+	safetyQuestions, err := h.client.SafetyQuestionsUser.FindMany(
+		db.SafetyQuestionsUser.UserID.Equals(user.UserID),
+	).With(
+		db.SafetyQuestionsUser.SafetyQuestions.Fetch(),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// Verifique se as perguntas e respostas fornecidas correspondem às registradas
+	for _, question := range resetPassword.SafetyQuestionsUser {
+		found := false
+		for _, safetyQuestion := range safetyQuestions {
+			if safetyQuestion.SafetyQuestions().Question == question.Question && safetyQuestion.Answer == question.Answer {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return c.JSON(http.StatusBadRequest, "As respostas fornecidas não correspondem às registradas")
+		}
+	}
+
+	// Atualize a senha do usuário
+	_, err = h.client.User.FindUnique(
+		db.User.UserID.Equals(user.UserID),
+	).Update(
+		db.User.Password.Set(resetPassword.Password),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, "Senha atualizada com sucesso")
+}
