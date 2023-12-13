@@ -24,12 +24,12 @@ model realtor {
   realtor_instagram String?           @db.VarChar(255)
   realtor_facebook  String?           @db.VarChar(255)
   realtor_whatsapp  String?           @db.VarChar(255)
-  uf_id             String            @db.Uuid
-  uf_options        uf_options        @relation(fields: [uf_id], references: [ufop_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_realtor_uf")
+  ufop_id           String            @db.Uuid
+  uf_options        uf_options        @relation(fields: [ufop_id], references: [ufop_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_realtor_uf")
   user              user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   realtor_location  realtor_location?
 
-  @@unique([creci, uf_id], map: "unique_creci_uf_constraint")
+  @@unique([creci, ufop_id], map: "unique_creci_uf_constraint")
 }
 
 model realtor_location {

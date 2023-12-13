@@ -1,0 +1,1 @@
+alter table realtor rename column uf_id to ufop_id;
