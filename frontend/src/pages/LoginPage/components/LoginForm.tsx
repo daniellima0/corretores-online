@@ -6,6 +6,7 @@ import {
   TextField,
   styled,
 } from "@mui/material";
+import LoadingSpinner from "../../../components/Loading";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -57,6 +58,7 @@ const TextFieldStyled = styled(TextField)({
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigator = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -65,6 +67,7 @@ const LoginForm = () => {
   });
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     event.preventDefault();
     fetch("http://localhost:8080/auth/login", {
       method: "POST",
@@ -82,10 +85,12 @@ const LoginForm = () => {
       })
       .then((json) => {
         console.log(json);
+        setLoading(false);
         navigator("/home-page");
       })
       .catch((error) => {
         console.error(error);
+        setLoading(false);
         alert("Erro ao fazer login");
       });
   };
@@ -102,6 +107,10 @@ const LoginForm = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Form onSubmit={handleLogin}>
