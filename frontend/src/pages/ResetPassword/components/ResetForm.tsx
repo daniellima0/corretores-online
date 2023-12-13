@@ -8,7 +8,9 @@ import {
   MenuItem,
 } from "@mui/material";
 import SelectQuestion from "../../SignUp/components/SelectQuestion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../../components/Loading";
 
 const Form = styled("form")({
   width: "80%",
@@ -57,12 +59,17 @@ const DropdownInputStyled = styled(TextField)({
 });
 
 const ResetForm = () => {
+  const [loading, setLoading] = useState(false);
+  const [safety_questions, setSafetyQuestions] = useState([]);
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
   const [formData, setFormData] = useState({
     email: "",
+    password: "",
+    confirmPassword: "",
     safety_questions: [
       {
         question: "",
@@ -77,7 +84,6 @@ const ResetForm = () => {
         answer: "",
       },
     ],
-    password: "",
   });
 
   const handleInputChange =
@@ -134,7 +140,75 @@ const ResetForm = () => {
     return true;
   };
 
-  
+  const handleSave = () => {
+    if (validateData()) {
+      setLoading(true);
+      const body = {
+        email: formData.email,
+        password: formData.password,
+        safety_questions: formData.safety_questions.map((item) => ({
+          question: item.question,
+          answer: item.answer,
+        })),
+      };
+
+      fetch("http://localhost:8080/auth/reset_password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(() => {
+          setLoading(false);
+          navigate("/login");
+        })
+        .catch((error) => {
+          console.error(error);
+          setLoading(false);
+          alert("Erro ao atualizar senha!");
+        });
+    }
+  };
+
+  useEffect(() => {
+    const fetchSafetyQuestions = async () => {
+      setLoading(true);
+      try {
+        const responseSafetyQuestion = await fetch(
+          "http://localhost:8080/safety_questions/",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!responseSafetyQuestion.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const jsonSafetyQuestion = await responseSafetyQuestion.json();
+        setSafetyQuestions(jsonSafetyQuestion);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSafetyQuestions();
+  });
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Form>
@@ -143,6 +217,8 @@ const ResetForm = () => {
         label="Email"
         variant="outlined"
         margin="normal"
+        value={formData.email}
+        onChange={handleInputChange("email")}
         fullWidth={false}
       />
       <SelectQuestion
@@ -162,28 +238,50 @@ const ResetForm = () => {
         label="Resposta 1"
         variant="outlined"
         margin="normal"
-        value={""}
-        //onChange={""}
+        value={formData.safety_questions[0].answer}
+        onChange={handleInputChange("safety_questions", "answer", 0)}
         style={{ width: "100%", borderRadius: "15px" }}
       />
-      <DropdownInputStyled placeholder={"Escolha a pergunta 2..."} />
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 2..."}
+        question={formData.safety_questions[1].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            1
+          )({ target: { value: selectedQuestion } })
+        }
+        possibleQuestions={safety_questions}
+      />
       <TextFieldStyled
         id="respostaDois"
         label="Resposta 2"
         variant="outlined"
         margin="normal"
-        value={""}
-        //onChange={""}
+        value={formData.safety_questions[1].answer}
+        onChange={handleInputChange("safety_questions", "answer", 1)}
         style={{ width: "100%", borderRadius: "15px" }}
       />
-      <DropdownInputStyled placeholder={"Escolha a pergunta 3..."} />
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 3..."}
+        question={formData.safety_questions[2].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            2
+          )({ target: { value: selectedQuestion } })
+        }
+        possibleQuestions={safety_questions}
+      />
       <TextFieldStyled
         id="respostaTres"
         label="Resposta 3"
         variant="outlined"
         margin="normal"
-        value={""}
-        //onChange={""}
+        value={formData.safety_questions[2].answer}
+        onChange={handleInputChange("safety_questions", "answer", 2)}
         style={{ width: "100%", borderRadius: "15px" }}
       />
       <TextFieldStyled
@@ -193,6 +291,8 @@ const ResetForm = () => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.password}
+        onChange={handleInputChange("password")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -214,6 +314,8 @@ const ResetForm = () => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.confirmPassword}
+        onChange={handleInputChange("confirmPassword")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -234,6 +336,7 @@ const ResetForm = () => {
           type="submit"
           variant="contained"
           color="primary"
+          onClick={handleSave}
         >
           <span>Redefinir</span>
         </ButtonStyled>
