@@ -21,6 +21,7 @@ function NavBar() {
   const [userType, setUserType] = React.useState("user");
   const [userId, setUserId] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [name, setName] = React.useState("");
   const navigator = useNavigate();
 
   useEffect(() => {
@@ -38,7 +39,8 @@ function NavBar() {
         const json = await response.json();
         setUserId(json.user_id);
         setUserType(json.auth_status);
-        console.log(json.auth_status);
+        setName(json.name);
+        console.log("\n\n\n\n\n", json);
         setLoading(false);
       } catch (error) {
         console.error(error);
@@ -235,7 +237,7 @@ function NavBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Opções">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar src={"a"} />
+                <Avatar alt={name} src={"a"} />
               </IconButton>
             </Tooltip>
             <Menu

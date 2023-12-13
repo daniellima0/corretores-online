@@ -7,6 +7,7 @@ import {
   styled,
   MenuItem,
 } from "@mui/material";
+import SelectQuestion from "../../SignUp/components/SelectQuestion";
 import { useState } from "react";
 
 const Form = styled("form")({
@@ -35,23 +36,10 @@ const ButtonStyled = styled(Button)({
 
 const TextFieldStyled = styled(TextField)({
   width: "100%",
-  "& label.Mui-focused": {
-    color: "#FF5E00",
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: "#FF5E00",
-  },
+  padding: "0px",
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
-      borderColor: "#1C5E9F",
       borderRadius: "15px",
-      border: "2px solid #1C5E9F",
-    },
-    "&:hover fieldset": {
-      borderColor: "#1C5E9F",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#1C5E9F",
     },
   },
 });
@@ -60,35 +48,13 @@ const DropdownInputStyled = styled(TextField)({
   marginTop: "14px",
   marginBottom: "8px",
   width: "100%",
-  "& label.Mui-focused": {
-    color: "#FF5E00",
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: "#FF5E00",
-  },
+
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
-      borderColor: "#1C5E9F",
       borderRadius: "15px",
-      border: "2px solid #1C5E9F",
-    },
-    "&:hover fieldset": {
-      borderColor: "#1C5E9F",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#1C5E9F",
     },
   },
 });
-
-const securityQuestions = [
-  { value: "questao1", label: "Qual é o nome da sua primeira escola?" },
-  {
-    value: "questao2",
-    label: "Qual é o nome do seu primeiro animal de estimação?",
-  },
-  { value: "questao3", label: "Qual é o nome da cidade onde nasceu?" },
-];
 
 const ResetForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -106,19 +72,35 @@ const ResetForm = () => {
         margin="normal"
         fullWidth={false}
       />
-      <DropdownInputStyled select label="Pergunta de segurança">
-        {securityQuestions.map((securityQuestion) => (
-          <MenuItem key={securityQuestion.value} value={securityQuestion.value}>
-            {securityQuestion.label}
-          </MenuItem>
-        ))}
-      </DropdownInputStyled>
+      <DropdownInputStyled placeholder={"Escolha a pergunta 1..."} />
       <TextFieldStyled
-        id="security-answer"
-        label="Insira a resposta de segurança"
+        id="respostaUm"
+        label="Resposta 1"
         variant="outlined"
         margin="normal"
-        fullWidth={false}
+        value={""}
+        //onChange={""}
+        style={{ width: "100%", borderRadius: "15px" }}
+      />
+      <DropdownInputStyled placeholder={"Escolha a pergunta 2..."} />
+      <TextFieldStyled
+        id="respostaDois"
+        label="Resposta 2"
+        variant="outlined"
+        margin="normal"
+        value={""}
+        //onChange={""}
+        style={{ width: "100%", borderRadius: "15px" }}
+      />
+      <DropdownInputStyled placeholder={"Escolha a pergunta 3..."} />
+      <TextFieldStyled
+        id="respostaTres"
+        label="Resposta 3"
+        variant="outlined"
+        margin="normal"
+        value={""}
+        //onChange={""}
+        style={{ width: "100%", borderRadius: "15px" }}
       />
       <TextFieldStyled
         type={showPassword ? "text" : "password"}

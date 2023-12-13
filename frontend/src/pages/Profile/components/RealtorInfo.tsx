@@ -68,7 +68,6 @@ const Header = styled("div")``;
 const Name = styled(Typography)`
   font-family: ${({ theme }) => theme.customTypography.semiBold};
   font-size: 2.2rem;
-  margin-top: 70px;
 
   @media (max-width: 768px) {
     font-size: 2rem;
@@ -111,6 +110,14 @@ const SocialMediaInfoWrapper = styled("div")`
     border-left: none;
     padding: 0;
   }
+`;
+
+const CreciNameContainer = styled("div")`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 70px;
+  align-items: center;
 `;
 
 const SecondSection = styled(FirstSection)`
@@ -164,6 +171,7 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
   const [profileData, setProfileData] = useState({
     real_id: "",
     creci: "",
+    uf: "",
     is_online: false,
     description: "",
     user: {
@@ -284,7 +292,11 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
         </ImagesContainer>
         <TextContainer>
           <Header>
-            <Name variant="h2">{profileData.user.name}</Name>
+            <CreciNameContainer>
+              <Name variant="h2">{profileData.user.name}</Name>
+              <Description variant="body1">{`(${profileData.creci}, ${profileData.uf})`}</Description>
+            </CreciNameContainer>
+
             <FormControlLabel
               control={
                 <Switch

@@ -12,32 +12,58 @@ import LoadingSpinner from "../../components/Loading";
 
 const LandingPage: React.FC = () => {
   const [showMap, setShowMap] = useState(false);
+  const [onlineRealtors, setOnlineRealtors] = useState([]);
 
   const navigator = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/auth/check", {
-          method: "GET",
-          credentials: "include",
-        });
-        console.log(response);
+  const fetchAuthData = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/auth/check", {
+        method: "GET",
+        credentials: "include",
+      });
+      console.log(response);
+      if (!response.ok) {
+        throw new Error("Failed to fetch research data");
+      }
+      const json = await response.json();
+      console.log(json);
+      navigator("/home-page");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOnlineRealtors = async () => {
+    setLoading(true);
+    fetch("http://localhost:8080/realtors/?is_online=true", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
-        const json = await response.json();
+        return response.json();
+      })
+      .then((json) => {
         console.log(json);
-        navigator("/home-page");
-      } catch (error) {
+        setOnlineRealtors(json);
+      })
+      .catch((error) => {
         console.error(error);
-      } finally {
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
+      });
+  };
 
-    fetchData();
+  useEffect(() => {
+    fetchAuthData();
+    fetchOnlineRealtors();
   }, [navigator]);
 
   if (loading) {
@@ -49,7 +75,7 @@ const LandingPage: React.FC = () => {
       <SearchAdress showMap={setShowMap} />
       <ArmengueComponent hidden={!showMap} />
       <HiddenComponent hidden={!showMap}>
-        <MapView />
+        <MapView onlineRealtors={onlineRealtors} />
       </HiddenComponent>
       <LearnMore />
       <HowDoesItWork />

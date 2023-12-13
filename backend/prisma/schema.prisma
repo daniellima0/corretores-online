@@ -20,10 +20,10 @@ model realtor {
   description       String?           @db.VarChar
   is_online         Boolean
   avatar            String?           @db.VarChar(255)
-  regions           String?           @db.VarChar(255)
-  realtor_instagram String?           @db.VarChar(255)
-  realtor_facebook  String?           @db.VarChar(255)
   realtor_whatsapp  String?           @db.VarChar(255)
+  realtor_facebook  String?           @db.VarChar(255)
+  realtor_instagram String?           @db.VarChar(255)
+  regions           String?           @db.VarChar(255)
   ufop_id           String            @db.Uuid
   uf_options        uf_options        @relation(fields: [ufop_id], references: [ufop_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_realtor_uf")
   user              user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)

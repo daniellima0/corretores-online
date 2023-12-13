@@ -198,7 +198,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 func (h *RealtorHandler) List(c echo.Context) error {
 	ctx := context.Background()
 
-	cookie, err := c.Request().Cookie("token")
+	/* cookie, err := c.Request().Cookie("token")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Você não está logado")
 	}
@@ -213,7 +213,7 @@ func (h *RealtorHandler) List(c echo.Context) error {
 	_, ok := claims["userId"].(string)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
-	}
+	} */
 
 	isOnline := c.QueryParam("is_online")
 
@@ -292,6 +292,7 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 		db.Realtor.UserID.Equals(c.Param("user_id"))).With(
 		db.Realtor.User.Fetch(),
 		db.Realtor.RealtorLocation.Fetch(),
+		db.Realtor.UfOptions.Fetch(),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -299,6 +300,7 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 
 	var realtorFiltered service.RealtorGet
 	realtorFiltered.RealID = realtor.RealID
+	realtorFiltered.UF = realtor.UfOptions().Uf
 	realtorFiltered.Creci = realtor.Creci
 	realtorFiltered.IsOnline = realtor.IsOnline
 	realtorFiltered.Description, _ = realtor.Description()

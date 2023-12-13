@@ -83,6 +83,7 @@ func (h *AuthHandler) CheckUserLoggedIn(c echo.Context) error {
 	response := service.CheckUserLoggedInResponse{
 		UserID:     userDb.UserID,
 		AuthStatus: userDb.AuthStatus().Type,
+		Name:       userDb.Name,
 	}
 
 	return c.JSON(http.StatusOK, response)

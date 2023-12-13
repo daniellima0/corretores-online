@@ -67,6 +67,7 @@ type UserGet struct {
 type RealtorGet struct {
 	RealID           string           `json:"real_id"`
 	Creci            string           `json:"creci"`
+	UF			     string           `json:"uf"`
 	IsOnline         bool             `json:"is_online"`
 	Description      string           `json:"description"`
 	UserGet          UserGet          `json:"user"`
@@ -80,4 +81,5 @@ type RealtorGet struct {
 type CheckUserLoggedInResponse struct {
 	UserID     string `json:"user_id"`
 	AuthStatus string `json:"auth_status"`
+	Name	   string `json:"name"`
 }
