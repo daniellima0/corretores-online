@@ -126,14 +126,12 @@ const Content = () => {
           method: "GET",
           credentials: "include",
         });
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
         setUserId(json.user_id);
         setLoading(false);
-        console.log(json);
       } catch (error) {
         console.error(error);
         setLoading(false);
@@ -142,14 +140,14 @@ const Content = () => {
 
     fetchData();
   }, []);
-
+  
   const fetchUrl =
     userType === "realtor"
       ? "http://localhost:8080/realtors/" + userId
       : userType === "user"
       ? "http://localhost:8080/user/" + userId
       : "";
-
+      
   // With the user id, fetch its data from the database and store it in a state
   useEffect(() => {
     setLoading(true);
@@ -159,14 +157,12 @@ const Content = () => {
           method: "GET",
           credentials: "include",
         });
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
         setProfileData(json);
         setLoading(false);
-        console.log(json);
       } catch (error) {
         console.error(error);
         setLoading(false);
@@ -226,13 +222,10 @@ const Content = () => {
             body: JSON.stringify(data),
           }
         );
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
-        console.log(json);
-        console.log("Realtor updated successfully!");
       } catch (error) {
         console.error(error);
       }
@@ -260,13 +253,10 @@ const Content = () => {
           },
           body: JSON.stringify(data),
         });
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
-        console.log(json);
-        console.log("User updated successfully!");
       } catch (error) {
         console.error(error);
       }
@@ -294,13 +284,10 @@ const Content = () => {
             body: JSON.stringify(data),
           }
         );
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
-        console.log(json);
-        console.log("Socials updated successfully!");
       } catch (error) {
         console.error(error);
       }

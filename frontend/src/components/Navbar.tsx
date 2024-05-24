@@ -32,7 +32,6 @@ function NavBar() {
           method: "GET",
           credentials: "include",
         });
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
@@ -40,7 +39,6 @@ function NavBar() {
         setUserId(json.user_id);
         setUserType(json.auth_status);
         setName(json.name);
-        console.log("\n\n\n\n\n", json);
         setLoading(false);
       } catch (error) {
         console.error(error);
@@ -91,7 +89,6 @@ function NavBar() {
   };
 
   const handleMyProfileClick = () => {
-    console.log("aaaaaaaaaaaaaa");
     navigator(`/profile/${userId}`);
     window.location.reload();
   };
