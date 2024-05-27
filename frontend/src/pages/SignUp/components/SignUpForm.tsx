@@ -7,10 +7,16 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import SelectQuestion from "./SelectQuestion";
-import { UserTypeContext } from "../../../App";
+import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../../components/Loading";
+import SelectUf from "./SelectUF";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import { Link } from "react-router-dom";
 
 const Form = styled("form")({
   width: "80%",
@@ -29,11 +35,21 @@ const Form = styled("form")({
 
 const TextFieldStyled = styled(TextField)({
   width: "100%",
+  padding: "0px",
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
       borderRadius: "15px",
     },
   },
+});
+
+const CreciBox = styled("div")({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  gap: "20px",
 });
 
 const Title = styled(Typography)`
@@ -42,10 +58,13 @@ const Title = styled(Typography)`
   margin-top: 20px;
 `;
 
-const SignUpForm = () => {
-  const { userType } = useContext(UserTypeContext);
+interface SignUpFormProps {
+  userType: "realtor" | "user";
+}
 
-  const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
+const SignUpForm: React.FC<SignUpFormProps> = (props) => {
+  const primaryColor = props.userType === "realtor" ? "#1C5E9F" : "#FF5E00";
+  const navigate = useNavigate();
 
   const ButtonStyled = styled(Button)({
     boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.2)",
@@ -60,115 +79,296 @@ const SignUpForm = () => {
     },
   });
 
-  const questions = [
-    "Qual é o nome do seu primeiro animal de estimação?",
-    "Em que cidade você nasceu?",
-    "Qual é o nome do meio da sua mãe?",
-    "Qual era o nome da sua escola primária?",
-    "Qual é o seu prato de comida favorito?",
-    "Qual é o nome do seu melhor amigo de infância?",
-    "Qual é o nome da rua em que você cresceu?",
-    "Qual é o nome do seu personagem fictício favorito?",
-    "Qual é o modelo do seu primeiro carro?",
-    "Em que ano você se formou no ensino médio?",
-  ];
-
   const [showPassword, setShowPassword] = useState(false);
+  const [safety_questions, setSafetyQuestions] = useState([]);
+  const [ufOptions, setUfOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   const [formData, setFormData] = React.useState({
-    nome: "",
-    sobrenome: "",
-    telefone: "",
+    name: "",
+    telephone: {
+      ddd: "",
+      number: "",
+    },
+    date_of_birth: "",
     cpf: "",
     creci: "",
     email: "",
     password: "",
     confirmPassword: "",
-    perguntaUm: "",
-    respostaUm: "",
-    perguntaDois: "",
-    respostaDois: "",
-    perguntaTres: "",
-    respostaTres: "",
+    uf: "",
+    safety_questions: [
+      { question: "", answer: "" },
+      { question: "", answer: "" },
+      { question: "", answer: "" },
+    ],
   });
 
+  const [areTermsAccepted, setAreTermsAccepted] = React.useState(false);
+
   const handleInputChange =
-    (field: string) => (event: { target: { value: any } }) => {
-      setFormData({ ...formData, [field]: event.target.value });
+    (field: string, nestedField?: string, index?: number) =>
+    (event: { target: { value: any } }) => {
+      console.log(field, nestedField, index, event.target.value);
+      setFormData((prevFormData) => {
+        if (nestedField !== undefined && index !== undefined) {
+          return {
+            ...prevFormData,
+            [field]: prevFormData[field].map((item: any, i: number) =>
+              i === index
+                ? { ...item, [nestedField]: event.target.value }
+                : item
+            ),
+          };
+        } else if (nestedField) {
+          return {
+            ...prevFormData,
+            [field]: {
+              ...prevFormData[field],
+              [nestedField]: event.target.value,
+            },
+          };
+        } else {
+          return { ...prevFormData, [field]: event.target.value };
+        }
+      });
     };
 
   const validateData = () => {
+    console.log(formData.date_of_birth);
     for (const field in formData) {
       if (!formData[field]) {
-        if (field === "creci" && userType === "costumer") continue;
+        if ((field === "creci" || field == "uf") && props.userType === "user")
+          continue;
         alert(`Preencha o campo ${field}!`);
-        return;
+        return false;
       }
+    }
+
+    if (formData.cpf.length !== 11) {
+      alert("CPF inválido!");
+      return false;
+    }
+
+    if (formData.telephone.ddd.length !== 2) {
+      alert("DDD inválido!");
+      return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
       alert("As senhas não coincidem!");
-      return;
+      return false;
+    }
+
+    if (formData.password.length < 8) {
+      alert("A senha deve ter no mínimo 8 caracteres!");
+      return false;
+    }
+
+    if (!areTermsAccepted) {
+      alert("Você deve aceitar os termos de uso para se cadastrar");
+      return false;
     }
 
     if (
-      formData["perguntaUm"] === formData["perguntaDois"] ||
-      formData["perguntaUm"] === formData["perguntaTres"] ||
-      formData["perguntaDois"] === formData["perguntaTres"]
+      formData.safety_questions[0].question ===
+        formData.safety_questions[1].question ||
+      formData.safety_questions[0].question ===
+        formData.safety_questions[2].question ||
+      formData.safety_questions[1].question ===
+        formData.safety_questions[2].question
     ) {
       alert("Perguntas de segurança repetidas!");
-      return;
+      return false;
     }
 
-    const securityQuestions = ["perguntaUm", "perguntaDois", "perguntaTres"];
-    for (const questionField of securityQuestions) {
-      const question = formData[questionField];
-      const answer = formData[`resposta${questionField.slice(8)}`];
-      if (!question || !answer) {
-        console.log(question, answer);
-        alert(`Preencha a pergunta e a resposta correspondente!`);
-        return;
+    const securityQuestions = formData.safety_questions.map(
+      (questionData, index) => {
+        const question = questionData.question;
+        const answer = questionData.answer;
+
+        if (!question || !answer) {
+          alert(
+            `Preencha a pergunta e a resposta correspondente para a pergunta ${
+              index + 1
+            }!`
+          );
+          return false;
+        }
+
+        return true;
       }
+    );
+
+    if (securityQuestions.includes(false)) {
+      return false;
     }
 
-    console.log("Data validation successful!");
+    return true;
   };
+
+  const handleSave = () => {
+    if (validateData()) {
+      setLoading(true);
+      const body = {
+        name: formData.name,
+        cpf: formData.cpf,
+        email: formData.email,
+        password: formData.password,
+        date_of_birth: new Date(formData.date_of_birth).toISOString(),
+        telephone: {
+          DDD: formData.telephone.ddd,
+          number: formData.telephone.number,
+        },
+        safety_questions: formData.safety_questions.map((item) => ({
+          question: item.question,
+          answer: item.answer,
+        })),
+        ...(props.userType === "realtor" && {
+          creci: formData.creci,
+          uf: formData.uf,
+        }),
+      };
+
+      let signUpUrl =
+        props.userType === "realtor"
+          ? "http://localhost:8080/realtors/"
+          : "http://localhost:8080/user/";
+
+      fetch(signUpUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(() => {
+          setLoading(false);
+          navigate("/login");
+        })
+        .catch((error) => {
+          console.error(error);
+          setLoading(false);
+          alert("Erro ao cadastrar usuário!");
+        });
+    }
+  };
+
+  const fetchSafetyQuestions = async () => {
+    setLoading(true);
+    try {
+      const responseSafetyQuestion = await fetch(
+        "http://localhost:8080/safety_questions/",
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!responseSafetyQuestion.ok) {
+        throw new Error("Failed to fetch research data");
+      }
+      const jsonSafetyQuestion = await responseSafetyQuestion.json();
+      setSafetyQuestions(jsonSafetyQuestion);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUfOptions = async () => {
+    setLoading(true);
+    try {
+      const responseUfOptions = await fetch(
+        "http://localhost:8080/uf_options/",
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!responseUfOptions.ok) {
+        throw new Error("Failed to fetch UF options data");
+      }
+      const jsonUfOptions = await responseUfOptions.json();
+      setUfOptions(jsonUfOptions);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSafetyQuestions();
+    fetchUfOptions();
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Form>
       <TextFieldStyled
-        id="nome"
-        label="Nome"
+        id="name"
+        label="Nome Completo"
         variant="outlined"
         margin="normal"
         fullWidth={false}
-        value={formData.nome}
-        onChange={handleInputChange("nome")}
+        value={formData.name}
+        onChange={handleInputChange("name")}
       />
       <TextFieldStyled
-        id="sobrenome"
-        label="Sobrenome"
+        id="ddd"
+        label="DDD"
+        type="text"
         variant="outlined"
         margin="normal"
         fullWidth={false}
-        value={formData.sobrenome}
-        onChange={handleInputChange("sobrenome")}
+        value={formData.telephone.ddd}
+        onChange={handleInputChange("telephone", "ddd")}
       />
       <TextFieldStyled
+        helperText="Digite apenas os números"
         id="telefone"
         label="Telefone"
         type="text"
         variant="outlined"
         margin="normal"
         fullWidth={false}
-        value={formData.telefone}
-        onChange={handleInputChange("telefone")}
+        value={formData.telephone.number}
+        onChange={handleInputChange("telephone", "number")}
       />
       <TextFieldStyled
+        helperText="Digite sua data de nascimento"
+        id="date_of_birth"
+        type="date"
+        variant="outlined"
+        margin="normal"
+        fullWidth={false}
+        value={formData.date_of_birth}
+        onChange={handleInputChange("date_of_birth")}
+      />
+      <TextFieldStyled
+        helperText="Digite apenas os números"
         id="cpf"
         label="CPF"
         variant="outlined"
@@ -177,16 +377,26 @@ const SignUpForm = () => {
         value={formData.cpf}
         onChange={handleInputChange("cpf")}
       />
-      {userType === "realtor" && (
-        <TextFieldStyled
-          id="creci"
-          label="CRECI"
-          variant="outlined"
-          margin="normal"
-          fullWidth={false}
-          value={formData.creci}
-          onChange={handleInputChange("creci")}
-        />
+      {props.userType === "realtor" && (
+        <CreciBox>
+          <TextFieldStyled
+            id="creci"
+            label="CRECI"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            value={formData.creci}
+            onChange={handleInputChange("creci")}
+          />
+          <SelectUf
+            placeholder={"UF"}
+            uf={formData.uf}
+            setUf={(selectedUf: any) =>
+              handleInputChange("uf")({ target: { value: selectedUf } })
+            }
+            possibleUfs={ufOptions}
+          />
+        </CreciBox>
       )}
       <TextFieldStyled
         id="email"
@@ -201,6 +411,7 @@ const SignUpForm = () => {
       <TextFieldStyled
         type={showPassword ? "text" : "password"}
         id="password"
+        helperText="Senha de no mínimo 8 caracteres"
         label="Senha"
         variant="outlined"
         margin="normal"
@@ -249,62 +460,94 @@ const SignUpForm = () => {
       </Title>
       <SelectQuestion
         placeholder={"Escolha a pergunta 1..."}
-        question={formData.perguntaUm}
-        setQuestion={(value: any) =>
-          handleInputChange("perguntaUm")({ target: { value } })
+        question={formData.safety_questions[0].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            0
+          )({ target: { value: selectedQuestion } })
         }
-        possibleQuestions={questions}
+        possibleQuestions={safety_questions}
       />
       <TextFieldStyled
         id="respostaUm"
         label="Resposta 1"
         variant="outlined"
         margin="normal"
-        value={formData.respostaUm}
-        onChange={handleInputChange("respostaUm")}
+        value={formData.safety_questions[0].answer}
+        onChange={handleInputChange("safety_questions", "answer", 0)}
         style={{ width: "100%", borderRadius: "15px" }}
       />
       <SelectQuestion
         placeholder={"Escolha a pergunta 2..."}
-        question={formData.perguntaDois}
-        setQuestion={(value: any) =>
-          handleInputChange("perguntaDois")({ target: { value } })
+        question={formData.safety_questions[1].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            1
+          )({ target: { value: selectedQuestion } })
         }
-        possibleQuestions={questions}
+        possibleQuestions={safety_questions}
       />
       <TextFieldStyled
         id="respostaDois"
         label="Resposta 2"
         variant="outlined"
         margin="normal"
-        value={formData.respostaDois}
-        onChange={handleInputChange("respostaDois")}
-        sx={{ width: "100%", borderRadius: "15px" }}
+        value={formData.safety_questions[1].answer}
+        onChange={handleInputChange("safety_questions", "answer", 1)}
+        style={{ width: "100%", borderRadius: "15px" }}
       />
       <SelectQuestion
         placeholder={"Escolha a pergunta 3..."}
-        question={formData.perguntaTres}
-        setQuestion={(value: any) =>
-          handleInputChange("perguntaTres")({ target: { value } })
+        question={formData.safety_questions[2].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            2
+          )({ target: { value: selectedQuestion } })
         }
-        possibleQuestions={questions}
+        possibleQuestions={safety_questions}
       />
       <TextFieldStyled
         id="respostaTres"
         label="Resposta 3"
         variant="outlined"
         margin="normal"
-        value={formData.respostaTres}
-        onChange={handleInputChange("respostaTres")}
-        sx={{ width: "100%", borderRadius: "15px" }}
+        value={formData.safety_questions[2].answer}
+        onChange={handleInputChange("safety_questions", "answer", 2)}
+        style={{ width: "100%", borderRadius: "15px" }}
       />
+      <FormGroup>
+        <FormControlLabel
+          checked={areTermsAccepted}
+          onChange={(event) => setAreTermsAccepted(event.target.checked)}
+          required
+          control={<Checkbox />}
+          label={
+            <span>
+              Eu li e concordo com os{" "}
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                to="/terms-and-conditions"
+              >
+                Termos de Uso
+              </Link>
+            </span>
+          }
+        />
+      </FormGroup>
       <div>
         <ButtonStyled
           fullWidth
           type="button"
           variant="contained"
           color="primary"
-          onClick={validateData}
+          onClick={handleSave}
         >
           <span>Cadastrar</span>
         </ButtonStyled>

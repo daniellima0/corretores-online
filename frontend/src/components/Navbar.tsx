@@ -3,7 +3,6 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import profilePicture from "../assets/profile-picture.jpeg";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -14,12 +13,41 @@ import Tooltip from "@mui/material/Tooltip";
 import logo from "../assets/logo-black.svg";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
-import { useContext } from "react";
-import { UserTypeContext } from "../App";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import LoadingSpinner from "./Loading";
 
 function NavBar() {
-  const { userType } = useContext(UserTypeContext);
+  const [userType, setUserType] = React.useState("user");
+  const [userId, setUserId] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [name, setName] = React.useState("");
+  const navigator = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setUserId(json.user_id);
+        setUserType(json.auth_status);
+        setName(json.name);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const pages = [];
 
@@ -27,9 +55,9 @@ function NavBar() {
     pages.push(
       { nickname: "Mapa", route: "home-page" },
       { nickname: "Configurações", route: "settings" },
-      { nickname: "Meu Perfil", route: "profile" }
+      { nickname: "Meu Perfil", route: `profile/${userId}` }
     );
-  } else if (userType == "costumer") {
+  } else if (userType == "user") {
     pages.push(
       { nickname: "Mapa", route: "home-page" },
       { nickname: "Configurações", route: "settings" }
@@ -60,9 +88,37 @@ function NavBar() {
     setAnchorElNav(null);
   };
 
+  const handleMyProfileClick = () => {
+    navigator(`/profile/${userId}`);
+    window.location.reload();
+  };
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const handleLogout = () => {
+    setAnchorElUser(null);
+    fetch("http://localhost:8080/auth/logout", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+      })
+      .then(() => {
+        navigator("/");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <AppBar
@@ -125,12 +181,21 @@ function NavBar() {
               {pages.map((page) => (
                 <MenuItem key={page.route} onClick={handleCloseNavMenu}>
                   <Typography color="black" textAlign="center">
-                    <Link
-                      to={`/${page.route}`}
-                      style={{ textDecoration: "inherit", color: "inherit" }}
-                    >
-                      {page.nickname}
-                    </Link>
+                    {page.nickname == "Meu Perfil" ? (
+                      <a
+                        onClick={handleMyProfileClick}
+                        style={{ textDecoration: "inherit", color: "inherit" }}
+                      >
+                        {page.nickname}
+                      </a>
+                    ) : (
+                      <Link
+                        to={`/${page.route}/`}
+                        style={{ textDecoration: "inherit", color: "inherit" }}
+                      >
+                        {page.nickname}
+                      </Link>
+                    )}
                   </Typography>
                 </MenuItem>
               ))}
@@ -171,12 +236,21 @@ function NavBar() {
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: "black", display: "block" }}
               >
-                <Link
-                  to={`/${page.route}`}
-                  style={{ textDecoration: "inherit", color: "inherit" }}
-                >
-                  {page.nickname}
-                </Link>
+                {page.nickname == "Meu Perfil" ? (
+                  <a
+                    onClick={handleMyProfileClick}
+                    style={{ textDecoration: "inherit", color: "inherit" }}
+                  >
+                    {page.nickname}
+                  </a>
+                ) : (
+                  <Link
+                    to={`/${page.route}`}
+                    style={{ textDecoration: "inherit", color: "inherit" }}
+                  >
+                    {page.nickname}
+                  </Link>
+                )}
               </Button>
             ))}
           </Box>
@@ -184,7 +258,7 @@ function NavBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Opções">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src={profilePicture} />
+                <Avatar alt={name} src={"a"} />
               </IconButton>
             </Tooltip>
             <Menu
@@ -204,7 +278,7 @@ function NavBar() {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem key={setting} onClick={handleLogout}>
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
               ))}

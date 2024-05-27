@@ -1,14 +1,13 @@
 import { styled } from "@mui/material/styles";
 import defaultBanner from "../../../assets/default-banner.png";
-import profilePicture from "../../../assets/profile-picture.jpeg";
-import ProfilePicture from "../../../components/ProfilePicture";
 import SocialMediaInfo from "../../../components/SocialMediaInfo";
 import RoundedButton from "../../../components/RoundedButton";
-import { FormControlLabel, Switch, Typography } from "@mui/material";
-import React, { useContext, useState } from "react";
+import { Avatar, FormControlLabel, Switch, Typography } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useTheme } from "@mui/material";
 import { UserTypeContext } from "../../../App";
+import { useParams } from "react-router-dom";
 
 const Container = styled("div")`
   margin-top: 40px;
@@ -69,7 +68,6 @@ const Header = styled("div")``;
 const Name = styled(Typography)`
   font-family: ${({ theme }) => theme.customTypography.semiBold};
   font-size: 2.2rem;
-  margin-top: 70px;
 
   @media (max-width: 768px) {
     font-size: 2rem;
@@ -114,6 +112,14 @@ const SocialMediaInfoWrapper = styled("div")`
   }
 `;
 
+const CreciNameContainer = styled("div")`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 70px;
+  align-items: center;
+`;
+
 const SecondSection = styled(FirstSection)`
   padding: 32px;
 `;
@@ -125,51 +131,139 @@ const AboutMeTitle = styled(Typography)`
 
 const Description = styled(Typography)``;
 
-const RealtorInfo = () => {
+interface RealtorInfoProps {
+  loggedUserId: string;
+}
+
+const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
   const { userType } = useContext(UserTypeContext);
 
   const theme = useTheme();
 
-  const realtor = {
-    name: "Marcel Fonseca",
-    bio: "Lorem ipsum Lorem ipsum Lorem ipsum",
-    regionsList: "Lorem ipsum, Lorem ipsum, Lorem ipsum, Lorem ipsum",
-    description:
-      "Lorem ipsum dolor sit amet consectetur. Mi enim acadipiscing malesuada malesuada scelerisque. Viverra non ametviverra semper elementum imperdiet. In enim nulla vitae seddictum orci molestie interdum nunc. Aliquet risus gravida accongue arcu quam scelerisque. Lorem ipsum dolor sit ametconsectetur. Mi enim ac adipiscing malesuada malesuadascelerisque. Viverra non amet viverra semper elementumimperdiet. In enim nulla vitae sed dictum orci molestieinterdum nunc. Aliquet risus gravida ac congue arcu quamscelerisque. Lorem ipsum dolor sit amet consectetur. Mi enimac adipiscing malesuada malesuada scelerisque. Viverra nonamet viverra semper elementum imperdiet. In enim nulla vitaesed dictum orci molestie interdum nunc. Aliquet risusgravida ac congue arcu quam scelerisque.",
-    phone: "+55998786550",
-  };
+  const params = useParams();
+
+  console.log("user_id = ", params.user_id);
+
+  const url = "http://localhost:8080/realtors/" + params.user_id;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+
+        setProfileData(json);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const [profileData, setProfileData] = useState({
+    real_id: "",
+    creci: "",
+    uf: "",
+    is_online: false,
+    description: "",
+    user: {
+      user_id: "",
+      name: "",
+      cpf: "",
+      email: "",
+      date_of_birth: "",
+      telephone: { DDD: "", number: "" },
+    },
+    realtor_location: { latitude: "0", longitude: "0" },
+    regions: "",
+    realtor_instagram: "",
+    realtor_facebook: "",
+    realtor_whatsapp: "",
+  });
 
   const handleClick = () => {
-    const whatsappUrl = `https://wa.me/${realtor.phone}`;
+    const whatsappUrl = `https://wa.me/${profileData.user.telephone.DDD}${profileData.user.telephone.number}`;
     window.open(whatsappUrl, "_blank");
   };
 
-  const [checked, setChecked] = useState(false);
-  const [realtorLocation, setRealtorLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked(event.target.checked);
-    if (event.target.checked) {
-      const successCallback = (position: any) => {
-        setRealtorLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      };
+    const { checked } = event.target;
 
-      const errorCallback = () => {
-        setChecked(false);
+    setProfileData((prevProfileData) => ({
+      ...prevProfileData,
+      is_online: checked,
+    }));
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        updateLocationAndStatus(checked, latitude, longitude);
+      },
+      () => {
+        setProfileData((prevProfileData) => ({
+          ...prevProfileData,
+          is_online: !checked,
+        }));
+
         alert("Compartilhe sua localização para ficar online");
-      };
-
-      navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
-    }
+      }
+    );
   };
 
-  console.log(realtorLocation);
+  const updateLocationAndStatus = (
+    isOnline: boolean,
+    latitude: number,
+    longitude: number
+  ) => {
+    fetch(
+      `http://localhost:8080/realtors/set_location/${profileData.user.user_id}`,
+      {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+        }),
+      }
+    )
+      .then(() => {
+        fetch(
+          `http://localhost:8080/realtors/set_status/${profileData.user.user_id}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              is_online: isOnline,
+            }),
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Failed to fetch. Status: ${response.status}`);
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   return (
     <Container>
@@ -178,49 +272,63 @@ const RealtorInfo = () => {
           <QRCodeWrapper>
             <QRCode
               style={{ height: "120px", width: "120px" }}
-              value="https://www.google.com"
+              value={`http://localhost:5173/profile/${params.user_id}`}
             />
           </QRCodeWrapper>
           <Banner src={defaultBanner} />
           <ProfilePictureWrapper>
-            <ProfilePicture
-              src={profilePicture}
-              width="160px"
-              borderColor="white"
-              borderWidth="4px"
+            <Avatar
+              alt={profileData.user.name}
+              src="/static/images/avatar/1.jpg"
+              sx={{
+                width: "160px",
+                height: "160px",
+                borderColor: "white",
+                borderWidth: "4px",
+                fontSize: "70px",
+              }}
             />
           </ProfilePictureWrapper>
         </ImagesContainer>
         <TextContainer>
           <Header>
-            <Name variant="h2">{realtor.name}</Name>
+            <CreciNameContainer>
+              <Name variant="h2">{profileData.user.name}</Name>
+              <Description variant="body1">{`(${profileData.creci}, ${profileData.uf})`}</Description>
+            </CreciNameContainer>
+
             <FormControlLabel
               control={
                 <Switch
-                  disabled={userType === "realtor" ? false : true}
-                  checked={checked}
+                  disabled={
+                    userType === "realtor" &&
+                    props.loggedUserId == params.user_id
+                      ? false
+                      : true
+                  }
+                  checked={profileData.is_online}
                   onChange={handleChange}
                   inputProps={{ "aria-label": "controlled" }}
                   size="medium"
                   color="success"
                 />
               }
-              label={checked ? "Online" : "Offline"}
+              label={profileData.is_online ? "Online" : "Offline"}
               labelPlacement="end"
             />
           </Header>
           <RegionsInfo>
-            <RegionsTitle variant="h2">Regiōes</RegionsTitle>
-            <RegionsList variant="body1">{realtor.regionsList}</RegionsList>
+            <RegionsTitle variant="h2">Regiōes de atuação</RegionsTitle>
+            <RegionsList variant="body1">{profileData.regions}</RegionsList>
           </RegionsInfo>
           <SocialMediaInfoWrapper>
-            <SocialMediaInfo />
+            <SocialMediaInfo realtorData={profileData} />
           </SocialMediaInfoWrapper>
         </TextContainer>
       </FirstSection>
       <SecondSection>
         <AboutMeTitle variant="h2">Sobre Mim</AboutMeTitle>
-        <Description variant="body1">{realtor.description}</Description>
+        <Description variant="body1">{profileData.description}</Description>
       </SecondSection>
       <RoundedButton
         buttonColor={userType == "realtor" ? theme.customPallete.realtor : ""}

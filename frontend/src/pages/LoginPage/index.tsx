@@ -38,13 +38,14 @@ const Card = styled("div")({
 const Title = styled(Typography)`
   font-family: ${({ theme }) => theme.customTypography.bold};
   font-size: 1.8rem;
+  width: 60%;
 `;
 
 const LoginPage = () => {
   return (
     <Div>
       <Card>
-        <Title variant="h1">Bem-vindo de volta!</Title>
+        <Title variant="h1">Bem-vindo de volta! Fazer Login</Title>
         <LoginForm />
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <Typography variant="subtitle1">

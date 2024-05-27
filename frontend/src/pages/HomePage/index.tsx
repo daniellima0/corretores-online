@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -16,10 +15,41 @@ import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import BrokerList from "./components/BrokerLIst";
 import CorretoresMap from "./components/CorretoresMap";
+import { RealtorType } from "types/RealtorType";
+import LoadingSpinner from "../../components/Loading";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const libraries: any = ["places"];
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
@@ -100,62 +130,33 @@ const HomePage = () => {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       });
+      console.log(position.coords.latitude);
+      console.log(position.coords.longitude);
     };
 
     const errorCallback = () => {
       return;
     };
+    const options = {
+      enableHighAccuracy: true,
+    };
 
-    navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    navigator.geolocation.getCurrentPosition(
+      successCallback,
+      errorCallback,
+      options
+    );
   }, []);
 
-  type Broker = {
-    id: number;
-    name: string;
-    position: { lat: number; lng: number };
-  };
-
-  const testData = [
-    {
-      id: 1,
-      name: "Bernardo Serravalle",
-      position: {
-        lat: -12.993966980061542,
-        lng: -38.44557003269835,
-      },
-    },
-    {
-      id: 2,
-      name: "Arthur Sant'Anna",
-      position: {
-        lat: -12.986820652837016,
-        lng: -38.4369292224266,
-      },
-    },
-    {
-      id: 3,
-      name: "Giulia Franca",
-      position: {
-        lat: -12.985937092644223,
-        lng: -38.44490330351072,
-      },
-    },
-    {
-      id: 4,
-      name: "Luca Villela",
-      position: {
-        lat: -13.00986936272844,
-        lng: -38.532670253972434,
-      },
-    },
-  ];
+  const [onlineRealtors, setOnlineRealtors] = useState<RealtorType[]>([]);
   const initialSearchBias = {
     lat: -12.98767014046349,
     lng: -38.48548147475881,
   };
   const [open, setOpen] = useState(true);
   const handleClose = () => setOpen(false);
-  const [filteredData, setFilteredData] = useState<Broker[]>(testData);
+  const [filteredData, setFilteredData] =
+    useState<RealtorType[]>(onlineRealtors);
   const [searchInputBias, setSearchInputBias] = useState<
     | {
         north: number;
@@ -200,6 +201,26 @@ const HomePage = () => {
     }
   }, [searchMapCenter]);
 
+  useEffect(() => {
+    fetch("http://localhost:8080/realtors/?is_online=true", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        return response.json();
+      })
+      .then((json) => {
+        console.log(json);
+        setOnlineRealtors(json);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
   const autocompleteOptions = {
     bounds: searchInputBias,
     componentRestrictions: { country: "br" },
@@ -210,19 +231,8 @@ const HomePage = () => {
     alert("Digite e escolha uma sugestão");
   };
 
-  if (!isLoaded) {
-    return (
-      <div>
-        <Navbar />
-        <div
-          className="BodyContainer"
-          style={{ width: "100%", height: "90vh" }}
-        >
-          Carregando Google Maps...
-        </div>
-        <Footer />
-      </div>
-    );
+  if (loading || !isLoaded) {
+    return <LoadingSpinner />;
   }
 
   return (
@@ -256,9 +266,10 @@ const HomePage = () => {
       </Modal>
 
       <Navbar />
+
       <div className="BodyContainer" style={bodyContainerStyle}>
         <BrokerList
-          key={testData.length}
+          key={onlineRealtors ? onlineRealtors.length : 0}
           data={filteredData}
           setSearchMapCenter={setSearchMapCenter}
         />
@@ -295,7 +306,7 @@ const HomePage = () => {
           </CapsulaInutil>
 
           <CorretoresMap
-            data={testData}
+            data={onlineRealtors}
             searchMapCenter={searchMapCenter}
             dataFilter={setFilteredData}
           />

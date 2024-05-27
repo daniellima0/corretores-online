@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -9,74 +8,64 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-
-type Broker = {
-  id: number;
-  name: string;
-  position: { lat: number; lng: number };
-};
+import { useNavigate } from "react-router-dom";
+import { RealtorType } from "types/RealtorType";
 
 function renderRow(
-  item: Broker,
-  setSearchMapCenter: (position: { lat: number; lng: number }) => void
+  item: RealtorType,
+  setSearchMapCenter: (position: { lat: number; lng: number }) => void,
+  navigator: any
 ) {
   const handleListItemClick = () => {
-    setSearchMapCenter(item.position);
+    navigator(`/profile/${item.user.user_id}`);
+
+    // setSearchMapCenter({
+    //   lat: Number(item.realtor_location.latitude),
+    //   lng: Number(item.realtor_location.longitude),
+    // });
   };
 
   return (
     <ListItem
-      key={item.id}
+      key={item.real_id}
       alignItems="flex-start"
       component="div"
       disablePadding
     >
       <ListItemButton sx={{ height: "100%" }} onClick={handleListItemClick}>
         <ListItemAvatar>
-          <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.name} src="a" />
+          <Avatar sx={{ bgcolor: "#FF5E00" }} alt={item.user.name} src="" />
         </ListItemAvatar>
         <ListItemText
           primary={
-            <React.Fragment>
+            <>
               <Typography
                 sx={{ display: "inline" }}
                 component={"span"}
                 variant="h5"
                 color="text.primary"
               >
-                {item.name}
+                {item.user.name}
               </Typography>
-            </React.Fragment>
+            </>
           }
-          secondary={
-            <React.Fragment>
-              <Typography
-                sx={{ display: "inline" }}
-                component={"span"}
-                variant="h6"
-                color="text.primary"
-              ></Typography>
-              Visitar perfil
-            </React.Fragment>
-          }
+          secondary={<>Visitar perfil</>}
         />
       </ListItemButton>
     </ListItem>
   );
 }
 
+interface BrokerListProps {
+  data: RealtorType[];
+  setSearchMapCenter: (position: { lat: number; lng: number }) => void;
+}
+
 export default function BrokerList({
   data,
   setSearchMapCenter,
-}: {
-  data: Broker[];
-  setSearchMapCenter: any;
-}) {
-  const [localData, setLocalData] = useState<Broker[]>([]);
-
-  useEffect(() => {
-    setLocalData(data);
-  }, [data]);
+}: BrokerListProps) {
+  const navigator = useNavigate();
 
   const ListBox = styled(Box)(({ theme }) => ({
     width: "25%",
@@ -109,10 +98,10 @@ export default function BrokerList({
             padding: "20px",
           }}
         >
-          {data.length > 1
-            ? `Foram encontrados ${localData.length} corretores nessa área:`
-            : data.length === 1
-            ? `Foi encontrado ${localData.length} corretor nessa área:`
+          {data && data.length != 0
+            ? data.length > 1
+              ? `Foram encontrados ${data.length} corretores nessa área:`
+              : `Foi encontrado ${data.length} corretor nessa área:`
             : `Não foram encontrados corretores nessa área.`}
         </Typography>
 
@@ -124,7 +113,8 @@ export default function BrokerList({
             width: "100%",
           }}
         >
-          {localData.map((item) => renderRow(item, setSearchMapCenter))}
+          {data &&
+            data.map((item) => renderRow(item, setSearchMapCenter, navigator))}
         </div>
       </div>
     </ListBox>

@@ -31,7 +31,7 @@ func GenerateJWT(w http.ResponseWriter, userId string) (string, error) {
 		HttpOnly: false,
 		Domain:   "localhost",
 		Path:     "/",
-		SameSite: http.SameSiteNoneMode,
+		Secure:   false,
 	})
 	return tokenString, nil
 }

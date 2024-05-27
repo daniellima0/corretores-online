@@ -22,8 +22,11 @@ type UserHandler struct {
 
 type UserResponse struct {
 	db.UserModel
-	Telephone           service.Telephone           `json:"telephone"`
-	SafetyQuestionsUser service.SafetyQuestionsUser `json:"safety_questions"`
+	Telephone           service.Telephone `json:"telephone"`
+	SafetyQuestionsUser [3]struct {
+		Question string `json:"question"`
+		Answer   string `json:"answer"`
+	} `json:"safety_questions"`
 }
 
 func NewUserHandler(client *db.PrismaClient) *UserHandler {
@@ -68,8 +71,14 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Telephone is required")
 	}
 
-	if len(user.SafetyQuestionsUser.QuestionAnswer) != 3 {
-		return c.JSON(http.StatusBadRequest, "Safety questions is required")
+	if len(user.SafetyQuestionsUser) < 3 {
+		return echo.NewHTTPError(http.StatusBadRequest, "SafetyQuestions is required")
+	}
+
+	questions := []string{
+		user.SafetyQuestionsUser[0].Question,
+		user.SafetyQuestionsUser[1].Question,
+		user.SafetyQuestionsUser[2].Question,
 	}
 
 	var encryptedPassword, err = bcrypt.GenerateFromPassword([]byte(user.Password), 14)
@@ -77,17 +86,17 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
+	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser[0].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[1].Answer), 14)
+	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser[1].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
+	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(user.SafetyQuestionsUser[2].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -99,6 +108,13 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 	authStatus, err := h.client.AuthStatus.FindFirst(
 		db.AuthStatus.Type.Equals("user"),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	safety_questions, err := h.client.SafetyQuestions.FindMany(
+		db.SafetyQuestions.Question.In(questions),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -118,21 +134,21 @@ func (h *UserHandler) Create(c echo.Context) error {
 	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
 		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[0].SaquID)),
 		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
 	).Tx()
 
 	second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
 		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[1].SaquID)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[1].SaquID)),
 		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
 	).Tx()
 
 	third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
 		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(user.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[2].SaquID)),
 		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(user.UserID)),
 	).Tx()
 
@@ -216,11 +232,11 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	filteredUser := struct {
-		Name      string
-		Cpf       string
-		Email     string
-		Dob       time.Time
-		Telephone types.JSON
+		Name      string     `json:"name"`
+		Cpf       string     `json:"cpf"`
+		Email     string     `json:"email"`
+		Dob       time.Time  `json:"date_of_birth"`
+		Telephone types.JSON `json:"telephone"`
 	}{
 		Name:      user.Name,
 		Cpf:       user.Cpf,
@@ -270,7 +286,7 @@ func (h *UserHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Email is required")
 	}
 
-	if strings.TrimSpace(user.Password) == "" {
+	/* if strings.TrimSpace(user.Password) == "" {
 		return c.JSON(http.StatusBadRequest, "Password is required")
 	}
 
@@ -283,8 +299,7 @@ func (h *UserHandler) Update(c echo.Context) error {
 	}
 
 	if strings.TrimSpace(user.DateOfBirth.String()) == "" {
-		return c.JSON(http.StatusBadRequest, "Date of birth is required")
-	}
+		return c.JSON(http.StatusBadRequest, "Date of birth is required") }*/
 
 	if strings.TrimSpace(user.Telephone.DDD) == "" || strings.TrimSpace(user.Telephone.Number) == "" {
 		return c.JSON(http.StatusBadRequest, "Telephone is required")
@@ -300,10 +315,10 @@ func (h *UserHandler) Update(c echo.Context) error {
 		db.User.DeletedAt.IsNull(),
 	).Update(
 		db.User.Name.Set(user.Name),
-		db.User.Cpf.Set(user.Cpf),
+		/* 		db.User.Cpf.Set(user.Cpf), */
 		db.User.Email.Set(user.Email),
-		db.User.Password.Set(user.Password),
-		db.User.DateOfBirth.Set(user.DateOfBirth),
+		/* 		db.User.Password.Set(user.Password),
+		   		db.User.DateOfBirth.Set(user.DateOfBirth), */
 		db.User.Telephone.Set(telephoneJson),
 	).Exec(ctx)
 	if err != nil {

@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import defaultCostumerPicture from "../assets/default-costumer-picture.svg";
+import defaultUserPicture from "../assets/default-user-picture.svg";
 import {ProfilePictureProps} from "../types/ProfilePicture";
 
 const Image = styled("img")<{
@@ -16,7 +16,7 @@ const Image = styled("img")<{
 const ProfilePicture: React.FC<ProfilePictureProps> = (props) => {
     return (
         <Image
-            src={props.src || defaultCostumerPicture}
+            src={props.src || defaultUserPicture}
             width={props.width || "fit"}
             borderWidth={props.borderWidth || "1px"}
             borderColor={props.borderColor || "transparent"}

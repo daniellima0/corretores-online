@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 
-	//"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/steebchen/prisma-client-go/runtime/types"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -28,10 +28,18 @@ type RealtorResponse struct {
 
 type RequestBody struct {
 	db.UserModel
-	Description         *string                     `json:"description"`
-	Creci               string                      `json:"creci"`
-	Telephone           service.Telephone           `json:"telephone"`
-	SafetyQuestionsUser service.SafetyQuestionsUser `json:"safety_questions"`
+	Description         *string           `json:"description"`
+	Regions             *string           `json:"regions"`
+	RealtorInstagram    *string           `json:"realtor_instagram"`
+	RealtorFacebook     *string           `json:"realtor_facebook"`
+	RealtorWhatsapp     *string           `json:"realtor_whatsapp"`
+	Creci               string            `json:"creci"`
+	Telephone           service.Telephone `json:"telephone"`
+	UF                  string            `json:"uf"`
+	SafetyQuestionsUser [3]struct {
+		Question string `json:"question"`
+		Answer   string `json:"answer"`
+	} `json:"safety_questions"`
 }
 
 func NewRealtorHandler(client *db.PrismaClient) *RealtorHandler {
@@ -76,8 +84,14 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Telephone is required")
 	}
 
-	if len(request.SafetyQuestionsUser.QuestionAnswer) != 3 {
+	if len(request.SafetyQuestionsUser) < 3 {
 		return echo.NewHTTPError(http.StatusBadRequest, "SafetyQuestions is required")
+	}
+
+	questions := []string{
+		request.SafetyQuestionsUser[0].Question,
+		request.SafetyQuestionsUser[1].Question,
+		request.SafetyQuestionsUser[2].Question,
 	}
 
 	telephoneJson, err := json.Marshal(request.Telephone)
@@ -97,17 +111,31 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[0].Answer), 14)
+	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser[0].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[1].Answer), 14)
+	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser[1].Answer), 14)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser.QuestionAnswer[2].Answer), 14)
+	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser[2].Answer), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	safety_questions, err := h.client.SafetyQuestions.FindMany(
+		db.SafetyQuestions.Question.In(questions),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	uf_option, err := h.client.UfOptions.FindUnique(
+		db.UfOptions.Uf.Equals(request.UF),
+	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -126,26 +154,25 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
 		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[0].SaquID)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[0].SaquID)),
 		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
 	).Tx()
 
 	second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
 		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[1].SaquID)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[1].SaquID)),
 		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
 	).Tx()
 
 	third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
 		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
 		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(request.SafetyQuestionsUser.QuestionAnswer[2].SaquID)),
+		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[2].SaquID)),
 		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
 	).Tx()
 
 	var realtor db.RealtorModel
-	realtor.RealID = uuid.New().String()
 	realtor.UserID = request.UserID
 	realtor.Creci = request.Creci
 
@@ -154,9 +181,10 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 	}
 
 	realtorCreated := h.client.Realtor.CreateOne(
-		db.Realtor.RealID.Set(realtor.RealID),
+		db.Realtor.RealID.Set(uuid.New().String()),
 		db.Realtor.Creci.Set(realtor.Creci),
 		db.Realtor.IsOnline.Set(false),
+		db.Realtor.UfOptions.Link(db.UfOptions.UfopID.Equals(uf_option.UfopID)),
 		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 
@@ -170,7 +198,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 func (h *RealtorHandler) List(c echo.Context) error {
 	ctx := context.Background()
 
-	cookie, err := c.Request().Cookie("token")
+	/* cookie, err := c.Request().Cookie("token")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Você não está logado")
 	}
@@ -185,7 +213,7 @@ func (h *RealtorHandler) List(c echo.Context) error {
 	_, ok := claims["userId"].(string)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
-	}
+	} */
 
 	isOnline := c.QueryParam("is_online")
 
@@ -204,15 +232,7 @@ func (h *RealtorHandler) List(c echo.Context) error {
 		db.Realtor.IsOnline.EqualsIfPresent(isOnlineBool),
 	).With(
 		db.Realtor.User.Fetch(),
-		db.Realtor.SocialsRealtor.Fetch().With(
-			db.SocialsRealtor.SocialsOptions.Fetch().With(
-				db.SocialsOptions.ContactOptions.Fetch(),
-			),
-		),
 		db.Realtor.RealtorLocation.Fetch(),
-		db.Realtor.RealtorRegions.Fetch().With(
-			db.RealtorRegions.RegionsUsed.Fetch(),
-		),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -225,6 +245,10 @@ func (h *RealtorHandler) List(c echo.Context) error {
 		realtorFiltered.Creci = realtor.Creci
 		realtorFiltered.IsOnline = realtor.IsOnline
 		realtorFiltered.Description, _ = realtor.Description()
+		realtorFiltered.Regions, _ = realtor.Regions()
+		realtorFiltered.RealtorFacebook, _ = realtor.RealtorFacebook()
+		realtorFiltered.RealtorInstagram, _ = realtor.RealtorInstagram()
+		realtorFiltered.RealtorWhatsapp, _ = realtor.RealtorWhatsapp()
 		realtorFiltered.UserGet.UserID = realtor.User().UserID
 		realtorFiltered.UserGet.Name = realtor.User().Name
 		realtorFiltered.UserGet.Cpf = realtor.User().Cpf
@@ -232,25 +256,6 @@ func (h *RealtorHandler) List(c echo.Context) error {
 		realtorFiltered.UserGet.DateOfBirth = realtor.User().DateOfBirth
 		json.Unmarshal(realtor.User().Telephone, &realtorFiltered.UserGet.Telephone)
 
-		if realtor.SocialsRealtor() != nil {
-			for _, social := range realtor.SocialsRealtor() {
-				var socialFiltered service.RealtorSocials
-				socialFiltered.ContactInfo = social.ContactInfo
-				socialFiltered.Options.Name = social.SocialsOptions().Name
-				socialFiltered.Options.Icon = social.SocialsOptions().Icon
-				socialFiltered.Options.Contact.Type = social.SocialsOptions().ContactOptions().Type
-				realtorFiltered.RealtorSocials = append(realtorFiltered.RealtorSocials, socialFiltered)
-			}
-		}
-		if realtor.RealtorRegions() != nil {
-			for _, region := range realtor.RealtorRegions() {
-				if region.RegionsUsed() != nil {
-					var regionFiltered service.RealtorRegions
-					regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
-					realtorFiltered.RealtorRegions = append(realtorFiltered.RealtorRegions, regionFiltered)
-				}
-			}
-		}
 		realtorLocation, ok := realtor.RealtorLocation()
 		if ok {
 			realtorFiltered.RealtorLocation.Latitude, _ = realtorLocation.Latitude()
@@ -284,17 +289,10 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 	}
 
 	realtor, err := h.client.Realtor.FindUnique(
-		db.Realtor.RealID.Equals(c.Param("real_id"))).With(
+		db.Realtor.UserID.Equals(c.Param("user_id"))).With(
 		db.Realtor.User.Fetch(),
-		db.Realtor.SocialsRealtor.Fetch().With(
-			db.SocialsRealtor.SocialsOptions.Fetch().With(
-				db.SocialsOptions.ContactOptions.Fetch(),
-			),
-		),
 		db.Realtor.RealtorLocation.Fetch(),
-		db.Realtor.RealtorRegions.Fetch().With(
-			db.RealtorRegions.RegionsUsed.Fetch(),
-		),
+		db.Realtor.UfOptions.Fetch(),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -302,9 +300,14 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 
 	var realtorFiltered service.RealtorGet
 	realtorFiltered.RealID = realtor.RealID
+	realtorFiltered.UF = realtor.UfOptions().Uf
 	realtorFiltered.Creci = realtor.Creci
 	realtorFiltered.IsOnline = realtor.IsOnline
 	realtorFiltered.Description, _ = realtor.Description()
+	realtorFiltered.Regions, _ = realtor.Regions()
+	realtorFiltered.RealtorFacebook, _ = realtor.RealtorFacebook()
+	realtorFiltered.RealtorInstagram, _ = realtor.RealtorInstagram()
+	realtorFiltered.RealtorWhatsapp, _ = realtor.RealtorWhatsapp()
 	realtorFiltered.UserGet.UserID = realtor.User().UserID
 	realtorFiltered.UserGet.Name = realtor.User().Name
 	realtorFiltered.UserGet.Cpf = realtor.User().Cpf
@@ -312,25 +315,6 @@ func (h *RealtorHandler) Get(c echo.Context) error {
 	realtorFiltered.UserGet.DateOfBirth = realtor.User().DateOfBirth
 	json.Unmarshal(realtor.User().Telephone, &realtorFiltered.UserGet.Telephone)
 
-	if realtor.SocialsRealtor() != nil {
-		for _, social := range realtor.SocialsRealtor() {
-			var socialFiltered service.RealtorSocials
-			socialFiltered.ContactInfo = social.ContactInfo
-			socialFiltered.Options.Name = social.SocialsOptions().Name
-			socialFiltered.Options.Icon = social.SocialsOptions().Icon
-			socialFiltered.Options.Contact.Type = social.SocialsOptions().ContactOptions().Type
-			realtorFiltered.RealtorSocials = append(realtorFiltered.RealtorSocials, socialFiltered)
-		}
-	}
-	if realtor.RealtorRegions() != nil {
-		for _, region := range realtor.RealtorRegions() {
-			if region.RegionsUsed() != nil {
-				var regionFiltered service.RealtorRegions
-				regionFiltered.RegionsUsed.Region = region.RegionsUsed().Region
-				realtorFiltered.RealtorRegions = append(realtorFiltered.RealtorRegions, regionFiltered)
-			}
-		}
-	}
 	realtorLocation, ok := realtor.RealtorLocation()
 	if ok {
 		realtorFiltered.RealtorLocation.Latitude, _ = realtorLocation.Latitude()
@@ -399,9 +383,13 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Login Inválido")
 	}
 
-	_, ok := claims["userId"].(string)
+	userID, ok := claims["userId"].(string)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
+	if userID != c.Param("user_id") {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para editar este corretor")
 	}
 
 	var request RequestBody
@@ -409,76 +397,124 @@ func (h *RealtorHandler) Update(c echo.Context) error {
 		return err
 	}
 
-	if strings.TrimSpace(request.Name) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Name is required")
-	}
-
-	if strings.TrimSpace(request.Cpf) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Cpf is required")
-	}
-
-	if strings.TrimSpace(request.Email) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Email is required")
-	}
-
-	if strings.TrimSpace(request.Password) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
-	}
-
-	if len(strings.TrimSpace(request.Password)) < 8 {
-		return c.JSON(http.StatusBadRequest, "Password must be at least 8 characters")
-	}
-
-	if request.DateOfBirth.IsZero() {
-		return echo.NewHTTPError(http.StatusBadRequest, "DateOfBirth is required")
-	}
-
-	if strings.TrimSpace(request.Telephone.DDD) == "" || strings.TrimSpace(request.Telephone.Number) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Telephone is required")
-	}
-
-	if strings.TrimSpace(request.Creci) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Creci is required")
-	}
-
-	telephoneJson, err := json.Marshal(request.Telephone)
-	if err != nil {
-		return err
-	}
-
 	realtor, err := h.client.Realtor.FindUnique(
-		db.Realtor.RealID.Equals(c.Param("real_id")),
+		db.Realtor.UserID.Equals(c.Param("user_id")),
 	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if realtor.UserID != claims["userId"].(string) {
-		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para editar este corretor")
-	}
-
-	realtorUpdated := h.client.Realtor.FindUnique(
+	_, err = h.client.Realtor.FindUnique(
 		db.Realtor.RealID.Equals(realtor.RealID),
 	).Update(
-		db.Realtor.Creci.Set(request.Creci),
 		db.Realtor.Description.SetIfPresent(request.Description),
-	).Tx()
-
-	userUpdated := h.client.User.FindMany(
-		db.User.UserID.Equals(realtor.UserID),
-		db.User.DeletedAt.IsNull(),
-	).Update(
-		db.User.Name.Set(request.Name),
-		db.User.Cpf.Set(request.Cpf),
-		db.User.Email.Set(request.Email),
-		db.User.Password.Set(request.Password),
-		db.User.DateOfBirth.Set(request.DateOfBirth),
-		db.User.Telephone.Set(telephoneJson),
-	).Tx()
-
-	if err := h.client.Prisma.Transaction(realtorUpdated, userUpdated).Exec(ctx); err != nil {
-		return err
+		db.Realtor.Regions.SetIfPresent(request.Regions),
+		db.Realtor.RealtorInstagram.SetIfPresent(request.RealtorInstagram),
+		db.Realtor.RealtorFacebook.SetIfPresent(request.RealtorFacebook),
+		db.Realtor.RealtorWhatsapp.SetIfPresent(request.RealtorWhatsapp),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, "Corretor atualizado com sucesso!")
+}
+
+func (h *RealtorHandler) SetOnline(c echo.Context) error {
+	ctx := context.Background()
+
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	userID, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
+	if userID != c.Param("user_id") {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissão para editar este corretor")
+	}
+
+	type SetOnlineRequest struct {
+		IsOnline bool `json:"is_online"`
+	}
+	var req SetOnlineRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid request body")
+	}
+
+	_, err = h.client.Realtor.FindUnique(
+		db.Realtor.UserID.Equals(c.Param("user_id")),
+	).Update(
+		db.Realtor.IsOnline.Set(req.IsOnline),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, "Status Alterado!")
+}
+
+func (h *RealtorHandler) SetLocation(c echo.Context) error {
+	ctx := context.Background()
+
+	cookie, err := c.Request().Cookie("token")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Você não está logado")
+	}
+
+	token := cookie.Value
+
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Login Inválido")
+	}
+
+	_, ok := claims["userId"].(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, "ID de usuário não encontrado")
+	}
+
+	if claims["userId"].(string) != c.Param("user_id") {
+		return c.JSON(http.StatusUnauthorized, "Você não tem permissãasjlakjsflkgdslif")
+	}
+
+	type SetLocationRequest struct {
+		Latitude  types.Decimal `json:"latitude"`
+		Longitude types.Decimal `json:"longitude"`
+	}
+	//AQUI
+	var req SetLocationRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid request body")
+	}
+
+	realtor, err := h.client.Realtor.FindUnique(
+		db.Realtor.UserID.Equals(c.Param("user_id")),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	_, err = h.client.RealtorLocation.UpsertOne(
+		db.RealtorLocation.RealID.Equals(realtor.RealID),
+	).Create(
+		db.RealtorLocation.ReloID.Set(uuid.New().String()),
+		db.RealtorLocation.Realtor.Link(db.Realtor.RealID.Equals(realtor.RealID)),
+		db.RealtorLocation.Latitude.Set(req.Latitude),
+		db.RealtorLocation.Longitude.Set(req.Longitude),
+	).Update(
+		db.RealtorLocation.Latitude.Set(req.Latitude),
+		db.RealtorLocation.Longitude.Set(req.Longitude),
+	).Exec(ctx)
+
+	return c.JSON(http.StatusOK, "Localização atualizada!")
 }

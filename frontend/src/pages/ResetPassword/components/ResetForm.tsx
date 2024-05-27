@@ -5,9 +5,11 @@ import {
   InputAdornment,
   TextField,
   styled,
-  MenuItem,
 } from "@mui/material";
-import { useState } from "react";
+import SelectQuestion from "../../SignUp/components/SelectQuestion";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../../components/Loading";
 
 const Form = styled("form")({
   width: "80%",
@@ -35,67 +37,182 @@ const ButtonStyled = styled(Button)({
 
 const TextFieldStyled = styled(TextField)({
   width: "100%",
-  "& label.Mui-focused": {
-    color: "#FF5E00",
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: "#FF5E00",
-  },
+  padding: "0px",
   "& .MuiOutlinedInput-root": {
     "& fieldset": {
-      borderColor: "#1C5E9F",
       borderRadius: "15px",
-      border: "2px solid #1C5E9F",
-    },
-    "&:hover fieldset": {
-      borderColor: "#1C5E9F",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#1C5E9F",
     },
   },
 });
-
-const DropdownInputStyled = styled(TextField)({
-  marginTop: "14px",
-  marginBottom: "8px",
-  width: "100%",
-  "& label.Mui-focused": {
-    color: "#FF5E00",
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: "#FF5E00",
-  },
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: "#1C5E9F",
-      borderRadius: "15px",
-      border: "2px solid #1C5E9F",
-    },
-    "&:hover fieldset": {
-      borderColor: "#1C5E9F",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#1C5E9F",
-    },
-  },
-});
-
-const securityQuestions = [
-  { value: "questao1", label: "Qual é o nome da sua primeira escola?" },
-  {
-    value: "questao2",
-    label: "Qual é o nome do seu primeiro animal de estimação?",
-  },
-  { value: "questao3", label: "Qual é o nome da cidade onde nasceu?" },
-];
 
 const ResetForm = () => {
+  const [loading, setLoading] = useState(false);
+  const [safety_questions, setSafetyQuestions] = useState([]);
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    safety_questions: [
+      { question: "", answer: "" },
+      { question: "", answer: "" },
+      { question: "", answer: "" },
+    ],
+    confirmPassword: "",
+  });
+
+  const handleInputChange =
+    (field: string, nestedField?: string, index?: number) =>
+    (event: { target: { value: any } }) => {
+      console.log(field, nestedField, index, event.target.value);
+      setFormData((prevFormData) => {
+        if (nestedField !== undefined && index !== undefined) {
+          return {
+            ...prevFormData,
+            [field]: prevFormData[field].map((item: any, i: number) =>
+              i === index
+                ? { ...item, [nestedField]: event.target.value }
+                : item
+            ),
+          };
+        } else if (nestedField) {
+          return {
+            ...prevFormData,
+            [field]: {
+              ...prevFormData[field],
+              [nestedField]: event.target.value,
+            },
+          };
+        } else {
+          return { ...prevFormData, [field]: event.target.value };
+        }
+      });
+    };
+
+  const validateData = () => {
+    const securityQuestions = formData.safety_questions.map(
+      (questionData, index) => {
+        const question = questionData.question;
+        const answer = questionData.answer;
+
+        if (formData.password !== formData.confirmPassword) {
+          alert(
+            "As senhas não coincidem. Por favor, verifique e tente novamente."
+          );
+          return false;
+        }
+
+        if (!question || !answer) {
+          alert(
+            `Preencha a pergunta e a resposta correspondente para a pergunta ${
+              index + 1
+            }!`
+          );
+          return false;
+        }
+
+        return true;
+      }
+    );
+
+    if (securityQuestions.includes(false)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSave = () => {
+    if (validateData()) {
+      setLoading(true);
+      console.log(
+        formData.safety_questions.map((item) => ({
+          question: item.question,
+          answer: item.answer,
+        }))
+      );
+      const body = {
+        email: formData.email,
+        password: formData.password,
+        safety_questions: [
+          {
+            question: formData.safety_questions[0].question,
+            answer: formData.safety_questions[0].answer,
+          },
+          {
+            question: formData.safety_questions[1].question,
+            answer: formData.safety_questions[1].answer,
+          },
+          {
+            question: formData.safety_questions[2].question,
+            answer: formData.safety_questions[2].answer,
+          },
+        ],
+      };
+      console.log(body);
+      console.log(JSON.stringify(body));
+
+      fetch("http://localhost:8080/auth/reset_password", {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(() => {
+          setLoading(false);
+          navigate("/login");
+        })
+        .catch((error) => {
+          console.error(error);
+          setLoading(false);
+          alert("Erro ao atualizar senha!");
+        });
+    }
+  };
+
+  useEffect(() => {
+    const fetchSafetyQuestions = async () => {
+      setLoading(true);
+      try {
+        const responseSafetyQuestion = await fetch(
+          "http://localhost:8080/safety_questions/",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!responseSafetyQuestion.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const jsonSafetyQuestion = await responseSafetyQuestion.json();
+        setSafetyQuestions(jsonSafetyQuestion);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSafetyQuestions();
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Form>
@@ -104,21 +221,72 @@ const ResetForm = () => {
         label="Email"
         variant="outlined"
         margin="normal"
+        value={formData.email}
+        onChange={handleInputChange("email")}
         fullWidth={false}
       />
-      <DropdownInputStyled select label="Pergunta de segurança">
-        {securityQuestions.map((securityQuestion) => (
-          <MenuItem key={securityQuestion.value} value={securityQuestion.value}>
-            {securityQuestion.label}
-          </MenuItem>
-        ))}
-      </DropdownInputStyled>
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 1..."}
+        question={formData.safety_questions[0].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            0
+          )({ target: { value: selectedQuestion } })
+        }
+        possibleQuestions={safety_questions}
+      />
       <TextFieldStyled
-        id="security-answer"
-        label="Insira a resposta de segurança"
+        id="respostaUm"
+        label="Resposta 1"
         variant="outlined"
         margin="normal"
-        fullWidth={false}
+        value={formData.safety_questions[0].answer}
+        onChange={handleInputChange("safety_questions", "answer", 0)}
+        style={{ width: "100%", borderRadius: "15px" }}
+      />
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 2..."}
+        question={formData.safety_questions[1].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            1
+          )({ target: { value: selectedQuestion } })
+        }
+        possibleQuestions={safety_questions}
+      />
+      <TextFieldStyled
+        id="respostaDois"
+        label="Resposta 2"
+        variant="outlined"
+        margin="normal"
+        value={formData.safety_questions[1].answer}
+        onChange={handleInputChange("safety_questions", "answer", 1)}
+        style={{ width: "100%", borderRadius: "15px" }}
+      />
+      <SelectQuestion
+        placeholder={"Escolha a pergunta 3..."}
+        question={formData.safety_questions[2].question}
+        setQuestion={(selectedQuestion: any) =>
+          handleInputChange(
+            "safety_questions",
+            "question",
+            2
+          )({ target: { value: selectedQuestion } })
+        }
+        possibleQuestions={safety_questions}
+      />
+      <TextFieldStyled
+        id="respostaTres"
+        label="Resposta 3"
+        variant="outlined"
+        margin="normal"
+        value={formData.safety_questions[2].answer}
+        onChange={handleInputChange("safety_questions", "answer", 2)}
+        style={{ width: "100%", borderRadius: "15px" }}
       />
       <TextFieldStyled
         type={showPassword ? "text" : "password"}
@@ -127,6 +295,8 @@ const ResetForm = () => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.password}
+        onChange={handleInputChange("password")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -148,6 +318,8 @@ const ResetForm = () => {
         variant="outlined"
         margin="normal"
         fullWidth={false}
+        value={formData.confirmPassword}
+        onChange={handleInputChange("confirmPassword")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -168,6 +340,7 @@ const ResetForm = () => {
           type="submit"
           variant="contained"
           color="primary"
+          onClick={handleSave}
         >
           <span>Redefinir</span>
         </ButtonStyled>

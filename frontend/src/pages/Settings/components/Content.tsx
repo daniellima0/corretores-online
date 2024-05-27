@@ -2,8 +2,9 @@ import { styled } from "@mui/material/styles/";
 import { Avatar, Typography } from "@mui/material";
 import RoundedButton from "../../../components/RoundedButton";
 import InputGroup from "./InputGroup";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserTypeContext } from "../../../App";
+import LoadingSpinner from "../../../components/Loading";
 
 const Container = styled("div")`
   display: flex;
@@ -35,10 +36,6 @@ const NameWrapper = styled("div")`
 
 const Name = styled(Typography)`
   font-family: ${(props) => props.theme.customTypography.semiBold};
-`;
-
-const Username = styled(Typography)`
-  color: ${(props) => props.theme.customPallete.grey};
 `;
 
 const Description = styled(Typography)`
@@ -96,99 +93,229 @@ const ButtonGroup = styled("div")`
   justify-content: space-between;
 `;
 
-// interface ProfileFormState {
-//   name: string;
-//   email: string;
-//   telefone: string;
-//   apelido: string;
-//   senha: string;
-//   confirmarSenha: string;
-//   instagram: string;
-//   facebook: string;
-//   whatsapp: string;
-//   regioesDeAtuacao: string;
-//   bio: string;
-// }
-
-// const initialProfileState: ProfileFormState = {
-//   name: "Marcel Fonseca",
-//   email: "marcel.fonseca@gmail.com",
-//   telefone: "+557198159-1481",
-//   apelido: "marcel.fonseca",
-//   senha: "senhadousuario",
-//   confirmarSenha: "",
-//   instagram: "https://www.instagram.com/marcel.fonseca",
-//   facebook: "https://www.facebook.com/marcel.fonseca",
-//   whatsapp: "+557198159-1481",
-//   regioesDeAtuacao: "Barra, Pituba, Imbuí",
-//   bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
-// };
-
 const Content = () => {
+  const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState({
+    description: "",
+    regions: "",
+    realtorInstagram: "",
+    realtorFacebook: "",
+    realtorWhatsapp: "",
+    user: {
+      name: "",
+      email: "",
+      telephone: {
+        DDD: "",
+        number: "",
+      },
+    },
+  });
+  const [userId, setUserId] = useState("");
+
   const { userType } = useContext(UserTypeContext);
 
   const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
-  const [profileData, setProfileData] = useState({
-    name: "Marcel Fonseca",
-    email: "marcel.fonseca@gmail.com",
-    telefone: "+557198159-1481",
-    apelido: "marcel.fonseca",
-    senha: "senhadousuario",
-    confirmarSenha: "",
-    instagram: "https://www.instagram.com/marcel.fonseca",
-    facebook: "https://www.facebook.com/marcel.fonseca",
-    whatsapp: "+557198159-1481",
-    regioesDeAtuacao: "Barra, Pituba, Imbuí",
-    bio: "Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas.",
-  });
+  // Checking if user trying to access this page is logged in.
+  // If true, store its id in a state
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setUserId(json.user_id);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    };
 
-  const validateData = () => {
+    fetchData();
+  }, []);
+  
+  const fetchUrl =
+    userType === "realtor"
+      ? "http://localhost:8080/realtors/" + userId
+      : userType === "user"
+      ? "http://localhost:8080/user/" + userId
+      : "";
+      
+  // With the user id, fetch its data from the database and store it in a state
+  useEffect(() => {
+    setLoading(true);
+    const fetchData = async () => {
+      try {
+        const response = await fetch(fetchUrl, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setProfileData(json);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [fetchUrl]);
+
+  const handleInputChange = (field: any) => (event: any) => {
+    if (field in profileData.user) {
+      setProfileData({
+        ...profileData,
+        user: {
+          ...profileData.user,
+          [field]: event.target.value,
+        },
+      });
+    } else {
+      setProfileData({
+        ...profileData,
+        [field]: event.target.value,
+      });
+    }
+  };
+
+  /*  const validateData = () => {
     if (
-      !profileData.name ||
-      !profileData.email ||
-      !profileData.telefone ||
-      !profileData.apelido ||
-      !profileData.senha
+      !profileData.user.name ||
+      !profileData.user.email ||
+      !profileData.user.telephone.DDD ||
+      !profileData.user.telephone.number ||
+      !profileData.description
     ) {
       alert("Preencha todos os campos obrigatórios!");
       return false;
     }
-    if (profileData.senha !== profileData.confirmarSenha) {
-      alert("As senhas não coincidem!");
-      return;
-    }
     return true;
-  };
+  }; */
 
-  const handleInputChange =
-    (field: string) => (event: { target: { value: any } }) => {
-      setProfileData({ ...profileData, [field]: event.target.value });
+  const handleSaveRealtor = () => {
+    const data = {
+      regions: profileData.regions,
+      description: profileData.description,
     };
 
-  const handleSave = () => {
-    if (validateData()) {
-      console.log("Dados válidos, salvando...");
-    }
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/realtors/" + userId,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  };
+
+  const handleSaveUser = () => {
+    const data = {
+      name: profileData.user.name,
+      email: profileData.user.email,
+      telephone: {
+        DDD: profileData.user.telephone.DDD,
+        number: profileData.user.telephone.number,
+      },
+    };
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/user/" + userId, {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  };
+
+  const HandleSaveSocials = () => {
+    const data = {
+      realtor_instagram: profileData.realtorInstagram,
+      realtor_facebook: profileData.realtorFacebook,
+      realtor_whatsapp: profileData.realtorWhatsapp,
+    };
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/realtors/" + userId,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
   };
 
   const refreshPage = () => {
     window.location.reload();
   };
 
+  if (loading || !profileData || !profileData.user) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <Container>
       <UserInfo>
         <ProfilePictureWrapper>
           <Avatar
-            alt="Marcel Fonseca"
-            src="/static/images/avatar/1.jpg"
+            alt={profileData.user.name}
+            src="a"
             sx={{ width: "50px", height: "50px" }}
           />
         </ProfilePictureWrapper>
         <NameWrapper>
-          <Name variant="body1">Marcel Fonseca</Name>
-          <Username variant="body1">(marcel.fonseca)</Username>
+          <Name variant="body1">{profileData.user.name}</Name>
         </NameWrapper>
         <Description variant="body2">Sua conta pessoal</Description>
       </UserInfo>
@@ -200,43 +327,42 @@ const Content = () => {
               label="Nome"
               name="name"
               type="text"
-              defaultValue="Marcel Fonseca"
+              value={profileData.user.name}
               onChange={handleInputChange("name")}
             />
             <InputGroup
               label="Email"
               name="email"
               type="text"
-              defaultValue="marcel.fonseca@gmail.com"
+              value={profileData.user.email}
               onChange={handleInputChange("email")}
             />
             <InputGroup
+              label="DDD"
+              name="ddd"
+              type="text"
+              value={`(${profileData.user.telephone.DDD})`}
+              onChange={handleInputChange("ddd")}
+            />
+            <InputGroup
               label="Telefone"
-              name="telefone"
+              name="telephone"
               type="text"
-              defaultValue="+557198159-1481"
-              onChange={handleInputChange("telefone")}
+              value={profileData.user.telephone.number}
+              onChange={handleInputChange("telephone")}
             />
-            <InputGroup
-              label="Apelido"
-              name="apelido"
-              type="text"
-              defaultValue="marcel.fonseca"
-              onChange={handleInputChange("apelido")}
-            />
-            <InputGroup
-              label="Senha"
-              name="senha"
-              type="password"
-              defaultValue="senhadousuario"
-              onChange={handleInputChange("senha")}
-            />
-            <InputGroup
-              label="Confirme a mudança de senha"
-              type="password"
-              defaultValue="senhadousuario"
-              onChange={handleInputChange("confirmarSenha")}
-            />
+            <ButtonGroup>
+              <CancelButton
+                buttonColor={primaryColor}
+                invertColor={true}
+                onClick={refreshPage}
+              >
+                Cancelar
+              </CancelButton>
+              <SaveButton buttonColor={primaryColor} onClick={handleSaveUser}>
+                Salvar
+              </SaveButton>
+            </ButtonGroup>
           </InputGroupWrapper>
           <ProfilePictureWithButtonWrapper>
             <ProfilePictureWithButtonDescription variant="body1">
@@ -257,28 +383,43 @@ const Content = () => {
             <InputGroupWrapper>
               <InputGroup
                 label="Instagram"
-                name="instagram"
+                name="realtorInstagram"
                 type="text"
-                defaultValue="https://www.instagram.com/marcel.fonseca"
                 icon="/public/instagram.svg"
-                onChange={handleInputChange("instagram")}
+                value={profileData.realtorInstagram}
+                onChange={handleInputChange("realtorInstagram")}
               />
               <InputGroup
                 label="Facebook"
-                name="facebook"
+                name="realtorFacebook"
                 type="text"
-                defaultValue="https://www.facebook.com/marcel.fonseca"
+                value={profileData.realtorFacebook}
                 icon="/public/facebook.png"
-                onChange={handleInputChange("facebook")}
+                onChange={handleInputChange("realtorFacebook")}
               />
               <InputGroup
                 label="WhatsApp"
-                name="whatsapp"
+                name="realtorWhatsapp"
                 type="text"
-                defaultValue="+557198159-1481"
+                value={profileData.realtorWhatsapp}
                 icon="/public/whatsapp.svg"
-                onChange={handleInputChange("whatsapp")}
+                onChange={handleInputChange("realtorWhatsapp")}
               />
+              <ButtonGroup>
+                <CancelButton
+                  buttonColor={primaryColor}
+                  invertColor={true}
+                  onClick={refreshPage}
+                >
+                  Cancelar
+                </CancelButton>
+                <SaveButton
+                  buttonColor={primaryColor}
+                  onClick={HandleSaveSocials}
+                >
+                  Salvar
+                </SaveButton>
+              </ButtonGroup>
             </InputGroupWrapper>
           </Section>
           <Section>
@@ -286,18 +427,18 @@ const Content = () => {
             <InputGroupWrapper>
               <InputGroup
                 label="Regiões de Atuação"
-                name="regioes-de-atuacao"
+                name="regions"
+                value={profileData.regions}
                 type="text"
-                defaultValue="Barra, Pituba, Imbuí"
-                onChange={handleInputChange("regioesDeAtuacao")}
+                onChange={handleInputChange("regions")}
               />
               <InputGroup
                 label="Bio"
-                name="bio"
+                name="description"
                 type="text"
-                defaultValue="Sou corretor de imóveis desde 2010 e tenho como objetivo ajudar as pessoas a encontrarem o lar ideal para elas."
+                value={profileData.description}
                 isTextField={true}
-                onChange={handleInputChange("bio")}
+                onChange={handleInputChange("description")}
               />
             </InputGroupWrapper>
           </Section>
@@ -311,7 +452,7 @@ const Content = () => {
         >
           Cancelar
         </CancelButton>
-        <SaveButton buttonColor={primaryColor} onClick={handleSave}>
+        <SaveButton buttonColor={primaryColor} onClick={handleSaveRealtor}>
           Salvar
         </SaveButton>
       </ButtonGroup>

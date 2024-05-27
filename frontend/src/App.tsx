@@ -7,11 +7,12 @@ import ChooseSignup from "./pages/ChooseSignup";
 import LoginPage from "./pages/LoginPage";
 import ResetPassword from "./pages/ResetPassword";
 import SignUp from "./pages/SignUp";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import { createContext, useEffect, useState } from "react";
 
 const router = createBrowserRouter([
   {
-    path: "/landing-page",
+    path: "/",
     element: <LandingPage />,
   },
   {
@@ -19,7 +20,7 @@ const router = createBrowserRouter([
     element: <Homepage />,
   },
   {
-    path: "/profile",
+    path: "/profile/:user_id",
     element: <Profile />,
   },
   {
@@ -39,12 +40,20 @@ const router = createBrowserRouter([
     element: <ResetPassword />,
   },
   {
-    path: "/signup",
-    element: <SignUp />,
+    path: "/realtor-signup",
+    element: <SignUp userType="realtor" />,
+  },
+  {
+    path: "/user-signup",
+    element: <SignUp userType="user" />,
+  },
+  {
+    path: "/terms-and-conditions",
+    element: <TermsAndConditions />,
   },
 ]);
 
-type UserType = "realtor" | "costumer" | null;
+type UserType = "realtor" | "user" | null;
 
 export const UserTypeContext = createContext<{
   userType: UserType;
@@ -58,10 +67,24 @@ function App() {
   const [userType, setUserType] = useState<UserType>(null);
 
   useEffect(() => {
-    const userType = localStorage.getItem("userType") as UserType;
-    setUserType(userType);
-    console.log(userType);
-  }, [userType]);
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/auth/check", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch research data");
+        }
+        const json = await response.json();
+        setUserType(json.auth_status);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <UserTypeContext.Provider value={{ userType, setUserType }}>

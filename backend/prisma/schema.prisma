@@ -13,23 +13,23 @@ model auth_status {
   user    user[]
 }
 
-model contact_options {
-  coop_id         String            @id @db.Uuid
-  type            String            @db.VarChar
-  socials_options socials_options[]
-}
-
 model realtor {
-  real_id          String            @id @db.Uuid
-  user_id          String            @unique @db.Uuid
-  creci            String            @db.VarChar
-  description      String?           @db.VarChar
-  is_online        Boolean
-  avatar           String?           @db.VarChar(255)
-  user             user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
-  realtor_location realtor_location?
-  realtor_regions  realtor_regions[]
-  socials_realtor  socials_realtor[]
+  real_id           String            @id @db.Uuid
+  user_id           String            @unique @db.Uuid
+  creci             String            @db.VarChar
+  description       String?           @db.VarChar
+  is_online         Boolean
+  avatar            String?           @db.VarChar(255)
+  realtor_whatsapp  String?           @db.VarChar(255)
+  realtor_facebook  String?           @db.VarChar(255)
+  realtor_instagram String?           @db.VarChar(255)
+  regions           String?           @db.VarChar(255)
+  ufop_id           String            @db.Uuid
+  uf_options        uf_options        @relation(fields: [ufop_id], references: [ufop_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_realtor_uf")
+  user              user              @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  realtor_location  realtor_location?
+
+  @@unique([creci, ufop_id], map: "unique_creci_uf_constraint")
 }
 
 model realtor_location {
@@ -38,20 +38,6 @@ model realtor_location {
   latitude  Decimal? @db.Decimal(10, 6)
   longitude Decimal? @db.Decimal(10, 6)
   realtor   realtor  @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model realtor_regions {
-  rere_id      String       @id @db.Uuid
-  reus_id      String       @db.Uuid
-  real_id      String       @db.Uuid
-  realtor      realtor      @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
-  regions_used regions_used @relation(fields: [reus_id], references: [reus_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model regions_used {
-  reus_id         String            @id @db.Uuid
-  region          String            @unique(map: "unique_regions") @db.VarChar
-  realtor_regions realtor_regions[]
 }
 
 model safety_questions {
@@ -69,24 +55,6 @@ model safety_questions_user {
   user             user             @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model socials_options {
-  soop_id         String            @id @db.Uuid
-  coop_id         String            @db.Uuid
-  icon            String            @db.VarChar
-  name            String            @db.VarChar
-  contact_options contact_options   @relation(fields: [coop_id], references: [coop_id], onDelete: NoAction, onUpdate: NoAction)
-  socials_realtor socials_realtor[]
-}
-
-model socials_realtor {
-  soci_id         String          @id @db.Uuid
-  soop_id         String          @db.Uuid
-  real_id         String          @db.Uuid
-  contact_info    String          @db.VarChar
-  realtor         realtor         @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
-  socials_options socials_options @relation(fields: [soop_id], references: [soop_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 model user {
   user_id               String                  @id @db.Uuid
   aust_id               String                  @db.Uuid
@@ -101,4 +69,10 @@ model user {
   realtor               realtor?
   safety_questions_user safety_questions_user[]
   auth_status           auth_status             @relation(fields: [aust_id], references: [aust_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model uf_options {
+  ufop_id String    @id @db.Uuid
+  uf      String    @unique(map: "unique_uf") @db.VarChar(2)
+  realtor realtor[]
 }

@@ -59,9 +59,9 @@ const ChooseSignup = () => {
             Corretor
           </Link>
         </RoundedButton>
-        <RoundedButton buttonColor={theme.customPallete.costumer} width="300px">
+        <RoundedButton buttonColor={theme.customPallete.user} width="300px">
           <Link
-            to="/costumer-signup"
+            to="/user-signup"
             style={{ textDecoration: "inherit", color: "inherit" }}
           >
             Cliente

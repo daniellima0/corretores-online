@@ -6,10 +6,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func SocialsOptionsRouter(e *echo.Echo, dbClient *db.PrismaClient) {
-	h := handler.NewSocialsOptionsHandler(dbClient)
+func UfOptionsRouter(e *echo.Echo, dbClient *db.PrismaClient) {
+	h := handler.NewUfOptionsHandler(dbClient)
 
-	g := e.Group("/socials_options/")
-	g.POST("", h.Create)
+	g := e.Group("/uf_options/")
 	g.GET("", h.List)
 }
