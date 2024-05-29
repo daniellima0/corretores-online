@@ -19,7 +19,6 @@ const Settings = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
-        const json = await response.json();
       } catch (error) {
         console.error(error);
         navigator("/login");

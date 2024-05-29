@@ -147,11 +147,6 @@ const SearchAdress: React.FC<SearchAdressProps> = ({ showMap }) => {
             </Titulo>
             <SearchContainer>
               <AutocompleteStyled
-                onLoad={(autocomplete) => {
-                  let autocompleteInstance: google.maps.places.Autocomplete | null =
-                    null;
-                  autocompleteInstance = autocomplete;
-                }}
                 onPlaceChanged={() => {
                   showMap(true);
                   handleClick();

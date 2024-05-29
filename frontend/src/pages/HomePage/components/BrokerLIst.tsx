@@ -13,16 +13,10 @@ import { RealtorType } from "types/RealtorType";
 
 function renderRow(
   item: RealtorType,
-  setSearchMapCenter: (position: { lat: number; lng: number }) => void,
   navigator: any
 ) {
   const handleListItemClick = () => {
     navigator(`/profile/${item.user.user_id}`);
-
-    // setSearchMapCenter({
-    //   lat: Number(item.realtor_location.latitude),
-    //   lng: Number(item.realtor_location.longitude),
-    // });
   };
 
   return (
@@ -63,7 +57,6 @@ interface BrokerListProps {
 
 export default function BrokerList({
   data,
-  setSearchMapCenter,
 }: BrokerListProps) {
   const navigator = useNavigate();
 
@@ -114,7 +107,7 @@ export default function BrokerList({
           }}
         >
           {data &&
-            data.map((item) => renderRow(item, setSearchMapCenter, navigator))}
+            data.map((item) => renderRow(item, navigator))}
         </div>
       </div>
     </ListBox>

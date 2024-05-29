@@ -19,13 +19,11 @@ const Profile = () => {
           method: "GET",
           credentials: "include",
         });
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
         const json = await response.json();
         setUserId(json.user_id);
-        console.log(json);
       } catch (error) {
         console.error(error);
         navigator("/login");

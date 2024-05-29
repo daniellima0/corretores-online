@@ -83,8 +83,7 @@ const LoginForm = () => {
         }
         return response.json();
       })
-      .then((json) => {
-        console.log(json);
+      .then(() => {
         setLoading(false);
         navigator("/home-page");
       })

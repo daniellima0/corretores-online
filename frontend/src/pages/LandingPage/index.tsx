@@ -23,12 +23,9 @@ const LandingPage: React.FC = () => {
         method: "GET",
         credentials: "include",
       });
-      console.log(response);
       if (!response.ok) {
         throw new Error("Failed to fetch research data");
       }
-      const json = await response.json();
-      console.log(json);
       navigator("/home-page");
     } catch (error) {
       console.error(error);
@@ -50,7 +47,6 @@ const LandingPage: React.FC = () => {
         return response.json();
       })
       .then((json) => {
-        console.log(json);
         setOnlineRealtors(json);
       })
       .catch((error) => {

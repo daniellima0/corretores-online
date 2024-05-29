@@ -42,7 +42,7 @@ function Map({ data, searchMapCenter, dataFilter }: MapProps2) {
   const [map, setMap] = useState<google.maps.Map>();
   const [circle, setCircle] = useState<google.maps.Circle | null>();
   const [brokersInCircle, setBrokersInCircle] = useState<
-    RealtorType[] | undefined
+    RealtorType[]
   >(data);
 
   const ref = useRef<HTMLDivElement>(null);
@@ -151,8 +151,6 @@ function Broker(props: MapProps) {
 
   const handleProfileVisit = (user_id: string) => {
     navigator(`/profile/${user_id}`);
-
-    console.log("Visitando perfil");
   };
 
   return (

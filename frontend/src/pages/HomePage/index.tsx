@@ -33,12 +33,9 @@ const HomePage = () => {
           method: "GET",
           credentials: "include",
         });
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
-        const json = await response.json();
-        console.log(json);
       } catch (error) {
         console.error(error);
         navigate("/login");
@@ -130,8 +127,6 @@ const HomePage = () => {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       });
-      console.log(position.coords.latitude);
-      console.log(position.coords.longitude);
     };
 
     const errorCallback = () => {
@@ -213,7 +208,6 @@ const HomePage = () => {
         return response.json();
       })
       .then((json) => {
-        console.log(json);
         setOnlineRealtors(json);
       })
       .catch((error) => {
