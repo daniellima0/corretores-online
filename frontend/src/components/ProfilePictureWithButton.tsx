@@ -10,9 +10,7 @@ const Button = styled("button")`
 `;
 
 const ProfilePictureWithButton: React.FC<ProfilePictureProps> = (props) => {
-    const handleClick = () => {
-        console.log("profile picture clicked");
-    };
+    const handleClick = () => {/* implement if necessary */};
 
     return (
         <Button onClick={handleClick}>

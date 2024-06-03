@@ -142,8 +142,6 @@ const RealtorInfo: React.FC<RealtorInfoProps> = (props) => {
 
   const params = useParams();
 
-  console.log("user_id = ", params.user_id);
-
   const url = "http://localhost:8080/realtors/" + params.user_id;
 
   useEffect(() => {

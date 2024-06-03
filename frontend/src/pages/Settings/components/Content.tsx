@@ -225,7 +225,6 @@ const Content = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
-        const json = await response.json();
       } catch (error) {
         console.error(error);
       }
@@ -256,7 +255,6 @@ const Content = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
-        const json = await response.json();
       } catch (error) {
         console.error(error);
       }
@@ -287,7 +285,6 @@ const Content = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch research data");
         }
-        const json = await response.json();
       } catch (error) {
         console.error(error);
       }

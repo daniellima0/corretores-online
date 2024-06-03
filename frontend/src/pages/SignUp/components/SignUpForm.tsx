@@ -113,7 +113,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   const handleInputChange =
     (field: string, nestedField?: string, index?: number) =>
     (event: { target: { value: any } }) => {
-      console.log(field, nestedField, index, event.target.value);
       setFormData((prevFormData) => {
         if (nestedField !== undefined && index !== undefined) {
           return {
@@ -139,7 +138,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     };
 
   const validateData = () => {
-    console.log(formData.date_of_birth);
     for (const field in formData) {
       if (!formData[field]) {
         if ((field === "creci" || field == "uf") && props.userType === "user")

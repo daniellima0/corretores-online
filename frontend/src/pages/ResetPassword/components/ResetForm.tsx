@@ -67,7 +67,6 @@ const ResetForm = () => {
   const handleInputChange =
     (field: string, nestedField?: string, index?: number) =>
     (event: { target: { value: any } }) => {
-      console.log(field, nestedField, index, event.target.value);
       setFormData((prevFormData) => {
         if (nestedField !== undefined && index !== undefined) {
           return {
@@ -128,12 +127,6 @@ const ResetForm = () => {
   const handleSave = () => {
     if (validateData()) {
       setLoading(true);
-      console.log(
-        formData.safety_questions.map((item) => ({
-          question: item.question,
-          answer: item.answer,
-        }))
-      );
       const body = {
         email: formData.email,
         password: formData.password,
@@ -152,8 +145,6 @@ const ResetForm = () => {
           },
         ],
       };
-      console.log(body);
-      console.log(JSON.stringify(body));
 
       fetch("http://localhost:8080/auth/reset_password", {
         method: "PUT",
