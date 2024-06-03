@@ -5,7 +5,6 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ChooseSignup from "./pages/ChooseSignup";
 import LoginPage from "./pages/LoginPage";
-import ResetPassword from "./pages/ResetPassword";
 import SignUp from "./pages/SignUp";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { createContext, useEffect, useState } from "react";
@@ -34,10 +33,6 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
-  },
-  {
-    path: "/reset-password",
-    element: <ResetPassword />,
   },
   {
     path: "/realtor-signup",

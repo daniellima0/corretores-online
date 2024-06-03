@@ -51,22 +51,25 @@ const ChooseSignup = () => {
     <Div>
       <Card>
         <Title variant="h1">Fazer cadastro como:</Title>
-        <RoundedButton buttonColor={theme.customPallete.realtor} width="300px">
-          <Link
-            to="/realtor-signup"
-            style={{ textDecoration: "inherit", color: "inherit" }}
+        <Link
+          to="/realtor-signup"
+          style={{ textDecoration: "inherit", color: "inherit" }}
+        >
+          <RoundedButton
+            buttonColor={theme.customPallete.realtor}
+            width="300px"
           >
             Corretor
-          </Link>
-        </RoundedButton>
-        <RoundedButton buttonColor={theme.customPallete.user} width="300px">
-          <Link
-            to="/user-signup"
-            style={{ textDecoration: "inherit", color: "inherit" }}
-          >
+          </RoundedButton>
+        </Link>
+        <Link
+          to="/user-signup"
+          style={{ textDecoration: "inherit", color: "inherit" }}
+        >
+          <RoundedButton buttonColor={theme.customPallete.user} width="300px">
             Cliente
-          </Link>
-        </RoundedButton>
+          </RoundedButton>
+        </Link>
       </Card>
     </Div>
   );

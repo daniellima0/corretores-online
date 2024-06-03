@@ -4,12 +4,10 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Typography,
   styled,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import * as React from "react";
-import SelectQuestion from "./SelectQuestion";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../../components/Loading";
 import SelectUf from "./SelectUF";
@@ -52,12 +50,6 @@ const CreciBox = styled("div")({
   gap: "20px",
 });
 
-const Title = styled(Typography)`
-  font-family: ${({ theme }) => theme.customTypography.bold};
-  font-size: 1.8rem;
-  margin-top: 20px;
-`;
-
 interface SignUpFormProps {
   userType: "realtor" | "user";
 }
@@ -80,7 +72,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [safety_questions, setSafetyQuestions] = useState([]);
   const [ufOptions, setUfOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -101,48 +92,35 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     password: "",
     confirmPassword: "",
     uf: "",
-    safety_questions: [
-      { question: "", answer: "" },
-      { question: "", answer: "" },
-      { question: "", answer: "" },
-    ],
   });
 
   const [areTermsAccepted, setAreTermsAccepted] = React.useState(false);
 
   const handleInputChange =
-    (field: string, nestedField?: string, index?: number) =>
-    (event: { target: { value: any } }) => {
-      console.log(field, nestedField, index, event.target.value);
+    (field: string, nestedField?: string) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+
       setFormData((prevFormData) => {
-        if (nestedField !== undefined && index !== undefined) {
-          return {
-            ...prevFormData,
-            [field]: prevFormData[field].map((item: any, i: number) =>
-              i === index
-                ? { ...item, [nestedField]: event.target.value }
-                : item
-            ),
-          };
-        } else if (nestedField) {
+        // If the field is nested, we need to update the nested object
+        if (nestedField) {
           return {
             ...prevFormData,
             [field]: {
               ...prevFormData[field],
-              [nestedField]: event.target.value,
+              [nestedField]: value,
             },
           };
-        } else {
-          return { ...prevFormData, [field]: event.target.value };
         }
+        // Otherwise, we can update the field directly
+        return { ...prevFormData, [field]: value };
       });
     };
 
   const validateData = () => {
-    console.log(formData.date_of_birth);
     for (const field in formData) {
-      if (!formData[field]) {
-        if ((field === "creci" || field == "uf") && props.userType === "user")
+      if (!formData[field as keyof typeof formData]) {
+        if ((field === "creci" || field === "uf") && props.userType === "user")
           continue;
         alert(`Preencha o campo ${field}!`);
         return false;
@@ -173,42 +151,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       alert("Você deve aceitar os termos de uso para se cadastrar");
       return false;
     }
-
-    if (
-      formData.safety_questions[0].question ===
-        formData.safety_questions[1].question ||
-      formData.safety_questions[0].question ===
-        formData.safety_questions[2].question ||
-      formData.safety_questions[1].question ===
-        formData.safety_questions[2].question
-    ) {
-      alert("Perguntas de segurança repetidas!");
-      return false;
-    }
-
-    const securityQuestions = formData.safety_questions.map(
-      (questionData, index) => {
-        const question = questionData.question;
-        const answer = questionData.answer;
-
-        if (!question || !answer) {
-          alert(
-            `Preencha a pergunta e a resposta correspondente para a pergunta ${
-              index + 1
-            }!`
-          );
-          return false;
-        }
-
-        return true;
-      }
-    );
-
-    if (securityQuestions.includes(false)) {
-      return false;
-    }
-
-    return true;
   };
 
   const handleSave = () => {
@@ -224,10 +166,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
           DDD: formData.telephone.ddd,
           number: formData.telephone.number,
         },
-        safety_questions: formData.safety_questions.map((item) => ({
-          question: item.question,
-          answer: item.answer,
-        })),
         ...(props.userType === "realtor" && {
           creci: formData.creci,
           uf: formData.uf,
@@ -264,32 +202,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
     }
   };
 
-  const fetchSafetyQuestions = async () => {
-    setLoading(true);
-    try {
-      const responseSafetyQuestion = await fetch(
-        "http://localhost:8080/safety_questions/",
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!responseSafetyQuestion.ok) {
-        throw new Error("Failed to fetch research data");
-      }
-      const jsonSafetyQuestion = await responseSafetyQuestion.json();
-      setSafetyQuestions(jsonSafetyQuestion);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchUfOptions = async () => {
     setLoading(true);
     try {
@@ -317,7 +229,6 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
   };
 
   useEffect(() => {
-    fetchSafetyQuestions();
     fetchUfOptions();
   }, []);
 
@@ -455,76 +366,12 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
           ),
         }}
       />
-      <Title variant="h1">
-        Perguntas de segurança para recuperação de senha
-      </Title>
-      <SelectQuestion
-        placeholder={"Escolha a pergunta 1..."}
-        question={formData.safety_questions[0].question}
-        setQuestion={(selectedQuestion: any) =>
-          handleInputChange(
-            "safety_questions",
-            "question",
-            0
-          )({ target: { value: selectedQuestion } })
-        }
-        possibleQuestions={safety_questions}
-      />
-      <TextFieldStyled
-        id="respostaUm"
-        label="Resposta 1"
-        variant="outlined"
-        margin="normal"
-        value={formData.safety_questions[0].answer}
-        onChange={handleInputChange("safety_questions", "answer", 0)}
-        style={{ width: "100%", borderRadius: "15px" }}
-      />
-      <SelectQuestion
-        placeholder={"Escolha a pergunta 2..."}
-        question={formData.safety_questions[1].question}
-        setQuestion={(selectedQuestion: any) =>
-          handleInputChange(
-            "safety_questions",
-            "question",
-            1
-          )({ target: { value: selectedQuestion } })
-        }
-        possibleQuestions={safety_questions}
-      />
-      <TextFieldStyled
-        id="respostaDois"
-        label="Resposta 2"
-        variant="outlined"
-        margin="normal"
-        value={formData.safety_questions[1].answer}
-        onChange={handleInputChange("safety_questions", "answer", 1)}
-        style={{ width: "100%", borderRadius: "15px" }}
-      />
-      <SelectQuestion
-        placeholder={"Escolha a pergunta 3..."}
-        question={formData.safety_questions[2].question}
-        setQuestion={(selectedQuestion: any) =>
-          handleInputChange(
-            "safety_questions",
-            "question",
-            2
-          )({ target: { value: selectedQuestion } })
-        }
-        possibleQuestions={safety_questions}
-      />
-      <TextFieldStyled
-        id="respostaTres"
-        label="Resposta 3"
-        variant="outlined"
-        margin="normal"
-        value={formData.safety_questions[2].answer}
-        onChange={handleInputChange("safety_questions", "answer", 2)}
-        style={{ width: "100%", borderRadius: "15px" }}
-      />
       <FormGroup>
         <FormControlLabel
           checked={areTermsAccepted}
-          onChange={(event) => setAreTermsAccepted(event.target.checked)}
+          onChange={(event) =>
+            setAreTermsAccepted((event.target as HTMLInputElement).checked)
+          }
           required
           control={<Checkbox />}
           label={
