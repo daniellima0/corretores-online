@@ -127,7 +127,7 @@ const ResetForm = () => {
   const handleSave = () => {
     if (validateData()) {
       setLoading(true);
-        const body = {
+      const body = {
         email: formData.email,
         password: formData.password,
         safety_questions: [
@@ -145,7 +145,6 @@ const ResetForm = () => {
           },
         ],
       };
-
 
       fetch("http://localhost:8080/auth/reset_password", {
         method: "PUT",
