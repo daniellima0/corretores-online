@@ -111,13 +111,9 @@ const Content = () => {
     },
   });
   const [userId, setUserId] = useState("");
-
   const { userType } = useContext(UserTypeContext);
-
   const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
-  // Checking if user trying to access this page is logged in.
-  // If true, store its id in a state
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -127,7 +123,7 @@ const Content = () => {
           credentials: "include",
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to fetch user data");
         }
         const json = await response.json();
         setUserId(json.user_id);
@@ -137,40 +133,48 @@ const Content = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
-  
-  const fetchUrl =
-    userType === "realtor"
-      ? "http://localhost:8080/realtors/" + userId
-      : userType === "user"
-      ? "http://localhost:8080/user/" + userId
-      : "";
-      
-  // With the user id, fetch its data from the database and store it in a state
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
-      try {
-        const response = await fetch(fetchUrl, {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch research data");
-        }
-        const json = await response.json();
-        setProfileData(json);
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        setLoading(false);
-      }
-    };
 
-    fetchData();
-  }, [fetchUrl]);
+  useEffect(() => {
+    const fetchUrl =
+      userType === "realtor"
+        ? "http://localhost:8080/realtors/" + userId
+        : "http://localhost:8080/user/" + userId;
+
+    if (userId) {
+      setLoading(true);
+      const fetchData = async () => {
+        try {
+          const response = await fetch(fetchUrl, {
+            method: "GET",
+            credentials: "include",
+          });
+          if (!response.ok) {
+            throw new Error("Failed to fetch profile data");
+          }
+          const json = await response.json();
+          if (userType === "realtor") {
+            setProfileData(json);
+          } else {
+            setProfileData({
+              ...profileData,
+              user: {
+                name: json.name,
+                email: json.email,
+                telephone: JSON.parse(json.telephone),
+              },
+            });
+          }
+          setLoading(false);
+        } catch (error) {
+          console.error(error);
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [userId, userType]);
 
   const handleInputChange = (field: any) => (event: any) => {
     if (field in profileData.user) {
@@ -188,20 +192,6 @@ const Content = () => {
       });
     }
   };
-
-  /*  const validateData = () => {
-    if (
-      !profileData.user.name ||
-      !profileData.user.email ||
-      !profileData.user.telephone.DDD ||
-      !profileData.user.telephone.number ||
-      !profileData.description
-    ) {
-      alert("Preencha todos os campos obrigatórios!");
-      return false;
-    }
-    return true;
-  }; */
 
   const handleSaveRealtor = () => {
     const data = {
@@ -223,14 +213,13 @@ const Content = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to save realtor data");
         }
         const json = await response.json();
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchData();
   };
 
@@ -254,22 +243,21 @@ const Content = () => {
           body: JSON.stringify(data),
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to save user data");
         }
         const json = await response.json();
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchData();
   };
 
-  const HandleSaveSocials = () => {
+  const handleSaveSocials = () => {
     const data = {
-      realtor_instagram: profileData.realtorInstagram,
-      realtor_facebook: profileData.realtorFacebook,
-      realtor_whatsapp: profileData.realtorWhatsapp,
+      realtorInstagram: profileData.realtorInstagram,
+      realtorFacebook: profileData.realtorFacebook,
+      realtorWhatsapp: profileData.realtorWhatsapp,
     };
     const fetchData = async () => {
       try {
@@ -285,20 +273,21 @@ const Content = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to save social data");
         }
         const json = await response.json();
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchData();
   };
 
   const refreshPage = () => {
     window.location.reload();
   };
+
+  console.log("profileData:", profileData);
 
   if (loading || !profileData || !profileData.user) {
     return <LoadingSpinner />;
@@ -342,14 +331,14 @@ const Content = () => {
               name="ddd"
               type="text"
               value={`(${profileData.user.telephone.DDD})`}
-              onChange={handleInputChange("ddd")}
+              onChange={handleInputChange("DDD")}
             />
             <InputGroup
               label="Telefone"
               name="telephone"
               type="text"
               value={profileData.user.telephone.number}
-              onChange={handleInputChange("telephone")}
+              onChange={handleInputChange("number")}
             />
             <ButtonGroup>
               <CancelButton
@@ -369,7 +358,7 @@ const Content = () => {
               Foto de Perfil
             </ProfilePictureWithButtonDescription>
             <Avatar
-              alt="Marcel Fonseca"
+              alt={profileData.user.name}
               src="/static/images/avatar/1.jpg"
               sx={{ width: "130px", height: "130px", fontSize: "60px" }}
             />
@@ -415,7 +404,7 @@ const Content = () => {
                 </CancelButton>
                 <SaveButton
                   buttonColor={primaryColor}
-                  onClick={HandleSaveSocials}
+                  onClick={handleSaveSocials}
                 >
                   Salvar
                 </SaveButton>
@@ -444,18 +433,20 @@ const Content = () => {
           </Section>
         </>
       )}
-      <ButtonGroup>
-        <CancelButton
-          buttonColor={primaryColor}
-          invertColor={true}
-          onClick={refreshPage}
-        >
-          Cancelar
-        </CancelButton>
-        <SaveButton buttonColor={primaryColor} onClick={handleSaveRealtor}>
-          Salvar
-        </SaveButton>
-      </ButtonGroup>
+      {userType === "realtor" && (
+        <ButtonGroup>
+          <CancelButton
+            buttonColor={primaryColor}
+            invertColor={true}
+            onClick={refreshPage}
+          >
+            Cancelar
+          </CancelButton>
+          <SaveButton buttonColor={primaryColor} onClick={handleSaveRealtor}>
+            Salvar
+          </SaveButton>
+        </ButtonGroup>
+      )}
     </Container>
   );
 };
