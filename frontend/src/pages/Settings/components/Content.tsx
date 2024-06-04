@@ -140,14 +140,14 @@ const Content = () => {
 
     fetchData();
   }, []);
-  
+
   const fetchUrl =
     userType === "realtor"
       ? "http://localhost:8080/realtors/" + userId
       : userType === "user"
       ? "http://localhost:8080/user/" + userId
       : "";
-      
+
   // With the user id, fetch its data from the database and store it in a state
   useEffect(() => {
     setLoading(true);
@@ -369,7 +369,7 @@ const Content = () => {
               Foto de Perfil
             </ProfilePictureWithButtonDescription>
             <Avatar
-              alt="Marcel Fonseca"
+              alt={profileData.user.name}
               src="/static/images/avatar/1.jpg"
               sx={{ width: "130px", height: "130px", fontSize: "60px" }}
             />

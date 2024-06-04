@@ -119,7 +119,7 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
 
   const validateData = () => {
     for (const field in formData) {
-      if (!formData[field as keyof typeof formData]) {
+      if (!formData[field]) {
         if ((field === "creci" || field === "uf") && props.userType === "user")
           continue;
         alert(`Preencha o campo ${field}!`);
@@ -151,6 +151,8 @@ const SignUpForm: React.FC<SignUpFormProps> = (props) => {
       alert("Você deve aceitar os termos de uso para se cadastrar");
       return false;
     }
+
+    return true;
   };
 
   const handleSave = () => {
