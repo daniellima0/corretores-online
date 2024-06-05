@@ -5,14 +5,12 @@ go 1.21.0
 require (
 	github.com/google/uuid v1.4.0
 	github.com/joho/godotenv v1.5.1
+	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.4.0
 	github.com/steebchen/prisma-client-go v0.37.0
 )
 
-require (
-	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/text v0.14.0 // indirect
-)
+require golang.org/x/text v0.14.0 // indirect
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
