@@ -40,35 +40,19 @@ model realtor_location {
   realtor   realtor  @relation(fields: [real_id], references: [real_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model safety_questions {
-  saqu_id               String                  @id @db.Uuid
-  question              String                  @unique @db.VarChar
-  safety_questions_user safety_questions_user[]
-}
-
-model safety_questions_user {
-  squu_id          String           @id @db.Uuid
-  saqu_id          String           @db.Uuid
-  user_id          String           @db.Uuid
-  answer           String           @db.VarChar
-  safety_questions safety_questions @relation(fields: [saqu_id], references: [saqu_id], onDelete: NoAction, onUpdate: NoAction)
-  user             user             @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 model user {
-  user_id               String                  @id @db.Uuid
-  aust_id               String                  @db.Uuid
-  name                  String                  @db.VarChar
-  cpf                   String                  @db.VarChar
-  email                 String                  @unique(map: "unique_email") @db.VarChar
-  password              String                  @db.VarChar
-  created_at            DateTime                @default(now()) @db.Timestamptz(6)
-  deleted_at            DateTime?               @db.Timestamptz(6)
-  date_of_birth         DateTime                @db.Date
-  telephone             Json
-  realtor               realtor?
-  safety_questions_user safety_questions_user[]
-  auth_status           auth_status             @relation(fields: [aust_id], references: [aust_id], onDelete: NoAction, onUpdate: NoAction)
+  user_id       String      @id @db.Uuid
+  aust_id       String      @db.Uuid
+  name          String      @db.VarChar
+  cpf           String      @db.VarChar
+  email         String      @unique(map: "unique_email") @db.VarChar
+  password      String      @db.VarChar
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  deleted_at    DateTime?   @db.Timestamptz(6)
+  date_of_birth DateTime    @db.Date
+  telephone     Json
+  realtor       realtor?
+  auth_status   auth_status @relation(fields: [aust_id], references: [aust_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model uf_options {

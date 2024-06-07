@@ -9,6 +9,5 @@ func StartRouters(e *echo.Echo, dbClient *db.PrismaClient) {
 	UserRouter(e, dbClient)
 	RealtorRouter(e, dbClient)
 	AuthRouter(e, dbClient)
-	SafetyQuestionRouter(e, dbClient)
 	UfOptionsRouter(e, dbClient)
 }

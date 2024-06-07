@@ -28,18 +28,14 @@ type RealtorResponse struct {
 
 type RequestBody struct {
 	db.UserModel
-	Description         *string           `json:"description"`
-	Regions             *string           `json:"regions"`
-	RealtorInstagram    *string           `json:"realtor_instagram"`
-	RealtorFacebook     *string           `json:"realtor_facebook"`
-	RealtorWhatsapp     *string           `json:"realtor_whatsapp"`
-	Creci               string            `json:"creci"`
-	Telephone           service.Telephone `json:"telephone"`
-	UF                  string            `json:"uf"`
-	SafetyQuestionsUser [3]struct {
-		Question string `json:"question"`
-		Answer   string `json:"answer"`
-	} `json:"safety_questions"`
+	Description      *string           `json:"description"`
+	Regions          *string           `json:"regions"`
+	RealtorInstagram *string           `json:"realtor_instagram"`
+	RealtorFacebook  *string           `json:"realtor_facebook"`
+	RealtorWhatsapp  *string           `json:"realtor_whatsapp"`
+	Creci            string            `json:"creci"`
+	Telephone        service.Telephone `json:"telephone"`
+	UF               string            `json:"uf"`
 }
 
 func NewRealtorHandler(client *db.PrismaClient) *RealtorHandler {
@@ -84,16 +80,6 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Telephone is required")
 	}
 
-	if len(request.SafetyQuestionsUser) < 3 {
-		return echo.NewHTTPError(http.StatusBadRequest, "SafetyQuestions is required")
-	}
-
-	questions := []string{
-		request.SafetyQuestionsUser[0].Question,
-		request.SafetyQuestionsUser[1].Question,
-		request.SafetyQuestionsUser[2].Question,
-	}
-
 	telephoneJson, err := json.Marshal(request.Telephone)
 	if err != nil {
 		return err
@@ -107,28 +93,6 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 	}
 
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	encryptedAnswer1, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser[0].Answer), 14)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	encryptedAnswer2, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser[1].Answer), 14)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	encryptedAnswer3, err := bcrypt.GenerateFromPassword([]byte(request.SafetyQuestionsUser[2].Answer), 14)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	safety_questions, err := h.client.SafetyQuestions.FindMany(
-		db.SafetyQuestions.Question.In(questions),
-	).Exec(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -151,27 +115,6 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.User.AuthStatus.Link(db.AuthStatus.AustID.Equals(auth_status.AustID)),
 	).Tx()
 
-	first_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer1)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[0].SaquID)),
-		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
-	).Tx()
-
-	second_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer2)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[1].SaquID)),
-		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
-	).Tx()
-
-	third_safety_questions := h.client.SafetyQuestionsUser.CreateOne(
-		db.SafetyQuestionsUser.SquuID.Set(uuid.New().String()),
-		db.SafetyQuestionsUser.Answer.Set(string(encryptedAnswer3)),
-		db.SafetyQuestionsUser.SafetyQuestions.Link(db.SafetyQuestions.SaquID.Equals(safety_questions[2].SaquID)),
-		db.SafetyQuestionsUser.User.Link(db.User.UserID.Equals(request.UserID)),
-	).Tx()
-
 	var realtor db.RealtorModel
 	realtor.UserID = request.UserID
 	realtor.Creci = request.Creci
@@ -188,7 +131,7 @@ func (h *RealtorHandler) Create(c echo.Context) error {
 		db.Realtor.User.Link(db.User.UserID.Equals(realtor.UserID)),
 	).Tx()
 
-	if err := h.client.Prisma.Transaction(userCreated, first_safety_questions, second_safety_questions, third_safety_questions, realtorCreated).Exec(ctx); err != nil {
+	if err := h.client.Prisma.Transaction(userCreated, realtorCreated).Exec(ctx); err != nil {
 		return err
 	}
 
