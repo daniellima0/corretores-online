@@ -5,6 +5,7 @@ import InputGroup from "./InputGroup";
 import { useContext, useEffect, useState } from "react";
 import { UserTypeContext } from "../../../App";
 import LoadingSpinner from "../../../components/Loading";
+import HiddenComponent from "../../../components/HiddenComponent";
 
 const Container = styled("div")`
   display: flex;
@@ -273,7 +274,7 @@ const Content = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Failed to save social data");
+          throw new Error("Failed to save socials data");
         }
         const json = await response.json();
       } catch (error) {
@@ -286,8 +287,6 @@ const Content = () => {
   const refreshPage = () => {
     window.location.reload();
   };
-
-  console.log("profileData:", profileData);
 
   if (loading || !profileData || !profileData.user) {
     return <LoadingSpinner />;
@@ -365,75 +364,68 @@ const Content = () => {
           </ProfilePictureWithButtonWrapper>
         </SectionContentWrapper>
       </Section>
-      {userType === "realtor" && (
-        <>
-          <Section>
-            <SectionTitle variant="h2">Redes Sociais</SectionTitle>
-            <InputGroupWrapper>
-              <InputGroup
-                label="Instagram"
-                name="realtorInstagram"
-                type="text"
-                icon="/public/instagram.svg"
-                value={profileData.realtorInstagram}
-                onChange={handleInputChange("realtorInstagram")}
-              />
-              <InputGroup
-                label="Facebook"
-                name="realtorFacebook"
-                type="text"
-                value={profileData.realtorFacebook}
-                icon="/public/facebook.png"
-                onChange={handleInputChange("realtorFacebook")}
-              />
-              <InputGroup
-                label="WhatsApp"
-                name="realtorWhatsapp"
-                type="text"
-                value={profileData.realtorWhatsapp}
-                icon="/public/whatsapp.svg"
-                onChange={handleInputChange("realtorWhatsapp")}
-              />
-              <ButtonGroup>
-                <CancelButton
-                  buttonColor={primaryColor}
-                  invertColor={true}
-                  onClick={refreshPage}
-                >
-                  Cancelar
-                </CancelButton>
-                <SaveButton
-                  buttonColor={primaryColor}
-                  onClick={handleSaveSocials}
-                >
-                  Salvar
-                </SaveButton>
-              </ButtonGroup>
-            </InputGroupWrapper>
-          </Section>
-          <Section>
-            <SectionTitle variant="h2">Biografia</SectionTitle>
-            <InputGroupWrapper>
-              <InputGroup
-                label="Regiões de Atuação"
-                name="regions"
-                value={profileData.regions}
-                type="text"
-                onChange={handleInputChange("regions")}
-              />
-              <InputGroup
-                label="Bio"
-                name="description"
-                type="text"
-                value={profileData.description}
-                isTextField={true}
-                onChange={handleInputChange("description")}
-              />
-            </InputGroupWrapper>
-          </Section>
-        </>
-      )}
-      {userType === "realtor" && (
+      <HiddenComponent hidden={userType !== "realtor"}>
+        <Section>
+          <SectionTitle variant="h2">Redes Sociais</SectionTitle>
+          <InputGroupWrapper>
+            <InputGroup
+              label="Instagram"
+              name="realtorInstagram"
+              type="text"
+              icon="/public/instagram.svg"
+              value={profileData.realtorInstagram}
+              onChange={handleInputChange("realtorInstagram")}
+            />
+            <InputGroup
+              label="Facebook"
+              name="realtorFacebook"
+              type="text"
+              value={profileData.realtorFacebook}
+              icon="/public/facebook.png"
+              onChange={handleInputChange("realtorFacebook")}
+            />
+            <InputGroup
+              label="WhatsApp"
+              name="realtorWhatsapp"
+              type="text"
+              value={profileData.realtorWhatsapp}
+              icon="/public/whatsapp.svg"
+              onChange={handleInputChange("realtorWhatsapp")}
+            />
+            <ButtonGroup>
+              <CancelButton
+                buttonColor={primaryColor}
+                invertColor={true}
+                onClick={refreshPage}
+              >
+                Cancelar
+              </CancelButton>
+              <SaveButton buttonColor={primaryColor} onClick={handleSaveSocials}>
+                Salvar
+              </SaveButton>
+            </ButtonGroup>
+          </InputGroupWrapper>
+        </Section>
+        <Section>
+          <SectionTitle variant="h2">Biografia</SectionTitle>
+          <InputGroupWrapper>
+            <InputGroup
+              label="Regiões de Atuação"
+              name="regions"
+              value={profileData.regions}
+              type="text"
+              onChange={handleInputChange("regions")}
+            />
+            <InputGroup
+              label="Bio"
+              name="description"
+              type="text"
+              value={profileData.description}
+              isTextField={true}
+              onChange={handleInputChange("description")}
+            />
+          </InputGroupWrapper>
+        </Section>
         <ButtonGroup>
           <CancelButton
             buttonColor={primaryColor}
@@ -446,7 +438,7 @@ const Content = () => {
             Salvar
           </SaveButton>
         </ButtonGroup>
-      )}
+      </HiddenComponent>
     </Container>
   );
 };
