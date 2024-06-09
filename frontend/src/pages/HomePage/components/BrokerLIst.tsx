@@ -9,7 +9,7 @@ import {
   styled,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { RealtorType } from "types/RealtorType";
+import { RealtorType } from "@/types/RealtorType";
 
 function renderRow(
   item: RealtorType,

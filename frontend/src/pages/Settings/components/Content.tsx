@@ -1,10 +1,10 @@
 import { styled } from "@mui/material/styles/";
 import { Avatar, Typography } from "@mui/material";
-import RoundedButton from "../../../components/RoundedButton";
-import InputGroup from "./InputGroup";
+import RoundedButton from "@/components/RoundedButton";
+import InputGroup from "@/pages/Settings/components/InputGroup";
 import { useContext, useEffect, useState } from "react";
-import { UserTypeContext } from "../../../App";
-import LoadingSpinner from "../../../components/Loading";
+import { UserTypeContext } from "@/App";
+import LoadingSpinner from "@/components/Loading";
 
 const Container = styled("div")`
   display: flex;
@@ -140,14 +140,14 @@ const Content = () => {
 
     fetchData();
   }, []);
-  
+
   const fetchUrl =
     userType === "realtor"
       ? "http://localhost:8080/realtors/" + userId
       : userType === "user"
       ? "http://localhost:8080/user/" + userId
       : "";
-      
+
   // With the user id, fetch its data from the database and store it in a state
   useEffect(() => {
     setLoading(true);

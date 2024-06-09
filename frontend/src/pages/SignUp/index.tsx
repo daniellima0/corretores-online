@@ -1,5 +1,5 @@
 import { Typography, styled } from "@mui/material";
-import SignUpForm from "./components/SignUpForm";
+import SignUpForm from "@/pages/SignUp/components/SignUpForm";
 
 const Div = styled("div")({
   display: "flex",

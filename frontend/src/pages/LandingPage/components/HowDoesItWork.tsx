@@ -1,10 +1,9 @@
 import { styled } from "@mui/material/styles";
 import { Divider, Typography } from "@mui/material";
-import personIcon from "../../../assets/personIcon.png";
-import handshakeIcon from "../../../assets/handshakeIcon.png";
-import phoneIcon from "../../../assets/phoneIcon.png";
-import MyCard from "./MyCard";
-import { Link } from "react-router-dom";
+import personIcon from "@/assets/personIcon.png";
+import handshakeIcon from "@/assets/handshakeIcon.png";
+import phoneIcon from "@/assets/phoneIcon.png";
+import MyCard from "@/pages/LandingPage/components/MyCard";
 
 const cardData = [
   {

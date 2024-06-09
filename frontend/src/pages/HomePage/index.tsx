@@ -11,12 +11,12 @@ import {
 } from "@mui/material";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import SearchIcon from "@mui/icons-material/Search";
-import Footer from "../../components/Footer";
-import Navbar from "../../components/Navbar";
-import BrokerList from "./components/BrokerLIst";
-import CorretoresMap from "./components/CorretoresMap";
-import { RealtorType } from "types/RealtorType";
-import LoadingSpinner from "../../components/Loading";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import BrokerList from "@/pages/HomePage/components/BrokerLIst";
+import CorretoresMap from "@/pages/HomePage/components/CorretoresMap";
+import { RealtorType } from "@/types/RealtorType";
+import LoadingSpinner from "@/components/Loading";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 

@@ -1,7 +1,7 @@
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import Content from "./components/Content";
-import LoadingSpinner from "../../components/Loading";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Content from "@/pages/Settings/components/Content";
+import LoadingSpinner from "@/components/Loading";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -34,7 +34,7 @@ const Settings = () => {
   if (loading) {
     return <LoadingSpinner />;
   }
-  
+
   return (
     <>
       <Navbar />

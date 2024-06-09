@@ -1,14 +1,14 @@
-import MapView from "./components/MapView";
-import LearnMore from "./components/LearnMore";
-import SearchAdress from "./components/SearchAdress";
-import GetToKnow from "./components/GetToKnow";
-import HowDoesItWork from "./components/HowDoesItWork";
-import HiddenComponent from "../../components/HiddenComponent";
+import MapView from "@/pages/LandingPage/components/MapView";
+import LearnMore from "@/pages/LandingPage/components/LearnMore";
+import SearchAdress from "@/pages/LandingPage/components/SearchAdress";
+import GetToKnow from "@/pages/LandingPage/components/GetToKnow";
+import HowDoesItWork from "@/pages/LandingPage/components/HowDoesItWork";
+import HiddenComponent from "@/components/HiddenComponent";
 import { useEffect, useState } from "react";
-import Footer from "../../components/Footer";
-import ArmengueComponent from "./components/ArmengueComponent";
+import Footer from "@/components/Footer";
+import ArmengueComponent from "@/pages/LandingPage/components/ArmengueComponent";
 import { useNavigate } from "react-router-dom";
-import LoadingSpinner from "../../components/Loading";
+import LoadingSpinner from "@/components/Loading";
 
 const LandingPage: React.FC = () => {
   const [showMap, setShowMap] = useState(false);

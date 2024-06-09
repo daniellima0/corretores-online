@@ -1,13 +1,11 @@
-import Navbar from "../../components/Navbar";
-import RealtorInfo from "./components/RealtorInfo";
-import Footer from "../../components/Footer";
-import LoadingSpinner from "../../components/Loading";
+import Navbar from "@/components/Navbar";
+import RealtorInfo from "@/pages/Profile/components/RealtorInfo";
+import Footer from "@/components/Footer";
+import LoadingSpinner from "@/components/Loading";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-
-
   const navigator = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");

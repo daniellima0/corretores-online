@@ -6,10 +6,10 @@ import {
   TextField,
   styled,
 } from "@mui/material";
-import SelectQuestion from "../../SignUp/components/SelectQuestion";
+import SelectQuestion from "@/pages/SignUp/components/SelectQuestion";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoadingSpinner from "../../../components/Loading";
+import LoadingSpinner from "@/components/Loading";
 
 const Form = styled("form")({
   width: "80%",

@@ -2,8 +2,8 @@ import { Wrapper } from "@googlemaps/react-wrapper";
 import { Avatar, Button } from "@mui/material";
 import { useRef, useState, useEffect } from "react";
 import { Root, createRoot } from "react-dom/client";
-import HiddenComponent from "./HiddenComponent";
-import { RealtorType } from "types/RealtorType";
+import HiddenComponent from "@/components/HiddenComponent";
+import { RealtorType } from "@/types/RealtorType";
 import { useNavigate } from "react-router-dom";
 
 interface CorretoresMapProps {

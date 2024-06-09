@@ -6,7 +6,7 @@ import {
   TextField,
   styled,
 } from "@mui/material";
-import LoadingSpinner from "../../../components/Loading";
+import LoadingSpinner from "@/components/Loading";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
