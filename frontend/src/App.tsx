@@ -7,6 +7,7 @@ import ChooseSignup from "./pages/ChooseSignup";
 import LoginPage from "./pages/LoginPage";
 import SignUp from "./pages/SignUp";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import EmailInputForm from "./pages/EmailInputPasswordReset";
 import { createContext, useEffect, useState } from "react";
 
 const router = createBrowserRouter([
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
   {
     path: "/terms-and-conditions",
     element: <TermsAndConditions />,
+  },
+  {
+    path: "/reset-password-email",
+    element: <EmailInputForm />,
   },
 ]);
 
