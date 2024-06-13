@@ -14,7 +14,7 @@ const Div = styled("div")({
 });
 
 const Card = styled("div")({
-  height: "470px",
+  height: "530px",
   width: "70%",
   backgroundColor: "#FFFFFF",
   display: "flex",
@@ -65,8 +65,15 @@ const ButtonStyled = styled(Button)({
   fontSize: "18px",
   fontWeight: "900",
   backgroundColor: "#FF5E00",
-  marginTop: "50px",
+  marginTop: "40px",
   "&: hover": { backgroundColor: "#FF5E00" },
+});
+
+const ResendNote = styled(Typography)({
+  fontSize: "16px",
+  color: "#7A7A7A",
+  width: "100%",
+  marginTop: "30px",
 });
 
 const EmailInputForm: React.FC = () => {
@@ -105,7 +112,7 @@ const EmailInputForm: React.FC = () => {
             Foi enviado um código de verificação para o seu email. Insira abaixo
             para seguir com a alteração de senha.
           </Description>
-          <CodeInputContainer onComplete={handleComplete} numDigits={5} />
+          <CodeInputContainer onComplete={handleComplete} numDigits={4} />
           <ButtonStyled
             fullWidth
             variant="contained"
@@ -115,6 +122,10 @@ const EmailInputForm: React.FC = () => {
           >
             Enviar
           </ButtonStyled>
+          <ResendNote>
+            {"Não recebeu o código? "}
+            <a href="#">Reenviar</a>
+          </ResendNote>
         </HiddenComponent>
       </Card>
     </Div>

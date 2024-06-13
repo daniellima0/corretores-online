@@ -7,6 +7,7 @@ import ChooseSignup from "./pages/ChooseSignup";
 import LoginPage from "./pages/LoginPage";
 import SignUp from "./pages/SignUp";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import PasswordReset from "./pages/PasswordReset";
 import EmailInputForm from "./pages/EmailInputPasswordReset";
 import { createContext, useEffect, useState } from "react";
 
@@ -48,8 +49,12 @@ const router = createBrowserRouter([
     element: <TermsAndConditions />,
   },
   {
-    path: "/reset-password-email",
+    path: "/password-reset-email",
     element: <EmailInputForm />,
+  },
+  {
+    path: "/password-reset",
+    element: <PasswordReset />,
   },
 ]);
 
