@@ -1,4 +1,7 @@
+import HiddenComponent from "../../components/HiddenComponent";
 import { Button, TextField, Typography, styled } from "@mui/material";
+import CodeInputContainer from "./components/CodeInputContainer";
+import { SetStateAction, useState } from "react";
 
 const Div = styled("div")({
   display: "flex",
@@ -11,7 +14,7 @@ const Div = styled("div")({
 });
 
 const Card = styled("div")({
-  height: "450px",
+  height: "470px",
   width: "70%",
   backgroundColor: "#FFFFFF",
   display: "flex",
@@ -54,31 +57,65 @@ const Description = styled(Typography)({
 
 const EmailInput = styled(TextField)({
   width: "100%",
-  marginBottom: "40px",
 });
 const ButtonStyled = styled(Button)({
-  borderRadius: "35px",
-  width: "50%",
-  height: "40px",
-  fontSize: "16px",
+  borderRadius: "10px",
+  width: "40%",
+  height: "55px",
+  fontSize: "18px",
   fontWeight: "900",
   backgroundColor: "#FF5E00",
+  marginTop: "50px",
   "&: hover": { backgroundColor: "#FF5E00" },
 });
 
 const EmailInputForm: React.FC = () => {
+  const [finalCode, setFinalCode] = useState("");
+
+  const handleComplete = (code: SetStateAction<string>) => {
+    setFinalCode(code);
+    console.log("Código final:", finalCode); //temporary
+  };
+
+  const [switchPages, setSwitchPages] = useState(false); //temporary
+
   return (
     <Div>
       <Card>
-        <Title variant="h1">Esqueceu a senha?</Title>
-        <Description>
-          Digite seu email cadastrado no Corretores Online e enviaremos as
-          instruções de como recuperar sua senha.
-        </Description>
-        <EmailInput variant="outlined" label="Endereço de Email" />
-        <ButtonStyled fullWidth variant="contained">
-          Enviar
-        </ButtonStyled>
+        <HiddenComponent hidden={switchPages}>
+          <Title variant="h1">Esqueceu a senha?</Title>
+          <Description>
+            Digite o email cadastrado no Corretores Online e enviaremos as
+            instruções de como recuperar sua senha.
+          </Description>
+          <EmailInput variant="outlined" label="Endereço de Email" />
+          <ButtonStyled
+            fullWidth
+            variant="contained"
+            onClick={() => {
+              setSwitchPages(true);
+            }}
+          >
+            Enviar
+          </ButtonStyled>
+        </HiddenComponent>
+        <HiddenComponent hidden={!switchPages}>
+          <Title variant="h1">Confirme o código</Title>
+          <Description>
+            Foi enviado um código de verificação para o seu email. Insira abaixo
+            para seguir com a alteração de senha.
+          </Description>
+          <CodeInputContainer onComplete={handleComplete} numDigits={5} />
+          <ButtonStyled
+            fullWidth
+            variant="contained"
+            onClick={() => {
+              setSwitchPages(false);
+            }}
+          >
+            Enviar
+          </ButtonStyled>
+        </HiddenComponent>
       </Card>
     </Div>
   );
