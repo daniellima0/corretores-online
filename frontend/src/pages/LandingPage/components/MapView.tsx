@@ -80,7 +80,9 @@ interface MapsProps {
 }
 
 const MapView: React.FC<MapsProps> = (props) => {
-  const numero = props.onlineRealtors ? props.onlineRealtors.length : 0;
+  const online_realtors = props.onlineRealtors
+    ? props.onlineRealtors.length
+    : 0;
 
   return (
     <>
@@ -90,8 +92,8 @@ const MapView: React.FC<MapsProps> = (props) => {
         />
         <MapTextContainer>
           <Title>
-            Existem <span color="#FF5E00">{numero}</span> corretores online
-            agora
+            Existem <span color="#FF5E00">{online_realtors}</span> corretores
+            online agora
           </Title>
           <MapTextButton fullWidth type="submit">
             <Link
