@@ -20,7 +20,7 @@ const Div = styled("div")({
 });
 
 const Card = styled("div")({
-  height: "500px",
+  height: "fit-content",
   width: "70%",
   backgroundColor: "#FFFFFF",
   display: "flex",
@@ -28,6 +28,8 @@ const Card = styled("div")({
   alignItems: "center",
   paddingLeft: "60px",
   paddingRight: "60px",
+  paddingTop: "40px",
+  paddingBottom: "40px",
   justifyContent: "center",
   textAlign: "center",
 
