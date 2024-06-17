@@ -459,5 +459,9 @@ func (h *RealtorHandler) SetLocation(c echo.Context) error {
 		db.RealtorLocation.Longitude.Set(req.Longitude),
 	).Exec(ctx)
 
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, "Localização atualizada!")
 }
