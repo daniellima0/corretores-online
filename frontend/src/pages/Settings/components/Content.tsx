@@ -5,6 +5,7 @@ import InputGroup from "./InputGroup";
 import { useContext, useEffect, useState } from "react";
 import { UserTypeContext } from "../../../App";
 import LoadingSpinner from "../../../components/Loading";
+import HiddenComponent from "../../../components/HiddenComponent";
 
 const Container = styled("div")`
   display: flex;
@@ -111,13 +112,9 @@ const Content = () => {
     },
   });
   const [userId, setUserId] = useState("");
-
   const { userType } = useContext(UserTypeContext);
-
   const primaryColor = userType === "realtor" ? "#1C5E9F" : "#FF5E00";
 
-  // Checking if user trying to access this page is logged in.
-  // If true, store its id in a state
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -127,7 +124,7 @@ const Content = () => {
           credentials: "include",
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to fetch user data");
         }
         const json = await response.json();
         setUserId(json.user_id);
@@ -137,7 +134,6 @@ const Content = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -169,8 +165,45 @@ const Content = () => {
       }
     };
 
-    fetchData();
-  }, [fetchUrl]);
+  useEffect(() => {
+    const fetchUrl =
+      userType === "realtor"
+        ? "http://localhost:8080/realtors/" + userId
+        : "http://localhost:8080/user/" + userId;
+
+    if (userId) {
+      setLoading(true);
+      const fetchData = async () => {
+        try {
+          const response = await fetch(fetchUrl, {
+            method: "GET",
+            credentials: "include",
+          });
+          if (!response.ok) {
+            throw new Error("Failed to fetch profile data");
+          }
+          const json = await response.json();
+          if (userType === "realtor") {
+            setProfileData(json);
+          } else {
+            setProfileData({
+              ...profileData,
+              user: {
+                name: json.name,
+                email: json.email,
+                telephone: JSON.parse(json.telephone),
+              },
+            });
+          }
+          setLoading(false);
+        } catch (error) {
+          console.error(error);
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [userId, userType]);
 
   const handleInputChange = (field: any) => (event: any) => {
     if (field in profileData.user) {
@@ -188,20 +221,6 @@ const Content = () => {
       });
     }
   };
-
-  /*  const validateData = () => {
-    if (
-      !profileData.user.name ||
-      !profileData.user.email ||
-      !profileData.user.telephone.DDD ||
-      !profileData.user.telephone.number ||
-      !profileData.description
-    ) {
-      alert("Preencha todos os campos obrigatórios!");
-      return false;
-    }
-    return true;
-  }; */
 
   const handleSaveRealtor = () => {
     const data = {
@@ -223,13 +242,12 @@ const Content = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to save realtor data");
         }
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchData();
   };
 
@@ -253,21 +271,20 @@ const Content = () => {
           body: JSON.stringify(data),
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to save user data");
         }
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchData();
   };
 
-  const HandleSaveSocials = () => {
+  const handleSaveSocials = () => {
     const data = {
-      realtor_instagram: profileData.realtorInstagram,
-      realtor_facebook: profileData.realtorFacebook,
-      realtor_whatsapp: profileData.realtorWhatsapp,
+      realtorInstagram: profileData.realtorInstagram,
+      realtorFacebook: profileData.realtorFacebook,
+      realtorWhatsapp: profileData.realtorWhatsapp,
     };
     const fetchData = async () => {
       try {
@@ -283,13 +300,12 @@ const Content = () => {
           }
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch research data");
+          throw new Error("Failed to save socials data");
         }
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchData();
   };
 
@@ -339,14 +355,14 @@ const Content = () => {
               name="ddd"
               type="text"
               value={`(${profileData.user.telephone.DDD})`}
-              onChange={handleInputChange("ddd")}
+              onChange={handleInputChange("DDD")}
             />
             <InputGroup
               label="Telefone"
               name="telephone"
               type="text"
               value={profileData.user.telephone.number}
-              onChange={handleInputChange("telephone")}
+              onChange={handleInputChange("number")}
             />
             <ButtonGroup>
               <CancelButton
@@ -373,86 +389,81 @@ const Content = () => {
           </ProfilePictureWithButtonWrapper>
         </SectionContentWrapper>
       </Section>
-      {userType === "realtor" && (
-        <>
-          <Section>
-            <SectionTitle variant="h2">Redes Sociais</SectionTitle>
-            <InputGroupWrapper>
-              <InputGroup
-                label="Instagram"
-                name="realtorInstagram"
-                type="text"
-                icon="/public/instagram.svg"
-                value={profileData.realtorInstagram}
-                onChange={handleInputChange("realtorInstagram")}
-              />
-              <InputGroup
-                label="Facebook"
-                name="realtorFacebook"
-                type="text"
-                value={profileData.realtorFacebook}
-                icon="/public/facebook.png"
-                onChange={handleInputChange("realtorFacebook")}
-              />
-              <InputGroup
-                label="WhatsApp"
-                name="realtorWhatsapp"
-                type="text"
-                value={profileData.realtorWhatsapp}
-                icon="/public/whatsapp.svg"
-                onChange={handleInputChange("realtorWhatsapp")}
-              />
-              <ButtonGroup>
-                <CancelButton
-                  buttonColor={primaryColor}
-                  invertColor={true}
-                  onClick={refreshPage}
-                >
-                  Cancelar
-                </CancelButton>
-                <SaveButton
-                  buttonColor={primaryColor}
-                  onClick={HandleSaveSocials}
-                >
-                  Salvar
-                </SaveButton>
-              </ButtonGroup>
-            </InputGroupWrapper>
-          </Section>
-          <Section>
-            <SectionTitle variant="h2">Biografia</SectionTitle>
-            <InputGroupWrapper>
-              <InputGroup
-                label="Regiões de Atuação"
-                name="regions"
-                value={profileData.regions}
-                type="text"
-                onChange={handleInputChange("regions")}
-              />
-              <InputGroup
-                label="Bio"
-                name="description"
-                type="text"
-                value={profileData.description}
-                isTextField={true}
-                onChange={handleInputChange("description")}
-              />
-            </InputGroupWrapper>
-          </Section>
-        </>
-      )}
-      <ButtonGroup>
-        <CancelButton
-          buttonColor={primaryColor}
-          invertColor={true}
-          onClick={refreshPage}
-        >
-          Cancelar
-        </CancelButton>
-        <SaveButton buttonColor={primaryColor} onClick={handleSaveRealtor}>
-          Salvar
-        </SaveButton>
-      </ButtonGroup>
+      <HiddenComponent hidden={userType !== "realtor"}>
+        <Section>
+          <SectionTitle variant="h2">Redes Sociais</SectionTitle>
+          <InputGroupWrapper>
+            <InputGroup
+              label="Instagram"
+              name="realtorInstagram"
+              type="text"
+              icon="/public/instagram.svg"
+              value={profileData.realtorInstagram}
+              onChange={handleInputChange("realtorInstagram")}
+            />
+            <InputGroup
+              label="Facebook"
+              name="realtorFacebook"
+              type="text"
+              value={profileData.realtorFacebook}
+              icon="/public/facebook.png"
+              onChange={handleInputChange("realtorFacebook")}
+            />
+            <InputGroup
+              label="WhatsApp"
+              name="realtorWhatsapp"
+              type="text"
+              value={profileData.realtorWhatsapp}
+              icon="/public/whatsapp.svg"
+              onChange={handleInputChange("realtorWhatsapp")}
+            />
+            <ButtonGroup>
+              <CancelButton
+                buttonColor={primaryColor}
+                invertColor={true}
+                onClick={refreshPage}
+              >
+                Cancelar
+              </CancelButton>
+              <SaveButton buttonColor={primaryColor} onClick={handleSaveSocials}>
+                Salvar
+              </SaveButton>
+            </ButtonGroup>
+          </InputGroupWrapper>
+        </Section>
+        <Section>
+          <SectionTitle variant="h2">Biografia</SectionTitle>
+          <InputGroupWrapper>
+            <InputGroup
+              label="Regiões de Atuação"
+              name="regions"
+              value={profileData.regions}
+              type="text"
+              onChange={handleInputChange("regions")}
+            />
+            <InputGroup
+              label="Bio"
+              name="description"
+              type="text"
+              value={profileData.description}
+              isTextField={true}
+              onChange={handleInputChange("description")}
+            />
+          </InputGroupWrapper>
+        </Section>
+        <ButtonGroup>
+          <CancelButton
+            buttonColor={primaryColor}
+            invertColor={true}
+            onClick={refreshPage}
+          >
+            Cancelar
+          </CancelButton>
+          <SaveButton buttonColor={primaryColor} onClick={handleSaveRealtor}>
+            Salvar
+          </SaveButton>
+        </ButtonGroup>
+      </HiddenComponent>
     </Container>
   );
 };
