@@ -1,5 +1,5 @@
 import { Typography, styled } from "@mui/material";
-import RoundedButton from "../../components/RoundedButton";
+import RoundedButton from "@/components/RoundedButton";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 

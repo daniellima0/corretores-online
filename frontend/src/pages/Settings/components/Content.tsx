@@ -1,11 +1,11 @@
 import { styled } from "@mui/material/styles/";
 import { Avatar, Typography } from "@mui/material";
-import RoundedButton from "../../../components/RoundedButton";
-import InputGroup from "./InputGroup";
+import RoundedButton from "@/components/RoundedButton";
+import InputGroup from "@/pages/Settings/components/InputGroup";
 import { useContext, useEffect, useState } from "react";
-import { UserTypeContext } from "../../../App";
-import LoadingSpinner from "../../../components/Loading";
-import HiddenComponent from "../../../components/HiddenComponent";
+import { UserTypeContext } from "@/App";
+import LoadingSpinner from "@/components/Loading";
+import HiddenComponent from "@/components/HiddenComponent";
 
 const Container = styled("div")`
   display: flex;

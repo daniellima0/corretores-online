@@ -3,7 +3,7 @@ import { Button, Typography } from "@mui/material";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { RealtorType } from "types/RealtorType";
+import { RealtorType } from "@/types/RealtorType";
 
 const Container = styled("section")(({ theme }) => ({
   display: "flex",

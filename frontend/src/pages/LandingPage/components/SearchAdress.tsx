@@ -1,7 +1,7 @@
 import { styled } from "@mui/material/styles";
-import background from "../../../assets/backadress.png";
+import background from "@/assets/backadress.png";
 import { Button, InputBase, Typography } from "@mui/material";
-import NavLogin from "./NavLogin";
+import NavLogin from "@/pages/LandingPage/components/NavLogin";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 

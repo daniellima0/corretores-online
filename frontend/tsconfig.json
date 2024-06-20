@@ -19,9 +19,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": "src/",
+    "baseUrl": ".",
     "paths": {
-      "@corretores-online/components": ["components/HiddenComponent"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["src"],

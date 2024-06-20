@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import mulherNoPc from "../../../assets/MulherNoPc.png";
+import mulherNoPc from "@/assets/MulherNoPc.png";
 import { Button, Typography } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Link } from "react-router-dom";

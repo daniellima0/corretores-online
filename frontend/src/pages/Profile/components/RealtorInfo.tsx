@@ -1,12 +1,12 @@
 import { styled } from "@mui/material/styles";
-import defaultBanner from "../../../assets/default-banner.png";
-import SocialMediaInfo from "../../../components/SocialMediaInfo";
-import RoundedButton from "../../../components/RoundedButton";
+import defaultBanner from "@/assets/default-banner.png";
+import SocialMediaInfo from "@/components/SocialMediaInfo";
+import RoundedButton from "@/components/RoundedButton";
 import { Avatar, FormControlLabel, Switch, Typography } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useTheme } from "@mui/material";
-import { UserTypeContext } from "../../../App";
+import { UserTypeContext } from "@/App";
 import { useParams } from "react-router-dom";
 
 const Container = styled("div")`

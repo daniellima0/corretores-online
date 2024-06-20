@@ -1,5 +1,5 @@
 import { Typography, styled } from "@mui/material";
-import LoginForm from "./components/LoginForm";
+import LoginForm from "@/pages/LoginPage/components/LoginForm";
 import { Link } from "react-router-dom";
 
 const Div = styled("div")({

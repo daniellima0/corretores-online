@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import house from "../../../assets/house.png";
+import house from "@/assets/house.png";
 import { Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 

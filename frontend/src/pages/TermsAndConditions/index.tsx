@@ -1,4 +1,4 @@
-import pdfFile from "../../assets/terms-and-conditions.pdf";
+import pdfFile from "@/assets/terms-and-conditions.pdf";
 
 const TermsAndConditions = () => {
   return (

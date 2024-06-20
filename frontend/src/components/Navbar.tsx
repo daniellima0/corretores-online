@@ -10,12 +10,12 @@ import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
-import logo from "../assets/logo-black.svg";
+import logo from "@/assets/logo-black.svg";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import LoadingSpinner from "./Loading";
+import LoadingSpinner from "@/components/Loading";
 
 function NavBar() {
   const [userType, setUserType] = React.useState("user");

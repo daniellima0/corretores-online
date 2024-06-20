@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import logo from "../assets/logo-white.svg";
+import logo from "@/assets/logo-white.svg";
 
 const Container = styled("footer")`
   height: 250px;
