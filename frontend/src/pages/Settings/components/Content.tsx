@@ -137,34 +137,6 @@ const Content = () => {
     fetchData();
   }, []);
 
-  const fetchUrl =
-    userType === "realtor"
-      ? "http://localhost:8080/realtors/" + userId
-      : userType === "user"
-      ? "http://localhost:8080/user/" + userId
-      : "";
-
-  // With the user id, fetch its data from the database and store it in a state
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
-      try {
-        const response = await fetch(fetchUrl, {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch research data");
-        }
-        const json = await response.json();
-        setProfileData(json);
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        setLoading(false);
-      }
-    };
-
   useEffect(() => {
     const fetchUrl =
       userType === "realtor"
@@ -244,6 +216,7 @@ const Content = () => {
         if (!response.ok) {
           throw new Error("Failed to save realtor data");
         }
+        const json = await response.json();
       } catch (error) {
         console.error(error);
       }
@@ -273,6 +246,7 @@ const Content = () => {
         if (!response.ok) {
           throw new Error("Failed to save user data");
         }
+        const json = await response.json();
       } catch (error) {
         console.error(error);
       }
@@ -302,6 +276,7 @@ const Content = () => {
         if (!response.ok) {
           throw new Error("Failed to save socials data");
         }
+        const json = await response.json();
       } catch (error) {
         console.error(error);
       }
