@@ -5,10 +5,10 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import ChooseSignup from "@/pages/ChooseSignup";
 import LoginPage from "@/pages/LoginPage";
-import ResetPassword from "@/pages/ResetPassword";
 import SignUp from "@/pages/SignUp";
 import TermsAndConditions from "@/pages/TermsAndConditions";
 import EmailInputForm from "@/pages/EmailInputPasswordReset";
+import PasswordReset from "@/pages/PasswordReset";
 
 import { createContext, useEffect, useState } from "react";
 
