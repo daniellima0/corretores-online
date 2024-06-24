@@ -83,12 +83,3 @@ type CheckUserLoggedInResponse struct {
 	AuthStatus string `json:"auth_status"`
 	Name       string `json:"name"`
 }
-
-type ResetPasswordRequest struct {
-	Email               string `json:"email"`
-	Password            string `json:"password"`
-	SafetyQuestionsUser [3]struct {
-		Question string `json:"question"`
-		Answer   string `json:"answer"`
-	} `json:"safety_questions"`
-}
