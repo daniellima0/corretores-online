@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/daniellima0/corretores-online/backend/prisma/db"
+	"github.com/daniellima0/corretores-online/backend/internal/prisma/db"
 	"github.com/labstack/echo/v4"
 )
 
