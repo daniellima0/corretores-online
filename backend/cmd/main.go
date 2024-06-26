@@ -4,8 +4,8 @@ import (
 	//"encoding/json"
 	"log"
 
+	"github.com/daniellima0/corretores-online/backend/internal/router"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
-	"github.com/daniellima0/corretores-online/backend/router"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
