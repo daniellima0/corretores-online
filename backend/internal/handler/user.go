@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daniellima0/corretores-online/backend/auth"
+	"github.com/daniellima0/corretores-online/backend/internal/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/daniellima0/corretores-online/backend/service"
 	"github.com/google/uuid"
