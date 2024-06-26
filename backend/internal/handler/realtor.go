@@ -11,7 +11,7 @@ import (
 
 	"github.com/daniellima0/corretores-online/backend/internal/auth"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
-	"github.com/daniellima0/corretores-online/backend/service"
+	"github.com/daniellima0/corretores-online/backend/internal/service"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/steebchen/prisma-client-go/runtime/types"
