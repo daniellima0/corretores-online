@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/daniellima0/corretores-online/backend/handler"
+	"github.com/daniellima0/corretores-online/backend/internal/handler"
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
 	"github.com/labstack/echo/v4"
 )
