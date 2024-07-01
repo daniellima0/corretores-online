@@ -1,4 +1,4 @@
-import { styled } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useState, useRef, useEffect, ChangeEvent, KeyboardEvent } from "react";
 
 const CodeInput = styled("input")({
@@ -15,7 +15,7 @@ const CodeInput = styled("input")({
   },
 });
 
-const CodeInputBox = styled("div")({
+const CodeInputBox = styled("div")(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -23,7 +23,11 @@ const CodeInputBox = styled("div")({
   flexDirection: "row",
   gap: "10px",
   height: "100px",
-});
+
+  [theme.breakpoints.down("md")]: {
+    width: "100%",
+  },
+}));
 
 type CodeInputContainerProps = {
   onComplete: (finalString: string) => void;

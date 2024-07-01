@@ -36,7 +36,7 @@ const Container = styled("section")(({ theme }) => ({
   height: "100vh",
 
   [theme.breakpoints.down("md")]: {
-    height: "120vh",
+    height: "140vh",
     justifyContent: "center",
     alignItems: "center",
   },
