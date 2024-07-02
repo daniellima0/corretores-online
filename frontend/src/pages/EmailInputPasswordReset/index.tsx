@@ -79,6 +79,7 @@ const ResendNote = styled(Typography)({
 });
 
 const EmailInputForm: React.FC = () => {
+  const [email, setEmail] = useState("");
   const [finalCode, setFinalCode] = useState("");
 
   const handleComplete = (code: SetStateAction<string>) => {
@@ -87,6 +88,26 @@ const EmailInputForm: React.FC = () => {
   };
 
   const [switchPages, setSwitchPages] = useState(false); //temporary
+
+  const handleSendEmail = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/mailer/password/reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to send reset email");
+      }
+      const json = await response.json();
+      console.log("Email sent:", json);
+      setSwitchPages(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <Div>
@@ -97,14 +118,13 @@ const EmailInputForm: React.FC = () => {
             Digite o email cadastrado no Corretores Online e enviaremos as
             instruções de como recuperar sua senha.
           </Description>
-          <EmailInput variant="outlined" label="Endereço de Email" />
-          <ButtonStyled
-            fullWidth
-            variant="contained"
-            onClick={() => {
-              setSwitchPages(true);
-            }}
-          >
+          <EmailInput
+            variant="outlined"
+            label="Endereço de Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <ButtonStyled fullWidth variant="contained" onClick={handleSendEmail}>
             Enviar
           </ButtonStyled>
         </HiddenComponent>
@@ -114,7 +134,7 @@ const EmailInputForm: React.FC = () => {
             Foi enviado um código de verificação para o seu email. Insira abaixo
             para seguir com a alteração de senha.
           </Description>
-          <CodeInputContainer onComplete={handleComplete} numDigits={4} />
+          <CodeInputContainer onComplete={handleComplete} numDigits={5} />
           <ButtonStyled
             fullWidth
             variant="contained"
