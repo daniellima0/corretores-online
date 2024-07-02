@@ -52,7 +52,7 @@ const LoginPage = () => {
             <span>
               Esqueceu sua senha,{" "}
               <Link
-                to="/reset-password"
+                to="/password-reset-email"
                 style={{ textDecoration: "underline", color: "blue" }}
               >
                 clique aqui
