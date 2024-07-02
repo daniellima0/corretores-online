@@ -91,13 +91,16 @@ const EmailInputForm: React.FC = () => {
 
   const handleSendEmail = async () => {
     try {
-      const response = await fetch("http://localhost:8080/mailer/password/reset", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "http://localhost:8080/mailer/password/reset",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to send reset email");
       }
@@ -146,7 +149,9 @@ const EmailInputForm: React.FC = () => {
           </ButtonStyled>
           <ResendNote>
             {"Não recebeu o código? "}
-            <a href="#">Reenviar</a>
+            <a onClick={handleSendEmail} href="#">
+              Reenviar
+            </a>
           </ResendNote>
         </HiddenComponent>
       </Card>
