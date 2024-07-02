@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "@/components/Loading";
 
 const Div = styled("div")({
   display: "flex",
@@ -87,12 +88,14 @@ const PasswordReset: React.FC = () => {
   const navigator = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handlePasswordReset = async () => {
     if (password !== confirmPassword) {
       alert("As senhas não coincidem");
       return;
     }
+    setLoading(true);
     try {
       const response = await fetch(
         "http://localhost:8080/auth/password/reset",
@@ -106,15 +109,22 @@ const PasswordReset: React.FC = () => {
         }
       );
       if (!response.ok) {
+        alert("Falha ao definir nova senha");
         throw new Error("Failed to set new password");
       }
       const json = await response.json();
       console.log("Password sent:", json);
+      setLoading(false);
       navigator("/login");
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Div>

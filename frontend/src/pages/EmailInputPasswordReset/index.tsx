@@ -3,6 +3,7 @@ import { Button, TextField, Typography, styled } from "@mui/material";
 import CodeInputContainer from "./components/CodeInputContainer";
 import { SetStateAction, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "@/components/Loading";
 
 const Div = styled("div")({
   display: "flex",
@@ -35,6 +36,8 @@ const Card = styled("div")({
 
   "@media (max-width: 800px)": {
     width: "90%",
+    paddingLeft: "20px",
+    paddingRight: "20px",
   },
   "@media (max-width: 500px)": {
     width: "100%",
@@ -83,6 +86,7 @@ const EmailInputForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const [finalCode, setFinalCode] = useState("");
   const navigator = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleComplete = (code: SetStateAction<string>) => {
     setFinalCode(code);
@@ -92,6 +96,7 @@ const EmailInputForm: React.FC = () => {
   const [switchPages, setSwitchPages] = useState(false); //temporary
 
   const handleSendEmail = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         "http://localhost:8080/mailer/password/reset",
@@ -104,17 +109,24 @@ const EmailInputForm: React.FC = () => {
         }
       );
       if (!response.ok) {
+        const json = await response.json();
+        if (json === "Usuario não encontrado") {
+          alert("Usuário não encontrado");
+        }
         throw new Error("Failed to send reset email");
       }
       const json = await response.json();
       console.log("Email sent:", json);
+      setLoading(false);
       setSwitchPages(true);
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   };
 
   const handleSendCode = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         "http://localhost:8080/auth/password/reset-code",
@@ -128,15 +140,25 @@ const EmailInputForm: React.FC = () => {
         }
       );
       if (!response.ok) {
+        const json = await response.json();
+        if (json === "Código de recuperação de senha inválido") {
+          alert("Código de recuperação de senha inválido");
+        }
         throw new Error("Failed to verify code");
       }
       const json = await response.json();
       console.log("Code sent:", json);
+      setLoading(false);
       navigator("/password-reset");
     } catch (error) {
+      setLoading(false);
       console.error(error);
     }
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Div>
