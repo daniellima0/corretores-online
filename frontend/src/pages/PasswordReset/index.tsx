@@ -8,6 +8,7 @@ import {
   styled,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Div = styled("div")({
   display: "flex",
@@ -83,6 +84,37 @@ const PasswordReset: React.FC = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const navigator = useNavigate();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handlePasswordReset = async () => {
+    if (password !== confirmPassword) {
+      alert("As senhas não coincidem");
+      return;
+    }
+    try {
+      const response = await fetch(
+        "http://localhost:8080/auth/password/reset",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to set new password");
+      }
+      const json = await response.json();
+      console.log("Password sent:", json);
+      navigator("/login");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <Div>
@@ -109,6 +141,8 @@ const PasswordReset: React.FC = () => {
               </InputAdornment>
             ),
           }}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <PasswordInput
           type={showPassword ? "text" : "password"}
@@ -128,8 +162,14 @@ const PasswordReset: React.FC = () => {
               </InputAdornment>
             ),
           }}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <ButtonStyled fullWidth variant="contained" onClick={() => {}}>
+        <ButtonStyled
+          fullWidth
+          variant="contained"
+          onClick={handlePasswordReset}
+        >
           Enviar
         </ButtonStyled>
       </Card>
