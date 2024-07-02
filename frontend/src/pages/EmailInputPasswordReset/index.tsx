@@ -2,6 +2,7 @@ import HiddenComponent from "../../components/HiddenComponent";
 import { Button, TextField, Typography, styled } from "@mui/material";
 import CodeInputContainer from "./components/CodeInputContainer";
 import { SetStateAction, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Div = styled("div")({
   display: "flex",
@@ -81,6 +82,7 @@ const ResendNote = styled(Typography)({
 const EmailInputForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const [finalCode, setFinalCode] = useState("");
+  const navigator = useNavigate();
 
   const handleComplete = (code: SetStateAction<string>) => {
     setFinalCode(code);
@@ -91,19 +93,46 @@ const EmailInputForm: React.FC = () => {
 
   const handleSendEmail = async () => {
     try {
-      const response = await fetch("http://localhost:8080/mailer/password/reset", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "http://localhost:8080/mailer/password/reset",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to send reset email");
       }
       const json = await response.json();
       console.log("Email sent:", json);
       setSwitchPages(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSendCode = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/auth/password/reset-code",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, code: finalCode }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to verify code");
+      }
+      const json = await response.json();
+      console.log("Code sent:", json);
+      navigator("/password-reset");
     } catch (error) {
       console.error(error);
     }
@@ -134,19 +163,15 @@ const EmailInputForm: React.FC = () => {
             Foi enviado um código de verificação para o seu email. Insira abaixo
             para seguir com a alteração de senha.
           </Description>
-          <CodeInputContainer onComplete={handleComplete} numDigits={5} />
-          <ButtonStyled
-            fullWidth
-            variant="contained"
-            onClick={() => {
-              setSwitchPages(false);
-            }}
-          >
+          <CodeInputContainer onComplete={handleComplete} numDigits={6} />
+          <ButtonStyled fullWidth variant="contained" onClick={handleSendCode}>
             Enviar
           </ButtonStyled>
           <ResendNote>
             {"Não recebeu o código? "}
-            <a href="#">Reenviar</a>
+            <a onClick={handleSendEmail} href="#">
+              Reenviar
+            </a>
           </ResendNote>
         </HiddenComponent>
       </Card>
