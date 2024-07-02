@@ -120,6 +120,7 @@ const EmailInputForm: React.FC = () => {
         "http://localhost:8080/auth/password/reset-code",
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
