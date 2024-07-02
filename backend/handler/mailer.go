@@ -1,16 +1,25 @@
 package handler
 
 import (
+	"context"
+	"crypto/rand"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/daniellima0/corretores-online/backend/prisma/db"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 )
 
 type MailerHandler struct {
 	client *db.PrismaClient
+}
+
+type PasswordResetRequestBody struct {
+	Email string `json:"email"`
 }
 
 func NewMailerHandler(client *db.PrismaClient) *MailerHandler {
@@ -29,24 +38,74 @@ func sendEmail(from, to, subject, body, smtpHost string, smtpPort int, smtpUser,
 	return d.DialAndSend(m)
 }
 
-func (h *MailerHandler) Send(c echo.Context) error {
-	from := "corretoresmail@gmail.com"
-	subject := "Corretores Online - Recuperação de senha"
-	body := "Olá, você solicitou a recuperação de senha no Corretores Online. Para redefinir sua senha, clique no link a seguir: http://localhost:3000/reset-password"
+func generateSecureRandomDigitCode(numDigits int) (string, error) {
+	const charset = "0123456789"
+	code := make([]byte, numDigits)
 
+	randomBytes := make([]byte, numDigits)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return "", err
+	}
+
+	for i, b := range randomBytes {
+		code[i] = charset[b%byte(len(charset))]
+	}
+
+	return string(code), nil
+}
+
+func (h *MailerHandler) SendPasswordResetCode(c echo.Context) error {
+	ctx := context.Background()
+
+	var request PasswordResetRequestBody
+	if err := c.Bind(&request); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	if strings.TrimSpace(request.Email) == "" {
+		return c.JSON(http.StatusBadRequest, "Email is required")
+	}
+
+	user, err := h.client.User.FindUnique(
+		db.User.Email.Equals(request.Email),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "Usuario não encontrado")
+	}
+
+	resetCode, err := generateSecureRandomDigitCode(6)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "Erro ao gerar código de recuperação de senha")
+	}
+
+	encryptedResetCode, err := bcrypt.GenerateFromPassword([]byte(resetCode), 14)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "Erro ao gerar código de recuperação de senha")
+	}
+
+	PwrcId := uuid.New().String()
+
+	_, err = h.client.PasswordResetCode.CreateOne(
+		db.PasswordResetCode.PwrcID.Set(PwrcId),
+		db.PasswordResetCode.Code.Set(string(encryptedResetCode)),
+		db.PasswordResetCode.User.Link(db.User.UserID.Equals(user.UserID)),
+	).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "Erro ao criar código de recuperação de senha")
+	}
+
+	from := "corretoresmail@gmail.com"
+	subject := "Corretores Online - Código de recuperação de senha"
+	body := "Olá, recebemos uma solicitação de recuperação de senha no Corretores Online. Seu código de recuperação é: " + resetCode
 	smtpHost := "smtp.gmail.com"
 	smtpPort := 587
 	smtpUser := "corretoresmail@gmail.com"
 	smtpPassword := os.Getenv("MAILER_PASSWORD")
 
-	address := c.Param("address")
-	if address == "" {
-		return c.JSON(http.StatusBadRequest, "Address is required")
-	}
-
-	err := sendEmail(from, address, subject, body, smtpHost, smtpPort, smtpUser, smtpPassword)
+	err = sendEmail(from, request.Email, subject, body, smtpHost, smtpPort, smtpUser, smtpPassword)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, "Erro ao enviar email de recuperação de senha")
 	}
 
 	return c.JSON(http.StatusOK, "Email sent")

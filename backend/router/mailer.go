@@ -10,5 +10,5 @@ func MailerRouter(e *echo.Echo, dbClient *db.PrismaClient) {
 	h := handler.NewMailerHandler(dbClient)
 
 	g := e.Group("/mailer/")
-	g.GET("send/:address", h.Send)
+	g.POST("password/reset", h.SendPasswordResetCode)
 }

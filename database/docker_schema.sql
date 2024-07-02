@@ -203,6 +203,16 @@ alter table realtor rename column uf_id to ufop_id;
 drop table safety_questions_user;
 drop table safety_questions;
 
+--Migration: 202406191515_add_password_reset_table
+create table public.password_reset_code (
+ pwrc_id uuid not null,
+ user_id uuid not null,
+ code varchar not null,
+ created_at timestamptz not null default now(),
+ constraint password_reset_code_pkey primary key (pwrc_id),
+ constraint password_reset_code_user_id_fkey foreign key (user_id) references public."user"(user_id)
+);
+
 --Seed: 202406031535_authStatusInsert
 insert into auth_status (aust_id, "type") values ('de83fab0-e435-4ed1-976b-6ee6a3fea310', 'realtor'),
 ('14fced63-064e-45f9-9ee6-864e3526961a','user');
