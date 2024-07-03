@@ -8,6 +8,8 @@ import {
   styled,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "@/components/Loading";
 
 const Div = styled("div")({
   display: "flex",
@@ -83,6 +85,46 @@ const PasswordReset: React.FC = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const navigator = useNavigate();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handlePasswordReset = async () => {
+    if (password !== confirmPassword) {
+      alert("As senhas não coincidem");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:8080/auth/password/reset",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password }),
+        }
+      );
+      if (!response.ok) {
+        alert("Falha ao definir nova senha");
+        throw new Error("Failed to set new password");
+      }
+      const json = await response.json();
+      console.log("Password sent:", json);
+      setLoading(false);
+      navigator("/login");
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Div>
@@ -109,6 +151,8 @@ const PasswordReset: React.FC = () => {
               </InputAdornment>
             ),
           }}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <PasswordInput
           type={showPassword ? "text" : "password"}
@@ -128,8 +172,14 @@ const PasswordReset: React.FC = () => {
               </InputAdornment>
             ),
           }}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <ButtonStyled fullWidth variant="contained" onClick={() => {}}>
+        <ButtonStyled
+          fullWidth
+          variant="contained"
+          onClick={handlePasswordReset}
+        >
           Enviar
         </ButtonStyled>
       </Card>

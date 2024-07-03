@@ -2,6 +2,8 @@ import HiddenComponent from "../../components/HiddenComponent";
 import { Button, TextField, Typography, styled } from "@mui/material";
 import CodeInputContainer from "./components/CodeInputContainer";
 import { SetStateAction, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "@/components/Loading";
 
 const Div = styled("div")({
   display: "flex",
@@ -34,6 +36,8 @@ const Card = styled("div")({
 
   "@media (max-width: 800px)": {
     width: "90%",
+    paddingLeft: "20px",
+    paddingRight: "20px",
   },
   "@media (max-width: 500px)": {
     width: "100%",
@@ -79,7 +83,10 @@ const ResendNote = styled(Typography)({
 });
 
 const EmailInputForm: React.FC = () => {
+  const [email, setEmail] = useState("");
   const [finalCode, setFinalCode] = useState("");
+  const navigator = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleComplete = (code: SetStateAction<string>) => {
     setFinalCode(code);
@@ -87,6 +94,71 @@ const EmailInputForm: React.FC = () => {
   };
 
   const [switchPages, setSwitchPages] = useState(false); //temporary
+
+  const handleSendEmail = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:8080/mailer/password/reset",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
+      if (!response.ok) {
+        const json = await response.json();
+        if (json === "Usuario não encontrado") {
+          alert("Usuário não encontrado");
+        }
+        throw new Error("Failed to send reset email");
+      }
+      const json = await response.json();
+      console.log("Email sent:", json);
+      setLoading(false);
+      setSwitchPages(true);
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
+  };
+
+  const handleSendCode = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:8080/auth/password/reset-code",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, code: finalCode }),
+        }
+      );
+      if (!response.ok) {
+        const json = await response.json();
+        if (json === "Código de recuperação de senha inválido") {
+          alert("Código de recuperação de senha inválido");
+        }
+        throw new Error("Failed to verify code");
+      }
+      const json = await response.json();
+      console.log("Code sent:", json);
+      setLoading(false);
+      navigator("/password-reset");
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Div>
@@ -97,14 +169,13 @@ const EmailInputForm: React.FC = () => {
             Digite o email cadastrado no Corretores Online e enviaremos as
             instruções de como recuperar sua senha.
           </Description>
-          <EmailInput variant="outlined" label="Endereço de Email" />
-          <ButtonStyled
-            fullWidth
-            variant="contained"
-            onClick={() => {
-              setSwitchPages(true);
-            }}
-          >
+          <EmailInput
+            variant="outlined"
+            label="Endereço de Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <ButtonStyled fullWidth variant="contained" onClick={handleSendEmail}>
             Enviar
           </ButtonStyled>
         </HiddenComponent>
@@ -114,19 +185,15 @@ const EmailInputForm: React.FC = () => {
             Foi enviado um código de verificação para o seu email. Insira abaixo
             para seguir com a alteração de senha.
           </Description>
-          <CodeInputContainer onComplete={handleComplete} numDigits={4} />
-          <ButtonStyled
-            fullWidth
-            variant="contained"
-            onClick={() => {
-              setSwitchPages(false);
-            }}
-          >
+          <CodeInputContainer onComplete={handleComplete} numDigits={6} />
+          <ButtonStyled fullWidth variant="contained" onClick={handleSendCode}>
             Enviar
           </ButtonStyled>
           <ResendNote>
             {"Não recebeu o código? "}
-            <a href="#">Reenviar</a>
+            <a onClick={handleSendEmail} href="#">
+              Reenviar
+            </a>
           </ResendNote>
         </HiddenComponent>
       </Card>
