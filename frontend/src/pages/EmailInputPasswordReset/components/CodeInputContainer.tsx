@@ -1,20 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { useState, useRef, useEffect, ChangeEvent, KeyboardEvent } from "react";
 
-const CodeInputBox = styled("div")({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  width: "90%",
-  flexDirection: "row",
-  gap: "10px",
-  height: "100px",
-
-  "@media (max-width: 400px)": {
-    width: "100%",
-  },
-});
-
 const CodeInput = styled("input")({
   width: "30%",
   height: "100px",
@@ -32,6 +18,7 @@ const CodeInput = styled("input")({
     height: "70px",
   },
 });
+
 const CodeInputBox = styled("div")(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
