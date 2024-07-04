@@ -1,7 +1,7 @@
 import styled from "@mui/material/styles/styled";
-import instagramIcon from "@/public/instagram.svg";
-import whatsappIcon from "@/public/whatsapp.svg";
-import facebookIcon from "@/public/facebook.png";
+import instagramIcon from "@/assets/instagram.svg";
+import whatsappIcon from "@/assets/whatsapp.svg";
+import facebookIcon from "@/assets/facebook.png";
 import { Typography } from "@mui/material";
 import CallIcon from "@mui/icons-material/Call";
 import EmailIcon from "@mui/icons-material/Email";
