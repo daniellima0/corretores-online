@@ -12,8 +12,6 @@ COPY . .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-RUN go build -o main .
-
 EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]

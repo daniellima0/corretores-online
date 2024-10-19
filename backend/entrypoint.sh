@@ -11,5 +11,7 @@ done
 go run github.com/steebchen/prisma-client-go db pull
 go run github.com/steebchen/prisma-client-go generate
 
+go build -o main .
+
 # Start the application
 ./main
